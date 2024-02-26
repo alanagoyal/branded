@@ -24,8 +24,6 @@ export async function POST(req: Request, res: NextResponse) {
     });
 
     console.log("Completion:", completion.choices[0].message.content);
-
-    // Respond with the generated name idea
     return new Response(
       JSON.stringify({ nameIdea: completion.choices[0].message.content }),
       {
