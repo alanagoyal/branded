@@ -14,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "./ui/textarea";
 
 const formSchema = z.object({
@@ -29,8 +28,25 @@ export function NameGenerator() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await fetch("/generate-name", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ description: values.description }), // Send the form values as JSON
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate startup name");
+      }
+
+      const data = await response.json(); // Parse the JSON response
+      console.log("Generated Name:", data.nameIdea); // Log or use the generated name as needed
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   }
 
   return (
