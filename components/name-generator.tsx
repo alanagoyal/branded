@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
 
@@ -39,6 +39,8 @@ export function NameGenerator() {
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("minLength:", minLength);
+    console.log("maxLength:", maxLength);
     setIsLoading(true); // Set loading to true when the request starts
     try {
       const response = await fetch("/generate-name", {
@@ -81,10 +83,10 @@ export function NameGenerator() {
             <div className="grid h-full items-stretch gap-6 md:grid-cols-[1fr_200px]">
               <div className="hidden flex-col space-y-4 sm:flex md:order-2">
                 <LengthSelector
-                  minLength={[6]}
-                  maxLength={[12]}
-                  onMinLengthChange={() => setMinLength(minLength)}
-                  onMaxLengthChange={() => setMaxLength(maxLength)}
+                  minLength={minLength}
+                  maxLength={maxLength}
+                  onMinLengthChange={setMinLength}
+                  onMaxLengthChange={setMaxLength}
                 />
               </div>
               <div className="md:order-1">

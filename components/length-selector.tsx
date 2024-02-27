@@ -35,6 +35,7 @@ export function LengthSelector({
               min={5}
               max={12}
               defaultValue={minLength}
+              value={minLength}
               step={1}
               onValueChange={onMinLengthChange}
               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
@@ -64,6 +65,7 @@ export function LengthSelector({
               min={5}
               max={12}
               defaultValue={maxLength}
+              value={maxLength}
               step={1}
               onValueChange={onMaxLengthChange}
               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
