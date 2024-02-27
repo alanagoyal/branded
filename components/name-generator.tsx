@@ -39,8 +39,6 @@ export function NameGenerator() {
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("minLength:", minLength);
-    console.log("maxLength:", maxLength);
     setIsLoading(true); // Set loading to true when the request starts
     try {
       const response = await fetch("/generate-name", {
@@ -48,7 +46,11 @@ export function NameGenerator() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ description: values.description }), // Send the form values as JSON
+        body: JSON.stringify({
+          description: values.description,
+          minLength: minLength,
+          maxLength: maxLength,
+        }), // Send the form values as JSON
       });
 
       if (!response.ok) {

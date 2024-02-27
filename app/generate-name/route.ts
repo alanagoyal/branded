@@ -15,8 +15,10 @@ export async function POST(req: Request, res: NextResponse) {
   console.log("request received");
   try {
     const body = await req.json();
-    const description = body.description;
+    const { description, minLength, maxLength } = body;
     console.log("description:", description);
+    console.log("minLength:", minLength);
+    console.log("maxLength:", maxLength);
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       seed: 123,
@@ -28,7 +30,7 @@ export async function POST(req: Request, res: NextResponse) {
         },
         {
           role: "user",
-          content: `Please provide me with 10 name ideas for my startup, based on this description: ${description}`,
+          content: `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters.`,
         },
       ],
     });
