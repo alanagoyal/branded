@@ -15,10 +15,16 @@ export async function POST(req: Request, res: NextResponse) {
   console.log("request received");
   try {
     const body = await req.json();
-    const { description, minLength, maxLength } = body;
-    console.log("description:", description);
-    console.log("minLength:", minLength);
-    console.log("maxLength:", maxLength);
+    const { description, minLength, maxLength, wordToInclude } = body;
+
+    // Construct the base content of the user message
+    let userMessageContent = `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters.`;
+    
+    // If wordToInclude has a value, append this requirement to the user message content
+    if (wordToInclude) {
+      userMessageContent += `Each name must include the word or phrase "${wordToInclude}". Do not leave this out.`;
+    }
+
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       seed: 123,
@@ -30,7 +36,7 @@ export async function POST(req: Request, res: NextResponse) {
         },
         {
           role: "user",
-          content: `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters.`,
+          content: userMessageContent,
         },
       ],
     });
