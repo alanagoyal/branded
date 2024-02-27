@@ -5,6 +5,7 @@ import { OpenAI } from "openai";
 // Initialize the OpenAI client with your API key
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://braintrustproxy.com/v1",
 });
 export async function POST(req: Request, res: NextResponse) {
   console.log("request received");
@@ -14,6 +15,7 @@ export async function POST(req: Request, res: NextResponse) {
     console.log("description:", description);
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
+      seed: 123,
       messages: [
         {
           role: "system",
