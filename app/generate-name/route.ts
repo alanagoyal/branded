@@ -1,12 +1,16 @@
 // generate-name/route.ts
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
+import { init, initLogger, wrapOpenAI } from "braintrust";
 
+const logger = initLogger({ projectName: "namebase" });
 // Initialize the OpenAI client with your API key
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://braintrustproxy.com/v1",
-});
+const openai = wrapOpenAI(
+  new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: "https://braintrustproxy.com/v1",
+  })
+);
 export async function POST(req: Request, res: NextResponse) {
   console.log("request received");
   try {
