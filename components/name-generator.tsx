@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "./ui/textarea";
 import { Separator } from "./ui/separator";
-import { Tabs, TabsContent } from "./ui/tabs";
 import { LengthSelector } from "./length-selector";
 import { SliderProps } from "@radix-ui/react-slider";
 import { Input } from "./ui/input";
+import { NamesTable } from "./names-table";
 
 const formSchema = z.object({
   description: z.string().max(160).min(4),
@@ -75,6 +75,8 @@ export function NameGenerator() {
     }
   }
 
+  console.log(namesList);
+
   return (
     <>
       <div className="hidden h-full flex-col md:flex">
@@ -85,70 +87,68 @@ export function NameGenerator() {
           </div>
         </div>
         <Separator />
-        <Tabs defaultValue="complete" className="flex-1">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="container h-full py-6">
-                <div className="grid h-full items-stretch gap-6 md:grid-cols-[1fr_200px]">
-                  <div className="hidden flex-col space-y-4 sm:flex md:order-2">
-                    <LengthSelector
-                      minLength={minLength}
-                      maxLength={maxLength}
-                      onMinLengthChange={setMinLength}
-                      onMaxLengthChange={setMaxLength}
-                    />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="container h-full py-6">
+              <div className="grid h-full items-stretch gap-6">
+                <div className="">
+                  <div className="flex h-full flex-col space-y-4">
                     <FormField
                       control={form.control}
-                      name="wordToInclude"
+                      name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Include Word (Optional)</FormLabel>
+                          <FormLabel>Description</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Textarea
+                              placeholder="What will you build?"
+                              {...field}
+                            />
                           </FormControl>
-                          <FormDescription>
-                            Choose a word to be included in the generated domain
-                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                  <div className="md:order-1">
-                    <TabsContent value="complete" className="mt-0 border-0 p-0">
-                      <div className="flex h-full flex-col space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  placeholder="What will you build?"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button type="submit" disabled={isLoading}>
-                          {isLoading ? "Loading..." : "Submit"}
-                        </Button>
-                      </div>
-                    </TabsContent>
-                  </div>
+                </div>
+                <div className="flex-col space-y-4 sm:flex">
+                  <LengthSelector
+                    minLength={minLength}
+                    maxLength={maxLength}
+                    onMinLengthChange={setMinLength}
+                    onMaxLengthChange={setMaxLength}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="wordToInclude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Include Word (Optional)</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Choose a word to be included in the generated domain
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "Loading..." : "Submit"}
+                </Button>
+                <div className="flex-col space-y-4 sm:flex">
+                  {namesList.length === 0 ? (
+                    <div></div>
+                  ) : (
+                    <NamesTable names={namesList} />
+                  )}
                 </div>
               </div>
-            </form>
-            <ul className="list-disc space-y-2">
-              {namesList.map((name, index) => (
-                <li key={index}>{name}</li>
-              ))}
-            </ul>
-          </Form>
-        </Tabs>
+            </div>
+          </form>
+        </Form>
       </div>
     </>
   );
