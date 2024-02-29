@@ -2,17 +2,12 @@ import type { Metadata } from "next";
 import "@/styles/globals.css";
 
 import { Inter, Roboto_Mono } from "next/font/google";
+import { SiteHeader } from "@/components/site-header";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
-});
-
-const roboto_mono = Roboto_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-roboto-mono",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +22,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${inter.variable}`}>
-      <body>{children}</body>
+      <body>
+        {" "}
+        <SiteHeader />
+        {children}
+      </body>
     </html>
   );
 }

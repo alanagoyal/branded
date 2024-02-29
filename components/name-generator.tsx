@@ -42,7 +42,6 @@ export function NameGenerator() {
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("wordToInclude:", values.wordToInclude);
     setIsLoading(true); // Set loading to true when the request starts
     try {
       const response = await fetch("/generate-name", {
@@ -74,8 +73,6 @@ export function NameGenerator() {
       setIsLoading(false); // Set loading to false when the request completes or fails
     }
   }
-
-  console.log(namesList);
 
   return (
     <>
