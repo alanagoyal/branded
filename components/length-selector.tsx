@@ -19,6 +19,21 @@ export function LengthSelector({
   onMinLengthChange,
   onMaxLengthChange,
 }: LengthSelectorProps) {
+  const handleMinLengthChange = (value: number[]) => {
+    if (value[0] <= maxLength![0]) {
+      onMinLengthChange(value);
+    } else {
+      onMinLengthChange([maxLength![0]]);
+    }
+  };
+
+  const handleMaxLengthChange = (value: number[]) => {
+    if (value[0] >= minLength![0]) {
+      onMaxLengthChange(value);
+    } else {
+      onMaxLengthChange([minLength![0]]);
+    }
+  };
   return (
     <div className="grid gap-2 pt-2">
       <HoverCard openDelay={200}>
@@ -37,7 +52,7 @@ export function LengthSelector({
               defaultValue={minLength}
               value={minLength}
               step={1}
-              onValueChange={onMinLengthChange}
+              onValueChange={handleMinLengthChange}
               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
               aria-label="Min Length"
             />
@@ -67,7 +82,7 @@ export function LengthSelector({
               defaultValue={maxLength}
               value={maxLength}
               step={1}
-              onValueChange={onMaxLengthChange}
+              onValueChange={handleMaxLengthChange}
               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
               aria-label="Min Length"
             />

@@ -18,28 +18,28 @@ SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
 
-CREATE TABLE IF NOT EXISTS "public"."domain_names" (
+CREATE TABLE IF NOT EXISTS "public"."names" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "description" "text",
     "name" "text" NOT NULL
 );
 
-ALTER TABLE "public"."domain_names" OWNER TO "postgres";
+ALTER TABLE "public"."names" OWNER TO "postgres";
 
-ALTER TABLE ONLY "public"."domain_names"
+ALTER TABLE ONLY "public"."names"
     ADD CONSTRAINT "domain_names_pkey" PRIMARY KEY ("id");
 
-ALTER TABLE "public"."domain_names" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."names" ENABLE ROW LEVEL SECURITY;
 
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
 
-GRANT ALL ON TABLE "public"."domain_names" TO "anon";
-GRANT ALL ON TABLE "public"."domain_names" TO "authenticated";
-GRANT ALL ON TABLE "public"."domain_names" TO "service_role";
+GRANT ALL ON TABLE "public"."names" TO "anon";
+GRANT ALL ON TABLE "public"."names" TO "authenticated";
+GRANT ALL ON TABLE "public"."names" TO "service_role";
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";

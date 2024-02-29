@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
 
@@ -18,9 +18,10 @@ import {
 import { Textarea } from "./ui/textarea";
 import { Separator } from "./ui/separator";
 import { LengthSelector } from "./length-selector";
-import { SliderProps } from "@radix-ui/react-slider";
 import { Input } from "./ui/input";
 import { NamesTable } from "./names-table";
+import { Slider } from "./ui/slider";
+import { SliderProps } from "@radix-ui/react-slider";
 
 const formSchema = z.object({
   description: z.string().max(160).min(4),
@@ -88,33 +89,33 @@ export function NameGenerator() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="container h-full py-6">
               <div className="grid h-full items-stretch gap-6">
-                <div className="">
-                  <div className="flex h-full flex-col space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="What will you build?"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                <div className="flex h-full flex-col space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="What will you build?"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
                 <div className="flex-col space-y-4 sm:flex">
                   <LengthSelector
                     minLength={minLength}
-                    maxLength={maxLength}
                     onMinLengthChange={setMinLength}
+                    maxLength={maxLength}
                     onMaxLengthChange={setMaxLength}
                   />
+                </div>
+                <div className="flex-col space-y-4 sm:flex">
                   <FormField
                     control={form.control}
                     name="wordToInclude"
