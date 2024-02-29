@@ -7,7 +7,6 @@ import { createClient } from '@/utils/supabase/server'
 
 export async function signup(formData: FormData) {
   const supabase = createClient()
-  console.log("in signup action")
 
   // type-casting here for convenience
   // in practice, you should validate your inputs

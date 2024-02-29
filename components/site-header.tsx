@@ -20,7 +20,9 @@ export async function SiteHeader() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="-ml-2 mr-6 flex items-center">
-              <span className="text-2xl font-bold">namebase</span>
+              <Link href="/">
+                <span className="text-2xl font-bold">namebase</span>
+              </Link>
             </div>
           </div>
           <div className="hidden sm:flex sm:items-center">

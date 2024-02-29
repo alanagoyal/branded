@@ -1,12 +1,10 @@
 "use client";
 
 import * as React from "react";
-
 import { cn } from "@/lib/utils";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Icons } from "./icons";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   signup: (formData: FormData) => Promise<void>;
@@ -14,15 +12,6 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function SignupForm({ className, signup, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-
-  async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault();
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  }
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
