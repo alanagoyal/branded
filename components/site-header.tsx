@@ -39,9 +39,7 @@ export async function SiteHeader() {
               <UserNav user={user} />
             ) : (
               <Link href="login">
-                <Button className="ml-4 whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-white hover:bg-gray-50">
-                  Sign up for free
-                </Button>
+                <Button className="ml-4 ">Log In</Button>
               </Link>
             )}
           </div>

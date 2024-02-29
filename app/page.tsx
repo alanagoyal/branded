@@ -18,7 +18,7 @@ export default function Home() {
           their next startup. Our tool streamlines the brainstorming process,
           saving you time and effort.
         </p>
-        <Link href="login">
+        <Link href="signup">
           {" "}
           <Button className="mt-8 bg-blue-600 hover:bg-blue-700 text-white  py-2 px-4 rounded">
             Sign up for free
