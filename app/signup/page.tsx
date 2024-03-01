@@ -3,12 +3,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { SignupForm } from "@/components/signup-form";
 
-export const metadata: Metadata = {
-  title: "Authentication",
-  description: "Authentication forms built using the components.",
-};
-
-export default async function AuthenticationPage() {
+export default async function Signup() {
   return (
     <>
       <div className="container mx-auto h-screen flex flex-col items-center justify-center p-4">

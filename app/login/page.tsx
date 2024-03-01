@@ -1,15 +1,9 @@
 import { login } from "./actions";
-import { Metadata } from "next";
 import Link from "next/link";
 
 import { LoginForm } from "@/components/login-form";
 
-export const metadata: Metadata = {
-  title: "Authentication",
-  description: "Authentication forms built using the components.",
-};
-
-export default async function AuthenticationPage() {
+export default async function Login() {
   return (
     <>
       <div className="container mx-auto h-screen flex flex-col items-center justify-center p-4">

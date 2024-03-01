@@ -12,7 +12,8 @@ export default async function Home() {
   const supabase = createClient();
   const { data, error } = await supabase.auth.getUser();
   if (data.user) {
-    redirect("/new");
+    // redirect("/new");
+    console.log(data.user);
   }
 
   return (
@@ -23,13 +24,12 @@ export default async function Home() {
         </h1>
         <p className="mt-4 max-w-2xl text-xl">
           Namebase helps founders generate creative and relevant name ideas for
-          their next startup. Our tool streamlines the brainstorming process,
-          saving you time and effort.
+          their next startup.
         </p>
-        <Link href="signup">
+        <Link href="/new">
           {" "}
           <Button className="mt-8 bg-blue-600 hover:bg-blue-700 text-white  py-2 px-4 rounded">
-            Sign up for free
+            Get Started
           </Button>
         </Link>
       </div>
