@@ -5,6 +5,7 @@ import { Icons } from "@/components/icons";
 
 import UserNav from "./user-nav";
 import { createClient } from "@/utils/supabase/server";
+import { ThemeToggle } from "./theme-toggle";
 
 export async function SiteHeader() {
   const supabase = createClient();
@@ -14,7 +15,7 @@ export async function SiteHeader() {
   } = await supabase.auth.getUser();
 
   return (
-    <nav className="border-b border-black">
+    <nav className="">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -40,6 +41,7 @@ export async function SiteHeader() {
                 <span className="sr-only">GitHub</span>
               </div>
             </Link>
+            <ThemeToggle />
             {user ? (
               <UserNav user={user} />
             ) : (
