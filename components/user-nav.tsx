@@ -45,10 +45,10 @@ export default function UserNav({ user }: any) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <Link href="/account">
+          <Link href="/profile">
             <DropdownMenuItem className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
-              <span>Account</span>
+              <span>Profile</span>
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
