@@ -99,13 +99,6 @@ export function NameGenerator({ user }: { user: any }) {
   return (
     <>
       <div className="min-h-screen flex flex-col">
-        <div className="container py-4">
-          <h2 className="text-lg font-semibold">Namebase</h2>
-          <div className="ml-auto flex w-full space-x-2 sm:justify-end">
-            <div className="hidden space-x-2 md:flex"></div>
-          </div>
-        </div>
-        <Separator />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="container h-full py-6">
