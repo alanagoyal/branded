@@ -20,15 +20,17 @@ import { Separator } from "./ui/separator";
 import { LengthSelector } from "./length-selector";
 import { Input } from "./ui/input";
 import { NamesTable } from "./names-table";
-import { Slider } from "./ui/slider";
 import { SliderProps } from "@radix-ui/react-slider";
+import { createClient } from "@/utils/supabase/client";
 
 const formSchema = z.object({
   description: z.string().max(160).min(4),
   wordToInclude: z.string().optional(),
 });
 
-export function NameGenerator() {
+export function NameGenerator({ user }: { user: any }) {
+  const supabase = createClient();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,6 +69,25 @@ export function NameGenerator() {
         return line.replace(/^\d+\.\s*/, "").trim(); // Remove the numbering and trim whitespace
       });
       setNamesList(namesArray); // Set the names list to the parsed response
+      for (const name of namesArray) {
+        try {
+          let { data, error } = await supabase.from("names").insert([
+            {
+              name: name,
+              description: values.description,
+              word_to_include: values.wordToInclude,
+              min_length: minLength![0],
+              max_length: maxLength![0],
+              created_at: new Date(),
+              created_by: user.id,
+            },
+          ]);
+          if (error) throw error;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
       form.reset(); // Reset the form after submission
     } catch (error) {
       console.error("Error submitting form:", error);
