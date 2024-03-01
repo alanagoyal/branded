@@ -4,9 +4,17 @@
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (data.user) {
+    redirect("/new");
+  }
+
   return (
     <div className="min-h-screen pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

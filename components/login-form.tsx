@@ -1,68 +1,93 @@
 "use client";
 
 import * as React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-import { cn } from "@/lib/utils";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Icons } from "./icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
-  login: (formData: FormData) => Promise<void>;
+export interface LoginFormData {
+  email: string;
+  password: string;
 }
 
-export function LoginForm({ className, login, ...props }: UserAuthFormProps) {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+interface LoginFormProps {
+  login: (formData: LoginFormData) => Promise<void>;
+}
+const formSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6, {
+    message: "Username must be at least 6 characters.",
+  }),
+});
 
-  async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault();
-    setIsLoading(true);
+export function LoginForm({ login }: LoginFormProps) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  }
+  const onSubmit = async (data: LoginFormData) => {
+    console.log(data);
+    await login(data);
+  };
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
-      <form>
-        <div className="grid gap-2">
-          <div className="grid gap-1">
-            <Label className="sr-only" htmlFor="email">
-              Email
-            </Label>
-            <Input
-              id="email"
-              name="email"
-              placeholder="name@example.com"
-              type="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-              disabled={isLoading}
-              required
-            />
+    <div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="grid gap-2">
+            <div className="grid gap-1">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="name@email.com" {...field}></Input>
+                    </FormControl>{" "}
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div>
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
+                      ></Input>
+                    </FormControl>{" "}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <Button type="submit">Sign In</Button>
           </div>
-          <div className="grid gap-1">
-            <Label className="sr-only" htmlFor="email">
-              Password
-            </Label>
-            <Input
-              id="password"
-              name="password"
-              placeholder="••••••••"
-              type="password"
-              autoCorrect="off"
-              disabled={isLoading}
-              required
-            />
-          </div>
-          <Button formAction={login} type="submit" disabled={isLoading}>
-            Sign In
-          </Button>
-        </div>
-      </form>
+        </form>
+      </Form>
     </div>
   );
 }

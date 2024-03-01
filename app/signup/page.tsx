@@ -1,7 +1,7 @@
-import { SignupForm } from "@/components/signup-form";
 import { signup } from "./actions";
 import { Metadata } from "next";
 import Link from "next/link";
+import { SignupForm } from "@/components/signup-form";
 
 export const metadata: Metadata = {
   title: "Authentication",

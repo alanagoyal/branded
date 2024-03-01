@@ -4,25 +4,17 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
+import { SignupFormData } from '@/components/signup-form';
 
-export async function signup(formData: FormData) {
+export async function signup(formData: SignupFormData) {
   const supabase = createClient()
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-
-  console.log(data)
-  const { error } = await supabase.auth.signUp(data)
-  console.log(error)
+  const { email, password } = formData;
+  const { error } = await supabase.auth.signUp({email, password})
 
   if (error) {
     redirect('/error')
   }
 
   revalidatePath('/', 'layout')
-  redirect('/')
+
 }

@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 
 import { Inter, Roboto_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({
         {" "}
         <SiteHeader />
         {children}
+        <Toaster />
       </body>
     </html>
   );
