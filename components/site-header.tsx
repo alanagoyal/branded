@@ -25,7 +25,11 @@ export async function SiteHeader() {
             </div>
           </div>
           <div className="hidden sm:flex sm:items-center">
-            <Link href="www.github.com" target="_blank" rel="noreferrer">
+            <Link
+              href="https://github.com/alanagoyal/namebase"
+              target="_blank"
+              rel="noreferrer"
+            >
               <div
                 className={buttonVariants({
                   size: "sm",
@@ -48,31 +52,4 @@ export async function SiteHeader() {
       </div>
     </nav>
   );
-  /* return (
-    <div>
-      <header className="sticky top-0 z-40 w-full border-b bg-background">
-        <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
-          <div className="flex flex-1 items-center justify-end space-x-4">
-            <nav className="flex items-center space-x-1">
-              <Link href="/">
-                <div>namebase</div>
-              </Link>
-              <Link href="www.github.com" target="_blank" rel="noreferrer">
-                <div
-                  className={buttonVariants({
-                    size: "sm",
-                    variant: "ghost",
-                  })}
-                >
-                  <Icons.gitHub className="h-5 w-5" />
-                  <span className="sr-only">GitHub</span>
-                </div>
-              </Link>
-              {user && <UserNav user={user} />}
-            </nav>
-          </div>
-        </div>
-      </header>
-    </div>
-  ); */
 }

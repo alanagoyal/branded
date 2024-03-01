@@ -24,7 +24,7 @@ import { SliderProps } from "@radix-ui/react-slider";
 import { createClient } from "@/utils/supabase/client";
 
 const formSchema = z.object({
-  description: z.string().max(160).min(4),
+  description: z.string().max(280).min(4),
   wordToInclude: z.string().optional(),
 });
 
@@ -147,7 +147,7 @@ export function NameGenerator({ user }: { user: any }) {
                           <Input {...field} autoComplete="off" />
                         </FormControl>
                         <FormDescription>
-                          Choose a word to be included in the generated domain
+                          Choose a word to include in your name
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -155,7 +155,7 @@ export function NameGenerator({ user }: { user: any }) {
                   />
                 </div>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Loading..." : "Submit"}
+                  {isLoading ? "Loading..." : "Go"}
                 </Button>
                 <div className="flex-col space-y-4 sm:flex">
                   {namesList.length === 0 ? (
