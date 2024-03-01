@@ -13,7 +13,7 @@ export default async function Home() {
   const { data, error } = await supabase.auth.getUser();
   if (data.user) {
     // redirect("/new");
-    console.log(data.user);
+    console.log;
   }
 
   return (
@@ -28,9 +28,7 @@ export default async function Home() {
         </p>
         <Link href="/new">
           {" "}
-          <Button className="mt-8 bg-blue-600 hover:bg-blue-700 text-white  py-2 px-4 rounded">
-            Get Started
-          </Button>
+          <Button className="mt-4">Get Started</Button>
         </Link>
       </div>
     </div>

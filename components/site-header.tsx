@@ -46,7 +46,7 @@ export async function SiteHeader() {
               <UserNav user={user} />
             ) : (
               <Link href="login">
-                <Button className="ml-4 ">Log In</Button>
+                <Button className="ml-4">Log In</Button>
               </Link>
             )}
           </div>
