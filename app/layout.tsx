@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
+import SiteFooter from "@/components/site-footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head />
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
@@ -37,25 +39,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {" "}
-          <SiteHeader />
-          {children}
-          <Toaster />
-          <footer className="text-center py-8">
-            {" "}
-            <div className="text-center mb-2">
-              <p>
-                Built with <span className="text-red-500">❤️</span> by{" "}
-                <a
-                  href="https://twitter.com/alanaagoyal"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Alana Goyal
-                </a>{" "}
-              </p>
+          <div vaul-drawer-wrapper="">
+            <div className="relative flex min-h-screen flex-col bg-background">
+              <SiteHeader />
+              <main className="flex-1">{children}</main>
+              <SiteFooter />
             </div>
-          </footer>
+          </div>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
