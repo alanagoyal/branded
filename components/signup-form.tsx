@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
+import { createClient } from "@/utils/supabase/client";
 
 export interface SignupFormData {
   email: string;
@@ -31,6 +32,7 @@ const formSchema = z.object({
 });
 
 export function SignupForm({ signup }: SignupFormProps) {
+  const supabase = createClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,12 +42,23 @@ export function SignupForm({ signup }: SignupFormProps) {
   });
 
   const onSubmit = async (data: SignupFormData) => {
-    console.log(data);
-    toast({
-      title: "Confirm your account",
-      description: `An email has been sent to ${data.email}.`,
-    });
-    await signup(data);
+    const { data: emailMatch, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("email", form.getValues("email"));
+
+    if (emailMatch && emailMatch.length > 0) {
+      toast({
+        title: "Account already exists",
+        description: "Please sign in or sign up with another email.",
+      });
+    } else {
+      toast({
+        title: "Confirm your account",
+        description: `An email has been sent to ${data.email}.`,
+      });
+      await signup(data);
+    }
   };
 
   return (
@@ -61,7 +74,11 @@ export function SignupForm({ signup }: SignupFormProps) {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="name@email.com" {...field}></Input>
+                      <Input
+                        placeholder="name@email.com"
+                        autoComplete="off"
+                        {...field}
+                      ></Input>
                     </FormControl>{" "}
                     <FormMessage />
                   </FormItem>
@@ -78,6 +95,7 @@ export function SignupForm({ signup }: SignupFormProps) {
                     <FormControl>
                       <Input
                         type="password"
+                        autoComplete="off"
                         placeholder="••••••••"
                         {...field}
                       ></Input>

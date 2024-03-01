@@ -1,9 +1,13 @@
 import { signup } from "./actions";
-import { Metadata } from "next";
 import Link from "next/link";
 import { SignupForm } from "@/components/signup-form";
+import { createClient } from "@/utils/supabase/server";
 
 export default async function Signup() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return (
     <>
       <div className="container mx-auto h-screen flex flex-col items-center justify-center p-4">

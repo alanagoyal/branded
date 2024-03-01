@@ -144,7 +144,7 @@ export function NameGenerator({ user }: { user: any }) {
                       <FormItem>
                         <FormLabel>Include Word (Optional)</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} autoComplete="off" />
                         </FormControl>
                         <FormDescription>
                           Choose a word to be included in the generated domain

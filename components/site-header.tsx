@@ -12,7 +12,6 @@ export async function SiteHeader() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  console.log(user);
 
   return (
     <nav className="border-b border-black">
