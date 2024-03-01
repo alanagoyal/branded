@@ -42,6 +42,18 @@ export async function SiteHeader() {
               </div>
             </Link>
             <ThemeToggle />
+            <Link href="/new">
+              {" "}
+              <div
+                className={buttonVariants({
+                  size: "sm",
+                  variant: "ghost",
+                })}
+              >
+                <Icons.new className="h-5 w-5" />
+                <span className="sr-only">New</span>
+              </div>
+            </Link>
             {user ? (
               <UserNav user={user} />
             ) : (

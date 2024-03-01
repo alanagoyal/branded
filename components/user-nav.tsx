@@ -21,6 +21,7 @@ export default function UserNav({ user }: any) {
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();
     router.push("/login");
+    router.refresh();
   };
 
   return (
