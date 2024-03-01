@@ -42,7 +42,6 @@ export function LoginForm({ login }: LoginFormProps) {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log(data);
     await login(data);
   };
 

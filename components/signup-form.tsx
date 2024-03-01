@@ -50,12 +50,12 @@ export function SignupForm({ signup }: SignupFormProps) {
     if (emailMatch && emailMatch.length > 0) {
       toast({
         title: "Account already exists",
-        description: "Please sign in or sign up with another email.",
+        description: "Please sign in or sign up with another email",
       });
     } else {
       toast({
         title: "Confirm your account",
-        description: `An email has been sent to ${data.email}.`,
+        description: `An email has been sent to ${data.email}`,
       });
       await signup(data);
     }
