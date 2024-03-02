@@ -21,7 +21,7 @@ export async function POST(req: Request, res: NextResponse) {
     
     if (style !== "any") {
       if (style === "one_word") {
-        userMessageContent += "Each name must be a single word from the English dictionary. For example 'Apple' or 'Google'. ";
+        userMessageContent += "Each name must be a single word from the English dictionary. For example 'Apple' or 'Google'. It should not be two words put together. ";
       }
       if (style === "two_words") {
         userMessageContent += "Each name must be two words written together as one. For example 'Facebook' or 'Snapchat'. ";
