@@ -214,12 +214,30 @@ export function NameGenerator({ user }: { user: any }) {
                         name="wordToInclude"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Word to Include (Optional)</FormLabel>
+                            <FormLabel>
+                              {form.watch("style") === "two_words" ||
+                              form.watch("style") === "portmanteau"
+                                ? "Word to to Include (Optional)"
+                                : form.watch("style") ===
+                                    "alternative_spelling" ||
+                                  form.watch("style") === "historical" ||
+                                  form.watch("style") === "foreign_language"
+                                ? "Word to Inspire (Optional)"
+                                : "Word to Include (Optional)"}
+                            </FormLabel>
                             <FormControl>
                               <Input {...field} autoComplete="off" />
                             </FormControl>
                             <FormDescription>
-                              Choose a word to include in your name
+                              {form.watch("style") === "two_words" ||
+                              form.watch("style") === "portmanteau"
+                                ? "Choose a word to include in your name"
+                                : form.watch("style") ===
+                                    "alternative_spelling" ||
+                                  form.watch("style") === "historical" ||
+                                  form.watch("style") === "foreign_language"
+                                ? "Choose a word to inspire your name"
+                                : "Choose a word to include in your name"}
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
