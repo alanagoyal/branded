@@ -45,8 +45,8 @@ export function LengthSelector({
         </div>
         <Slider
           id="min-length"
-          min={5}
-          max={12}
+          min={4}
+          max={14}
           defaultValue={minLength}
           value={minLength}
           step={1}
@@ -65,8 +65,8 @@ export function LengthSelector({
         </div>
         <Slider
           id="max-length"
-          min={5}
-          max={12}
+          min={4}
+          max={14}
           defaultValue={maxLength}
           value={maxLength}
           step={1}

@@ -16,12 +16,11 @@ export async function POST(req: Request, res: NextResponse) {
     const body = await req.json();
     const { description, minLength, maxLength, wordToInclude, wordPlacement, style } = body;
 
-    console.log(style)
     let userMessageContent = `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
     
     if (style !== "any") {
       if (style === "one_word") {
-        userMessageContent += "Each name must be a single word from the English dictionary. For example 'Apple' or 'Google'. It should not be two words put together. ";
+        userMessageContent += "Each name should be a single English word that is simple and easy to remember. Avoid using compound words or phrases. Aim for names that convey a sense of uniqueness and potential relevance to a startup. Think of words that evoke a feeling of innovation, efficiency, or effectiveness. Examples of suitable names include 'spark,' 'stride,' 'pivot,' etc. ";
       }
       if (style === "two_words") {
         userMessageContent += "Each name must be two words written together as one. For example 'Facebook' or 'Snapchat'. ";
@@ -52,7 +51,6 @@ export async function POST(req: Request, res: NextResponse) {
     }
 
 
-
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       seed: 123,
@@ -69,8 +67,6 @@ export async function POST(req: Request, res: NextResponse) {
       ],
     });
 
-    console.log("Completion:", completion.choices[0].message.content);
-    console.log(userMessageContent)
     return new Response(
       JSON.stringify({ response: completion.choices[0].message.content }),
       {

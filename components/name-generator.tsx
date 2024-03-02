@@ -67,7 +67,6 @@ export function NameGenerator({ user }: { user: any }) {
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values.style);
     setIsLoading(true);
 
     try {
