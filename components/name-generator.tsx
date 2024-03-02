@@ -43,6 +43,7 @@ const formSchema = z.object({
       "portmanteau",
       "alternative_spelling",
       "foreign_language",
+      "historical",
       "any",
     ])
     .optional(),
@@ -96,7 +97,7 @@ export function NameGenerator({ user }: { user: any }) {
       setNamesList(namesArray);
       for (const name of namesArray) {
         try {
-          let { data, error } = await supabase.from("names").insert([
+          let { error } = await supabase.from("names").insert([
             {
               name: name,
               description: values.description,
@@ -181,6 +182,9 @@ export function NameGenerator({ user }: { user: any }) {
                               </SelectItem>
                               <SelectItem value="foreign_language">
                                 Foreign Language
+                              </SelectItem>
+                              <SelectItem value="historical">
+                                Historical Reference
                               </SelectItem>
                               <SelectItem value="any">Surprise Me</SelectItem>
                             </SelectGroup>

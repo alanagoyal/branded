@@ -48,6 +48,11 @@ export async function POST(req: Request, res: NextResponse) {
             userMessageContent +=
               "Each name must be a word in a foreign language that means something based on the English description. For example 'Samsara' is a Sanskrit word that means 'cycle of life'. ";
           }
+
+          if (style === "historical") {
+            userMessageContent +=
+              "Each name should be inspired by a historical reference or figure. For example 'Da Vinci' or 'Tesla'. ";
+          }
         }
         if (wordToInclude) {
           userMessageContent += `Each name must include the word or phrase "${wordToInclude}". Do not leave this out. `;
