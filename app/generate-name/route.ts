@@ -12,17 +12,26 @@ const openai = wrapOpenAI(
   })
 );
 export async function POST(req: Request, res: NextResponse) {
-  console.log("request received");
   try {
     const body = await req.json();
-    const { description, minLength, maxLength, wordToInclude } = body;
+    const { description, minLength, maxLength, wordToInclude, wordPlacement } = body;
 
-    // Construct the base content of the user message
     let userMessageContent = `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters.`;
     
-    // If wordToInclude has a value, append this requirement to the user message content
     if (wordToInclude) {
       userMessageContent += `Each name must include the word or phrase "${wordToInclude}". Do not leave this out.`;
+    }
+
+    if (wordPlacement === "start") {
+      userMessageContent += "The word or phrase must be at the start of the name.";
+    }
+
+    if (wordPlacement === "end") {
+      userMessageContent += "The word or phrase must be at the end of the name.";
+    }
+
+    if (wordPlacement === "any") {
+      userMessageContent += "The word or phrase can be placed anywhere in the name.";
     }
 
     const completion = await openai.chat.completions.create({

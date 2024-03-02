@@ -16,16 +16,24 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "./ui/textarea";
-import { Separator } from "./ui/separator";
 import { LengthSelector } from "./length-selector";
 import { Input } from "./ui/input";
 import { NamesTable } from "./names-table";
 import { SliderProps } from "@radix-ui/react-slider";
 import { createClient } from "@/utils/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
   wordToInclude: z.string().optional(),
+  wordPlacement: z.enum(["start", "end", "any"]).optional(),
 });
 
 export function NameGenerator({ user }: { user: any }) {
@@ -36,6 +44,7 @@ export function NameGenerator({ user }: { user: any }) {
     defaultValues: {
       description: "",
       wordToInclude: "",
+      wordPlacement: "any",
     },
   });
 
@@ -45,7 +54,8 @@ export function NameGenerator({ user }: { user: any }) {
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true); // Set loading to true when the request starts
+    setIsLoading(true);
+
     try {
       const response = await fetch("/generate-name", {
         method: "POST",
@@ -57,18 +67,19 @@ export function NameGenerator({ user }: { user: any }) {
           minLength: minLength,
           maxLength: maxLength,
           wordToInclude: values.wordToInclude,
-        }), // Send the form values as JSON
+          wordPlacement: values.wordPlacement,
+        }),
       });
 
       if (!response.ok) {
         throw new Error("Failed to generate startup name");
       }
 
-      const data = await response.json(); // Parse the JSON response
+      const data = await response.json();
       const namesArray = data.response.split("\n").map((line: any) => {
-        return line.replace(/^\d+\.\s*/, "").trim(); // Remove the numbering and trim whitespace
+        return line.replace(/^\d+\.\s*/, "").trim();
       });
-      setNamesList(namesArray); // Set the names list to the parsed response
+      setNamesList(namesArray);
       for (const name of namesArray) {
         try {
           let { data, error } = await supabase.from("names").insert([
@@ -76,10 +87,11 @@ export function NameGenerator({ user }: { user: any }) {
               name: name,
               description: values.description,
               word_to_include: values.wordToInclude,
+              word_placement: values.wordPlacement,
               min_length: minLength![0],
               max_length: maxLength![0],
               created_at: new Date(),
-              created_by: user.id,
+              created_by: user?.id,
             },
           ]);
           if (error) throw error;
@@ -87,12 +99,10 @@ export function NameGenerator({ user }: { user: any }) {
           console.log(error);
         }
       }
-
-      form.reset(); // Reset the form after submission
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
-      setIsLoading(false); // Set loading to false when the request completes or fails
+      setIsLoading(false);
     }
   }
 
@@ -101,8 +111,8 @@ export function NameGenerator({ user }: { user: any }) {
       <div className="min-h-screen flex flex-col">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="container h-full py-6">
-              <div className="grid h-full items-stretch gap-6">
+            <div className="container max-w-lg mx-auto py-6">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="flex h-full flex-col space-y-4">
                   <FormField
                     control={form.control}
@@ -135,18 +145,51 @@ export function NameGenerator({ user }: { user: any }) {
                     name="wordToInclude"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Include Word (Optional)</FormLabel>
+                        <FormLabel>Word to Include (Optional)</FormLabel>
                         <FormControl>
                           <Input {...field} autoComplete="off" />
                         </FormControl>
                         <FormDescription>
-                          Choose a word to include in your name
+                          Choose a word to include in the generated names
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
+                {form.watch("wordToInclude") && (
+                  <div className="flex-col space-y-4 sm:flex">
+                    {" "}
+                    <FormField
+                      control={form.control}
+                      name="wordPlacement"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Placement</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="start">Start </SelectItem>
+                              <SelectItem value="end">End</SelectItem>
+                              <SelectItem value="any">Anywhere</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            Choose the placement of the word to include
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? "Loading..." : "Go"}
                 </Button>
