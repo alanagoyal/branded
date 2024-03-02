@@ -17,15 +17,13 @@ export async function SiteHeader() {
   return (
     <nav className="">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="-ml-2 mr-6 flex items-center">
-              <Link href="/">
-                <span className="text-2xl font-bold">namebase</span>
-              </Link>
-            </div>
+        <div className="flex justify-between items-center h-16">
+          <div className="-ml-2 mr-6 flex items-center">
+            <Link href="/">
+              <span className="text-2xl font-bold">namebase</span>
+            </Link>
           </div>
-          <div className="hidden sm:flex sm:items-center">
+          <div className="sm:flex items-center">
             <Link
               href="https://github.com/alanagoyal/namebase"
               target="_blank"

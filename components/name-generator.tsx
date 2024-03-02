@@ -126,6 +126,9 @@ export function NameGenerator({ user }: { user: any }) {
                             {...field}
                           />
                         </FormControl>
+                        <FormDescription>
+                          Describe your project in a few sentences
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
