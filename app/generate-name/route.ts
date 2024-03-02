@@ -25,7 +25,7 @@ export async function POST(req: Request, res: NextResponse) {
 
     const output = await traced(
       async (span) => {
-        let userMessageContent = `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
+        let userMessageContent = `Please provide me with 3 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
 
         if (style !== "any") {
           if (style === "one_word") {

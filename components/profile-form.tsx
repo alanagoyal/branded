@@ -53,6 +53,7 @@ export default function ProfileForm({
     } catch (error) {
       console.log(error);
       toast({
+        variant: "destructive",
         description: "Error updating profile",
       });
     }

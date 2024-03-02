@@ -49,6 +49,7 @@ export function SignupForm({ signup }: SignupFormProps) {
 
     if (emailMatch && emailMatch.length > 0) {
       toast({
+        variant: "destructive",
         title: "Account already exists",
         description: "Please sign in or sign up with another email",
       });

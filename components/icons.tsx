@@ -1,4 +1,5 @@
 import { Moon, Plus, SunMedium } from "lucide-react";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 
@@ -6,6 +7,8 @@ export const Icons = {
   sun: SunMedium,
   moon: Moon,
   new: Plus,
+  favorite: FaHeart,
+  unfavorite: FaRegHeart,
   logo: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" {...props}>
       <rect width="256" height="256" fill="none" />
