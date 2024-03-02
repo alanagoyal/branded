@@ -24,7 +24,9 @@ import { createClient } from "@/utils/supabase/client";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
@@ -34,6 +36,16 @@ const formSchema = z.object({
   description: z.string().max(280).min(4),
   wordToInclude: z.string().optional(),
   wordPlacement: z.enum(["start", "end", "any"]).optional(),
+  style: z
+    .enum([
+      "one_word",
+      "two_words",
+      "portmanteau",
+      "alternative_spelling",
+      "foreign_language",
+      "any",
+    ])
+    .optional(),
 });
 
 export function NameGenerator({ user }: { user: any }) {
@@ -45,6 +57,7 @@ export function NameGenerator({ user }: { user: any }) {
       description: "",
       wordToInclude: "",
       wordPlacement: "any",
+      style: "any",
     },
   });
 
@@ -54,6 +67,7 @@ export function NameGenerator({ user }: { user: any }) {
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values.style);
     setIsLoading(true);
 
     try {
@@ -68,6 +82,7 @@ export function NameGenerator({ user }: { user: any }) {
           maxLength: maxLength,
           wordToInclude: values.wordToInclude,
           wordPlacement: values.wordPlacement,
+          style: values.style,
         }),
       });
 
@@ -88,6 +103,7 @@ export function NameGenerator({ user }: { user: any }) {
               description: values.description,
               word_to_include: values.wordToInclude,
               word_placement: values.wordPlacement,
+              word_style: values.style,
               min_length: minLength![0],
               max_length: maxLength![0],
               created_at: new Date(),
@@ -128,6 +144,51 @@ export function NameGenerator({ user }: { user: any }) {
                         </FormControl>
                         <FormDescription>
                           Describe your project in a few sentences
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex-col space-y-4 sm:flex">
+                  {" "}
+                  <FormField
+                    control={form.control}
+                    name="style"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Style</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Style" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Style</SelectLabel>
+                              <SelectItem value="one_word">One Word</SelectItem>
+                              <SelectItem value="two_words">
+                                Two Words
+                              </SelectItem>
+                              <SelectItem value="portmanteau">
+                                Portmanteau
+                              </SelectItem>
+                              <SelectItem value="alternative_spelling">
+                                Alternative Spelling
+                              </SelectItem>
+                              <SelectItem value="foreign_language">
+                                Foreign Language
+                              </SelectItem>
+                              <SelectItem value="any">Surprise Me</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Choose the placement of the word to include
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -179,9 +240,12 @@ export function NameGenerator({ user }: { user: any }) {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="start">Start </SelectItem>
-                              <SelectItem value="end">End</SelectItem>
-                              <SelectItem value="any">Anywhere</SelectItem>
+                              <SelectGroup>
+                                <SelectLabel>Placement</SelectLabel>
+                                <SelectItem value="start">Start </SelectItem>
+                                <SelectItem value="end">End</SelectItem>
+                                <SelectItem value="any">Anywhere</SelectItem>
+                              </SelectGroup>
                             </SelectContent>
                           </Select>
                           <FormDescription>

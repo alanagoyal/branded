@@ -14,25 +14,44 @@ const openai = wrapOpenAI(
 export async function POST(req: Request, res: NextResponse) {
   try {
     const body = await req.json();
-    const { description, minLength, maxLength, wordToInclude, wordPlacement } = body;
+    const { description, minLength, maxLength, wordToInclude, wordPlacement, style } = body;
 
-    let userMessageContent = `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters.`;
+    console.log(style)
+    let userMessageContent = `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
     
+    if (style !== "any") {
+      if (style === "one_word") {
+        userMessageContent += "Each name must be a single word from the English dictionary. For example 'Apple' or 'Google'. ";
+      }
+      if (style === "two_words") {
+        userMessageContent += "Each name must be two words written together as one. For example 'Facebook' or 'Snapchat'. ";
+      } 
+      if (style === "portmanteau") {
+        userMessageContent += "Each name must be a portmanteau of two words. For example 'Microsoft' is a portmanteau of 'microcomputer' and 'software'. ";
+      }
+      if (style === "alternative_spelling") {
+        userMessageContent += "Each name must be an alternative spelling of a word. For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. ";
+      }
+      if (style === "foreign_language") {
+        userMessageContent += "Each name must be a word in a foreign language that means something based on the English description. For example 'Samsara' is a Sanskrit word that means 'cycle of life'. ";
+      }
+    }
     if (wordToInclude) {
-      userMessageContent += `Each name must include the word or phrase "${wordToInclude}". Do not leave this out.`;
+      userMessageContent += `Each name must include the word or phrase "${wordToInclude}". Do not leave this out. `;
+      if (wordPlacement === "start") {
+        userMessageContent += "The word or phrase must be at the start of the name.";
+      }
+  
+      if (wordPlacement === "end") {
+        userMessageContent += "The word or phrase must be at the end of the name.";
+      }
+  
+      if (wordPlacement === "any") {
+        userMessageContent += "The word or phrase can be placed anywhere in the name.";
+      }
     }
 
-    if (wordPlacement === "start") {
-      userMessageContent += "The word or phrase must be at the start of the name.";
-    }
 
-    if (wordPlacement === "end") {
-      userMessageContent += "The word or phrase must be at the end of the name.";
-    }
-
-    if (wordPlacement === "any") {
-      userMessageContent += "The word or phrase can be placed anywhere in the name.";
-    }
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -51,6 +70,7 @@ export async function POST(req: Request, res: NextResponse) {
     });
 
     console.log("Completion:", completion.choices[0].message.content);
+    console.log(userMessageContent)
     return new Response(
       JSON.stringify({ response: completion.choices[0].message.content }),
       {
