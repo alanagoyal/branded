@@ -214,7 +214,7 @@ export function NameGenerator({ user }: { user: any }) {
                           <Input {...field} autoComplete="off" />
                         </FormControl>
                         <FormDescription>
-                          Choose a word to include in the generated names
+                          Choose a word to include in your name
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
