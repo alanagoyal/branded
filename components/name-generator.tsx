@@ -191,7 +191,7 @@ export function NameGenerator({ user }: { user: any }) {
                           </SelectContent>
                         </Select>
                         <FormDescription>
-                          Choose the placement of the word to include
+                          Choose a style for your name
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -206,60 +206,67 @@ export function NameGenerator({ user }: { user: any }) {
                     onMaxLengthChange={setMaxLength}
                   />
                 </div>
-                <div className="flex-col space-y-4 sm:flex">
-                  <FormField
-                    control={form.control}
-                    name="wordToInclude"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Word to Include (Optional)</FormLabel>
-                        <FormControl>
-                          <Input {...field} autoComplete="off" />
-                        </FormControl>
-                        <FormDescription>
-                          Choose a word to include in your name
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                {form.watch("wordToInclude") && (
-                  <div className="flex-col space-y-4 sm:flex">
-                    {" "}
-                    <FormField
-                      control={form.control}
-                      name="wordPlacement"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Placement</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
+                {form.watch("style") !== "one_word" &&
+                  form.watch("style") !== "any" && (
+                    <div className="flex-col space-y-4 sm:flex">
+                      <FormField
+                        control={form.control}
+                        name="wordToInclude"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Word to Include (Optional)</FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="" />
-                              </SelectTrigger>
+                              <Input {...field} autoComplete="off" />
                             </FormControl>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>Placement</SelectLabel>
-                                <SelectItem value="start">Start </SelectItem>
-                                <SelectItem value="end">End</SelectItem>
-                                <SelectItem value="any">Anywhere</SelectItem>
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            Choose the placement of the word to include
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
+                            <FormDescription>
+                              Choose a word to include in your name
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+
+                {form.watch("wordToInclude") &&
+                  (form.watch("style") === "two_words" ||
+                    form.watch("style") === "portmanteau" ||
+                    form.watch("style") === "any") && (
+                    <div className="flex-col space-y-4 sm:flex">
+                      {" "}
+                      <FormField
+                        control={form.control}
+                        name="wordPlacement"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Placement</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>Placement</SelectLabel>
+                                  <SelectItem value="start">Start </SelectItem>
+                                  <SelectItem value="end">End</SelectItem>
+                                  <SelectItem value="any">Anywhere</SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Choose the placement of the word to include
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? "Loading..." : "Go"}
                 </Button>

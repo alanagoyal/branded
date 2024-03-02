@@ -35,42 +35,77 @@ export async function POST(req: Request, res: NextResponse) {
           if (style === "two_words") {
             userMessageContent +=
               "Each name must be two words written together as one. For example 'Facebook' or 'Snapchat'. ";
+
+            if (wordToInclude) {
+              userMessageContent += `Each name must include the word or phrase "${wordToInclude}". Do not leave this out. `;
+              if (wordPlacement === "start") {
+                userMessageContent +=
+                  "The word or phrase must be at the start of the name.";
+              }
+
+              if (wordPlacement === "end") {
+                userMessageContent +=
+                  "The word or phrase must be at the end of the name.";
+              }
+
+              if (wordPlacement === "any") {
+                userMessageContent +=
+                  "The word or phrase can be placed anywhere in the name.";
+              }
+            }
           }
           if (style === "portmanteau") {
             userMessageContent +=
               "Each name must be a portmanteau of two words. For example 'Microsoft' is a portmanteau of 'microcomputer' and 'software'. ";
+
+            if (wordToInclude) {
+              userMessageContent += `Each name must include the word or phrase "${wordToInclude}" as part of the portmanteau. `;
+              if (wordPlacement === "start") {
+                userMessageContent +=
+                  "The word or phrase must be at the start of the portmanteau.";
+              }
+
+              if (wordPlacement === "end") {
+                userMessageContent +=
+                  "The word or phrase must be at the end of the portmanteau.";
+              }
+
+              if (wordPlacement === "any") {
+                userMessageContent +=
+                  "The word or phrase can be placed anywhere in the portmanteau.";
+              }
+            }
           }
+
           if (style === "alternative_spelling") {
-            userMessageContent +=
-              "Each name must be an alternative spelling of a word. For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. ";
+            if (wordToInclude) {
+              userMessageContent += `Each name should be an alternative spelling of the word "${wordToInclude}". For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. `;
+            } else {
+              userMessageContent +=
+                "Each name must be an alternative spelling of a word. For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. ";
+            }
           }
           if (style === "foreign_language") {
-            userMessageContent +=
-              "Each name must be a word in a foreign language that means something based on the English description. For example 'Samsara' is a Sanskrit word that means 'cycle of life'. ";
+            if (wordToInclude) {
+              userMessageContent += `Each name must be a word in a foreign language that means something based on the description and the phrase "${wordToInclude}". For example 'Samsara' is a Sanskrit word that means 'cycle of life'. `;
+            } else {
+              userMessageContent +=
+                "Each name must be a word in a foreign language that means something based on the English description. For example 'Samsara' is a Sanskrit word that means 'cycle of life'. ";
+            }
           }
 
           if (style === "historical") {
-            userMessageContent +=
-              "Each name should be inspired by a historical reference or figure. For example 'Da Vinci' or 'Tesla'. ";
+            if (wordToInclude) {
+              userMessageContent += `Each name should be inspired by a historical reference related to the word or phrase "${wordToInclude}". For example 'Da Vinci' is related to 'art' or 'Kepler' is related to 'astronomy'. `;
+            } else {
+              userMessageContent +=
+                "Each name should be inspired by a historical reference or figure. For example 'Da Vinci' or 'Tesla'. ";
+            }
           }
         }
-        if (wordToInclude) {
-          userMessageContent += `Each name must include the word or phrase "${wordToInclude}". Do not leave this out. `;
-          if (wordPlacement === "start") {
-            userMessageContent +=
-              "The word or phrase must be at the start of the name.";
-          }
 
-          if (wordPlacement === "end") {
-            userMessageContent +=
-              "The word or phrase must be at the end of the name.";
-          }
-
-          if (wordPlacement === "any") {
-            userMessageContent +=
-              "The word or phrase can be placed anywhere in the name.";
-          }
-        }
+        userMessageContent +=
+          "Please provide the names only with no explanation. ";
 
         const completion = await openai.chat.completions.create({
           model: "gpt-3.5-turbo",
