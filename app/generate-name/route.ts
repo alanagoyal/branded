@@ -31,6 +31,9 @@ export async function POST(req: Request, res: NextResponse) {
           if (style === "one_word") {
             userMessageContent +=
               "Each name should be one word with one or two syllables. It should be a word that can be found in the English dictionary like 'Thrive', 'Default', or 'Surge'. It should not be a compound word like 'Facebook' or 'Guidewire'. ";
+            if (wordToInclude) {
+              userMessageContent += `The name should be a synonym for "${wordToInclude}". `;
+            }
           }
           if (style === "two_words") {
             userMessageContent +=
