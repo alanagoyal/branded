@@ -1,6 +1,6 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { LogOut, User } from "lucide-react";
+import { Heart, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -14,6 +14,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Icons } from "./icons";
 
 export default function UserNav({ user }: any) {
   const router = useRouter();
@@ -50,6 +51,14 @@ export default function UserNav({ user }: any) {
             <DropdownMenuItem className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
+            </DropdownMenuItem>
+          </Link>
+        </DropdownMenuGroup>
+        <DropdownMenuGroup>
+          <Link href="/favorites">
+            <DropdownMenuItem className="cursor-pointer">
+              <Heart className="mr-2 h-4 w-4" />
+              <span>Favorites</span>
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>

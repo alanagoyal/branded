@@ -56,9 +56,9 @@ export function NamesTable({ namesList }: { namesList: any }) {
             <TableCell>
               <Button onClick={() => toggleFavoriteName(name)} variant="ghost">
                 {favoritedNames[name] ? (
-                  <Icons.favorite />
-                ) : (
                   <Icons.unfavorite />
+                ) : (
+                  <Icons.favorite />
                 )}
               </Button>
             </TableCell>
