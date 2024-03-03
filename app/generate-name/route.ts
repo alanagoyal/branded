@@ -90,7 +90,7 @@ export async function POST(req: Request, res: NextResponse) {
           }
           if (style === "foreign_language") {
             if (wordToInclude) {
-              userMessageContent += `Each name must be a word in a foreign language that means something based on the description and the phrase "${wordToInclude}". For example 'Samsara' is a Sanskrit word that means 'cycle of life'. `;
+              userMessageContent += `Each name must be a word in a foreign language that means something based on the description and the word or phrase "${wordToInclude}". For example 'Samsara' is a Sanskrit word that means 'cycle of life'. `;
             } else {
               userMessageContent +=
                 "Each name must be a word in a foreign language that means something based on the English description. For example 'Samsara' is a Sanskrit word that means 'cycle of life'. ";
