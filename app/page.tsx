@@ -11,10 +11,7 @@ import { redirect } from "next/navigation";
 export default async function Home() {
   const supabase = createClient();
   const { data, error } = await supabase.auth.getUser();
-  if (data.user) {
-    // redirect("/new");
-    console.log;
-  }
+
 
   return (
     <div className="min-h-screen pt-20">
