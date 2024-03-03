@@ -1,3 +1,7 @@
+"use client";
+import { createClient } from "@/utils/supabase/client";
+import { Icons } from "./icons";
+import { Button } from "./ui/button";
 import {
   Table,
   TableBody,
@@ -7,19 +11,57 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { useState } from "react";
+import { toast } from "./ui/use-toast";
 
-export function NamesTable({ names }: { names: string[] }) {
+export function NamesTable({ namesList }: { namesList: any }) {
+  const supabase = createClient();
+  const [favoritedNames, setFavoritedNames] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  async function toggleFavoriteName(name: string) {
+    try {
+      const isFavorited = favoritedNames[name] || false;
+      setFavoritedNames((prevState) => ({
+        ...prevState,
+        [name]: !isFavorited,
+      }));
+
+      const { error } = await supabase
+        .from("names")
+        .update({ favorited: !isFavorited })
+        .eq("id", namesList[name]);
+
+      toast({
+        description: isFavorited
+          ? "Removed from favorites"
+          : "Added to favorites",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="text-center">Names</TableHead>
+          <TableHead>Names</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {names.map((name, index) => (
+        {Object.keys(namesList).map((name, index) => (
           <TableRow key={index}>
             <TableCell>{name}</TableCell>
+            <TableCell>
+              <Button onClick={() => toggleFavoriteName(name)} variant="ghost">
+                {favoritedNames[name] ? (
+                  <Icons.favorite />
+                ) : (
+                  <Icons.unfavorite />
+                )}
+              </Button>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
