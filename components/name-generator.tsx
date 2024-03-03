@@ -313,7 +313,7 @@ export function NameGenerator({ user }: { user: any }) {
             </div>
           </form>
         </Form>
-        <div className="flex-col space-y-4 sm:flex">
+        <div className="flex-col pt-4 space-y-4 sm:flex">
           {Object.keys(namesList).length > 0 ? (
             <NamesTable namesList={namesList} />
           ) : null}

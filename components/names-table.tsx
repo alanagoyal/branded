@@ -44,11 +44,6 @@ export function NamesTable({ namesList }: { namesList: any }) {
   }
   return (
     <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Names</TableHead>
-        </TableRow>
-      </TableHeader>
       <TableBody>
         {Object.keys(namesList).map((name, index) => (
           <TableRow key={index}>
