@@ -67,6 +67,13 @@ export function NameGenerator({ user }: { user: any }) {
   const [minLength, setMinLength] = useState<SliderProps["defaultValue"]>([6]);
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
+  async function clear() {
+    form.reset();
+    setNamesList({});
+  }
+
+  const isFormFilled = form.watch("description");
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
@@ -295,6 +302,11 @@ export function NameGenerator({ user }: { user: any }) {
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Loading..." : "Go"}
               </Button>
+              {isFormFilled && (
+                <Button type="button" variant="secondary" onClick={clear}>
+                  Reset
+                </Button>
+              )}
             </div>
           </form>
         </Form>
