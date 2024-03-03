@@ -102,6 +102,7 @@ export function NameGenerator({ user }: { user: any }) {
         return line.replace(/^\d+\.\s*/, "").trim();
       });
 
+      console.log(user?.id);
       for (const name of namesArray) {
         try {
           const updates = {
@@ -115,6 +116,8 @@ export function NameGenerator({ user }: { user: any }) {
             created_at: new Date(),
             created_by: user?.id,
           };
+
+          console.log(updates);
 
           let { data, error } = await supabase
             .from("names")
