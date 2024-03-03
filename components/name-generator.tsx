@@ -63,7 +63,7 @@ export function NameGenerator({ user }: { user: any }) {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [namesList, setNamesList] = useState([]);
+  const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [minLength, setMinLength] = useState<SliderProps["defaultValue"]>([6]);
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
@@ -94,23 +94,35 @@ export function NameGenerator({ user }: { user: any }) {
       const namesArray = data.response.split("\n").map((line: any) => {
         return line.replace(/^\d+\.\s*/, "").trim();
       });
-      setNamesList(namesArray);
+
       for (const name of namesArray) {
         try {
-          let { error } = await supabase.from("names").insert([
-            {
-              name: name,
-              description: values.description,
-              word_to_include: values.wordToInclude,
-              word_placement: values.wordPlacement,
-              word_style: values.style,
-              min_length: minLength![0],
-              max_length: maxLength![0],
-              created_at: new Date(),
-              created_by: user?.id,
-            },
-          ]);
+          const updates = {
+            name: name,
+            description: values.description,
+            word_to_include: values.wordToInclude,
+            word_placement: values.wordPlacement,
+            word_style: values.style,
+            min_length: minLength![0],
+            max_length: maxLength![0],
+            created_at: new Date(),
+            created_by: user?.id,
+          };
+
+          let { data, error } = await supabase
+            .from("names")
+            .upsert(updates)
+            .select("id")
+            .single();
+
           if (error) throw error;
+
+          if (data) {
+            setNamesList((prevState) => ({
+              ...prevState,
+              [name]: data?.id,
+            }));
+          }
         } catch (error) {
           console.log(error);
         }
@@ -127,178 +139,170 @@ export function NameGenerator({ user }: { user: any }) {
       <div className="min-h-screen flex flex-col">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="container max-w-lg mx-auto py-6">
-              <div className="grid grid-cols-1 gap-4">
-                <div className="flex h-full flex-col space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="What will you build?"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Describe your project in a few sentences
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex-col space-y-4 sm:flex">
-                  {" "}
-                  <FormField
-                    control={form.control}
-                    name="style"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Style</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Style" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Style</SelectLabel>
-                              <SelectItem value="one_word">One Word</SelectItem>
-                              <SelectItem value="two_words">
-                                Two Words
-                              </SelectItem>
-                              <SelectItem value="portmanteau">
-                                Portmanteau
-                              </SelectItem>
-                              <SelectItem value="alternative_spelling">
-                                Alternative Spelling
-                              </SelectItem>
-                              <SelectItem value="foreign_language">
-                                Foreign Language
-                              </SelectItem>
-                              <SelectItem value="historical">
-                                Historical Reference
-                              </SelectItem>
-                              <SelectItem value="any">Surprise Me</SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Choose a style for your name
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex-col space-y-4 sm:flex">
-                  <LengthSelector
-                    minLength={minLength}
-                    onMinLengthChange={setMinLength}
-                    maxLength={maxLength}
-                    onMaxLengthChange={setMaxLength}
-                  />
-                </div>
-
-                <div className="flex-col space-y-4 sm:flex">
-                  <FormField
-                    control={form.control}
-                    name="wordToInclude"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {form.watch("style") === "two_words" ||
-                          form.watch("style") === "portmanteau" ||
-                          form.watch("style") === "any"
-                            ? "Word to to Include (Optional)"
-                            : form.watch("style") === "alternative_spelling" ||
-                              form.watch("style") === "historical" ||
-                              form.watch("style") === "foreign_language" ||
-                              form.watch("style") === "one_word"
-                            ? "Word to Inspire (Optional)"
-                            : "Word to Include (Optional)"}
-                        </FormLabel>
-                        <FormControl>
-                          <Input {...field} autoComplete="off" />
-                        </FormControl>
-                        <FormDescription>
-                          {form.watch("style") === "two_words" ||
-                          form.watch("style") === "portmanteau" ||
-                          form.watch("style") === "any"
-                            ? "Choose a word to include in your name"
-                            : form.watch("style") === "alternative_spelling" ||
-                              form.watch("style") === "historical" ||
-                              form.watch("style") === "foreign_language" ||
-                              form.watch("style") === "one_word"
-                            ? "Choose a word to inspire your name"
-                            : "Choose a word to include in your name"}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {form.watch("wordToInclude") &&
-                  (form.watch("style") === "two_words" ||
-                    form.watch("style") === "portmanteau" ||
-                    form.watch("style") === "any") && (
-                    <div className="flex-col space-y-4 sm:flex">
-                      {" "}
-                      <FormField
-                        control={form.control}
-                        name="wordPlacement"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Placement</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectLabel>Placement</SelectLabel>
-                                  <SelectItem value="start">Start </SelectItem>
-                                  <SelectItem value="end">End</SelectItem>
-                                  <SelectItem value="any">Anywhere</SelectItem>
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                            <FormDescription>
-                              Choose the placement of the word to include
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex h-full flex-col space-y-4">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="What will you build?"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Describe your project in a few sentences
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Loading..." : "Go"}
-                </Button>
-                <div className="flex-col space-y-4 sm:flex">
-                  {namesList.length === 0 ? (
-                    <div></div>
-                  ) : (
-                    <NamesTable names={namesList} />
-                  )}
-                </div>
+                />
               </div>
+              <div className="flex-col space-y-4 sm:flex">
+                {" "}
+                <FormField
+                  control={form.control}
+                  name="style"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Style</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Style" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Style</SelectLabel>
+                            <SelectItem value="one_word">One Word</SelectItem>
+                            <SelectItem value="two_words">Two Words</SelectItem>
+                            <SelectItem value="portmanteau">
+                              Portmanteau
+                            </SelectItem>
+                            <SelectItem value="alternative_spelling">
+                              Alternative Spelling
+                            </SelectItem>
+                            <SelectItem value="foreign_language">
+                              Foreign Language
+                            </SelectItem>
+                            <SelectItem value="historical">
+                              Historical Reference
+                            </SelectItem>
+                            <SelectItem value="any">Surprise Me</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Choose a style for your name
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex-col space-y-4 sm:flex">
+                <LengthSelector
+                  minLength={minLength}
+                  onMinLengthChange={setMinLength}
+                  maxLength={maxLength}
+                  onMaxLengthChange={setMaxLength}
+                />
+              </div>
+              <div className="flex-col space-y-4 sm:flex">
+                <FormField
+                  control={form.control}
+                  name="wordToInclude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {form.watch("style") === "two_words" ||
+                        form.watch("style") === "portmanteau" ||
+                        form.watch("style") === "any"
+                          ? "Word to to Include (Optional)"
+                          : form.watch("style") === "alternative_spelling" ||
+                            form.watch("style") === "historical" ||
+                            form.watch("style") === "foreign_language" ||
+                            form.watch("style") === "one_word"
+                          ? "Word to Inspire (Optional)"
+                          : "Word to Include (Optional)"}
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} autoComplete="off" />
+                      </FormControl>
+                      <FormDescription>
+                        {form.watch("style") === "two_words" ||
+                        form.watch("style") === "portmanteau" ||
+                        form.watch("style") === "any"
+                          ? "Choose a word to include in your name"
+                          : form.watch("style") === "alternative_spelling" ||
+                            form.watch("style") === "historical" ||
+                            form.watch("style") === "foreign_language" ||
+                            form.watch("style") === "one_word"
+                          ? "Choose a word to inspire your name"
+                          : "Choose a word to include in your name"}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {form.watch("wordToInclude") &&
+                (form.watch("style") === "two_words" ||
+                  form.watch("style") === "portmanteau" ||
+                  form.watch("style") === "any") && (
+                  <div className="flex-col space-y-4 sm:flex">
+                    {" "}
+                    <FormField
+                      control={form.control}
+                      name="wordPlacement"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Placement</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Placement</SelectLabel>
+                                <SelectItem value="start">Start </SelectItem>
+                                <SelectItem value="end">End</SelectItem>
+                                <SelectItem value="any">Anywhere</SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            Choose the placement of the word to include
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Loading..." : "Go"}
+              </Button>
             </div>
           </form>
         </Form>
+        <div className="flex-col space-y-4 sm:flex">
+          {Object.keys(namesList).length > 0 ? (
+            <NamesTable namesList={namesList} />
+          ) : null}
+        </div>
       </div>
     </>
   );
