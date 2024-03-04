@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import { Share } from "./share";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),

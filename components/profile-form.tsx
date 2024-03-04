@@ -59,17 +59,20 @@ export default function ProfileForm({
     }
   }
   return (
-    <div>
+    <div className="flex flex-col">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {" "}
+          <div>
+            
+          </div>
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <FormLabel className="text-base mx-2">Email</FormLabel>
+                  <FormLabel className="text-sm px-2">Email</FormLabel>
                 </div>
                 <FormControl>
                   <Input {...field} disabled />
@@ -83,7 +86,7 @@ export default function ProfileForm({
             render={({ field }) => (
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <FormLabel className="text-base mx-2">First Name</FormLabel>
+                  <FormLabel className="text-sm px-2">First Name</FormLabel>
                 </div>
                 <FormControl>
                   <Input {...field} />
@@ -97,7 +100,7 @@ export default function ProfileForm({
             render={({ field }) => (
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <FormLabel className="text-base mx-2">Last Name</FormLabel>
+                  <FormLabel className="text-sm px-2">Last Name</FormLabel>
                 </div>
                 <FormControl>
                   <Input {...field} />
@@ -105,7 +108,7 @@ export default function ProfileForm({
               </FormItem>
             )}
           />
-          <div className="py-1 flex justify-center">
+          <div className="py-1 flex justify-center w-full">
             <Button type="submit">Update</Button>
           </div>
         </form>

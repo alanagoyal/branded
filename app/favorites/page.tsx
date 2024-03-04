@@ -11,7 +11,6 @@ export default async function Favorites() {
     .select()
     .eq("created_by", user?.id)
     .eq("favorited", true);
-  console.log(names);
   return (
     <div className="flex flex-col items-center min-h-screen pt-20 py-2">
       <h1 className="text-4xl font-bold mb-4">Your Names</h1>
