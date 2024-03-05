@@ -310,26 +310,28 @@ export function NameGenerator({ user }: { user: any }) {
                   </div>
                 )}
               <Dialog>
-                <DialogTrigger asChild disabled={isLoading}>
+                <DialogTrigger asChild>
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? "Loading..." : "Go"}
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    {" "}
-                    <DialogTitle>Your Names</DialogTitle>
-                    <DialogDescription>
-                      These are the names we generated for you
-                    </DialogDescription>
-                  </DialogHeader>
+                {!isLoading && (
+                  <DialogContent>
+                    <DialogHeader>
+                      {" "}
+                      <DialogTitle>Your Names</DialogTitle>
+                      <DialogDescription>
+                        These are the names we generated for you
+                      </DialogDescription>
+                    </DialogHeader>
 
-                  <div className="flex-col pt-4 space-y-4 sm:flex">
-                    {Object.keys(namesList).length > 0 ? (
-                      <NamesTable namesList={namesList} />
-                    ) : null}
-                  </div>
-                </DialogContent>
+                    <div className="flex-col pt-4 space-y-4 sm:flex">
+                      {Object.keys(namesList).length > 0 ? (
+                        <NamesTable namesList={namesList} />
+                      ) : null}
+                    </div>
+                  </DialogContent>
+                )}
               </Dialog>
 
               {isFormFilled && (
