@@ -32,6 +32,14 @@ import {
 } from "./ui/select";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { Share } from "./share";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -117,8 +125,6 @@ export function NameGenerator({ user }: { user: any }) {
             created_at: new Date(),
             created_by: user?.id,
           };
-
-          console.log(updates);
 
           let { data, error } = await supabase
             .from("names")
@@ -303,9 +309,29 @@ export function NameGenerator({ user }: { user: any }) {
                     />
                   </div>
                 )}
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Loading..." : "Go"}
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild disabled={isLoading}>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? "Loading..." : "Go"}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    {" "}
+                    <DialogTitle>Your Names</DialogTitle>
+                    <DialogDescription>
+                      These are the names we generated for you
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="flex-col pt-4 space-y-4 sm:flex">
+                    {Object.keys(namesList).length > 0 ? (
+                      <NamesTable namesList={namesList} />
+                    ) : null}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               {isFormFilled && (
                 <Button type="button" variant="secondary" onClick={clear}>
                   Reset
@@ -314,11 +340,6 @@ export function NameGenerator({ user }: { user: any }) {
             </div>
           </form>
         </Form>
-        <div className="flex-col pt-4 space-y-4 sm:flex">
-          {Object.keys(namesList).length > 0 ? (
-            <NamesTable namesList={namesList} />
-          ) : null}
-        </div>
       </div>
     </>
   );

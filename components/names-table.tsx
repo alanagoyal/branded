@@ -13,6 +13,7 @@ import {
 } from "./ui/table";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
+import { Share } from "./share";
 
 export function NamesTable({ namesList }: { namesList: any }) {
   const supabase = createClient();
@@ -43,23 +44,29 @@ export function NamesTable({ namesList }: { namesList: any }) {
     }
   }
   return (
-    <Table>
-      <TableBody>
-        {Object.keys(namesList).map((name, index) => (
-          <TableRow key={index}>
-            <TableCell>{name}</TableCell>
-            <TableCell>
-              <Button onClick={() => toggleFavoriteName(name)} variant="ghost">
-                {favoritedNames[name] ? (
-                  <Icons.unfavorite />
-                ) : (
-                  <Icons.favorite />
-                )}
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <div>
+      <Table>
+        <TableBody>
+          {Object.keys(namesList).map((name, index) => (
+            <TableRow key={index} className="flex items-center justify-between">
+              <TableCell>{name}</TableCell>
+              <TableCell className="ml-auto">
+                <Button
+                  onClick={() => toggleFavoriteName(name)}
+                  variant="ghost"
+                >
+                  {favoritedNames[name] ? (
+                    <Icons.unfavorite />
+                  ) : (
+                    <Icons.favorite />
+                  )}
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      {/* <Share /> */}
+    </div>
   );
 }
