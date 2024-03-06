@@ -3,6 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { Button } from "./ui/button"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
+import { toast } from "./ui/use-toast"
 
 
 export function Share({idString}: {idString: string}) {
@@ -11,7 +12,9 @@ export function Share({idString}: {idString: string}) {
   const handleCopy = () => {
     navigator.clipboard.writeText(defaultValue)
       .then(() => {
-        console.log('Text copied to clipboard');
+        toast({
+          description: "Copied to clipboard"
+        })
       })
       .catch((err) => {
         console.error('Unable to copy text: ', err);

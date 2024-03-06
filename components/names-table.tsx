@@ -25,8 +25,7 @@ export function NamesTable({ namesList,
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
   }>({});
-  const idString = idsList.join("");
-  console.log(namesList)
+  
   async function toggleFavoriteName(name: string) {
     try {
       const isFavorited = favoritedNames[name] || false;
@@ -72,7 +71,6 @@ export function NamesTable({ namesList,
           ))}
         </TableBody>
       </Table>
-      <Share idString={idString} />
     </div>
   );
 }

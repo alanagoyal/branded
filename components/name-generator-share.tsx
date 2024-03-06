@@ -30,16 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Share } from "./share";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
+import Link from "next/link";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -59,7 +50,6 @@ const formSchema = z.object({
 });
 
 export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
-  console.log(names);
   const supabase = createClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -77,7 +67,6 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
   const [idsList, setIdsList] = useState<string[]>([]);
   const [minLength, setMinLength] = useState<SliderProps["defaultValue"]>([6]);
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>();
 
   useEffect(() => {
     const updatedNamesList: { [name: string]: string } = {};
@@ -85,13 +74,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
       updatedNamesList[name.name] = name.id;
     }
     setNamesList(updatedNamesList);
-    setIsDialogOpen(true)
-  }, []); 
-
-  async function clear() {
-    form.reset();
-    setNamesList({});
-  }
+  }, []);
 
   const isFormFilled = form.watch("description");
 
@@ -323,35 +306,23 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                     />
                   </div>
                 )}
-              <Dialog open={isDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Loading..." : "Go"}
-                  </Button>
-                </DialogTrigger>
-                {!isLoading && (
-                  <DialogContent>
-                    <DialogHeader>
-                      {" "}
-                      <DialogTitle>Your Names</DialogTitle>
-                      <DialogDescription>
-                        These are the names we generated for you
-                      </DialogDescription>
-                    </DialogHeader>
 
-                    <div className="flex-col pt-4 space-y-4 sm:flex">
-                      {Object.keys(namesList).length > 0 ? (
-                        <NamesTable namesList={namesList} idsList={idsList} />
-                      ) : null}
-                    </div>
-                  </DialogContent>
-                )}
-              </Dialog>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Loading..." : "Go"}
+              </Button>
+
               {isFormFilled && (
-                <Button type="button" variant="secondary" onClick={clear}>
-                  Reset
-                </Button>
+                <Link href="/new">
+                  <Button className="w-full" type="button" variant="secondary">
+                    Reset
+                  </Button>
+                </Link>
               )}
+              <div className="flex-col pt-4 space-y-4 sm:flex">
+                {Object.keys(namesList).length > 0 ? (
+                  <NamesTable namesList={namesList} idsList={idsList} />
+                ) : null}
+              </div>
             </div>
           </form>
         </Form>

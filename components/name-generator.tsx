@@ -333,6 +333,7 @@ export function NameGenerator({ user }: { user: any }) {
                         <NamesTable namesList={namesList} idsList={idsList}/>
                       ) : null}
                     </div>
+                    <Share idString={idsList.join("")} />
                   </DialogContent>
                 )}
               </Dialog>
