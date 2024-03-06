@@ -67,14 +67,18 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
   const [idsList, setIdsList] = useState<string[]>([]);
   const [minLength, setMinLength] = useState<SliderProps["defaultValue"]>([6]);
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   useEffect(() => {
     const updatedNamesList: { [name: string]: string } = {};
     for (const name of names) {
       updatedNamesList[name.name] = name.id;
+      if (user && name.created_by === user.id) {
+        setIsOwner(true)
+      }
     }
     setNamesList(updatedNamesList);
-  }, []);
+  }, [names, user]);
 
   const isFormFilled = form.watch("description");
 
@@ -320,7 +324,11 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
               )}
               <div className="flex-col pt-4 space-y-4 sm:flex">
                 {Object.keys(namesList).length > 0 ? (
-                  <NamesTable namesList={namesList} idsList={idsList} />
+                  <NamesTable
+                    isOwner={isOwner}
+                    namesList={namesList}
+                    idsList={idsList}
+                  />
                 ) : null}
               </div>
             </div>

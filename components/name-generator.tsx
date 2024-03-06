@@ -60,7 +60,7 @@ const formSchema = z.object({
 
 export function NameGenerator({ user }: { user: any }) {
   const supabase = createClient();
-
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -112,7 +112,7 @@ export function NameGenerator({ user }: { user: any }) {
         return line.replace(/^\d+\.\s*/, "").trim();
       });
 
-      const ids: string[] = []; // initialize empty ids list
+      const ids: string[] = []; 
       for (const name of namesArray) {
         try {
           const updates = {
@@ -136,7 +136,7 @@ export function NameGenerator({ user }: { user: any }) {
           if (error) throw error;
 
           if (data) {
-            ids.push(data?.id) // add id to ids list
+            ids.push(data?.id) 
             setNamesList((prevState) => ({
               ...prevState,
               [name]: data?.id,
@@ -146,7 +146,7 @@ export function NameGenerator({ user }: { user: any }) {
           console.log(error);
         }
       }
-      setIdsList(ids) // set state
+      setIdsList(ids) 
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -330,7 +330,7 @@ export function NameGenerator({ user }: { user: any }) {
 
                     <div className="flex-col pt-4 space-y-4 sm:flex">
                       {Object.keys(namesList).length > 0 ? (
-                        <NamesTable namesList={namesList} idsList={idsList}/>
+                        <NamesTable isOwner={!!user} namesList={namesList} idsList={idsList}/>
                       ) : null}
                     </div>
                     <Share idString={idsList.join("")} />
