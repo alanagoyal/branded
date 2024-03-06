@@ -15,14 +15,37 @@ import { useState } from "react";
 import { toast } from "./ui/use-toast";
 import { Share } from "./share";
 
-export function NamesTable({ namesList }: { namesList: any }) {
+export function NamesTable({ namesList,
+  idsList,
+}: {
+  namesList:any,
+  idsList: any;
+}) {
   const supabase = createClient();
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
   }>({});
-  const idsList = Object.values(namesList)
-  const idString = JSON.stringify(idsList).replace(/["\[\]]/g, '');
+  // const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
 
+ console.log(idsList);
+  const idString = idsList.join("");
+  console.log(idString);
+
+/*  for (const id of idsList) {
+    try {
+      let { data, error } = await supabase.from("names").select().eq("id", id).single()
+
+      if (error) throw error;
+
+      if (data) {
+        setNamesList((prevState) => ({
+          ...prevState, [data?.name]: id,
+        }))
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  } */
 
   async function toggleFavoriteName(name: string) {
     try {

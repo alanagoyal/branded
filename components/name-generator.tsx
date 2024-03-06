@@ -73,6 +73,7 @@ export function NameGenerator({ user }: { user: any }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
+  const [idsList, setIdsList] = useState<string[]>([]);
   const [minLength, setMinLength] = useState<SliderProps["defaultValue"]>([6]);
   const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
 
@@ -111,7 +112,7 @@ export function NameGenerator({ user }: { user: any }) {
         return line.replace(/^\d+\.\s*/, "").trim();
       });
 
-      console.log(user?.id);
+      const ids: string[] = []; // initialize empty ids list
       for (const name of namesArray) {
         try {
           const updates = {
@@ -135,6 +136,7 @@ export function NameGenerator({ user }: { user: any }) {
           if (error) throw error;
 
           if (data) {
+            ids.push(data?.id) // add id to ids list
             setNamesList((prevState) => ({
               ...prevState,
               [name]: data?.id,
@@ -144,6 +146,7 @@ export function NameGenerator({ user }: { user: any }) {
           console.log(error);
         }
       }
+      setIdsList(ids) // set state
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -327,13 +330,12 @@ export function NameGenerator({ user }: { user: any }) {
 
                     <div className="flex-col pt-4 space-y-4 sm:flex">
                       {Object.keys(namesList).length > 0 ? (
-                        <NamesTable namesList={namesList} />
+                        <NamesTable namesList={namesList} idsList={idsList}/>
                       ) : null}
                     </div>
                   </DialogContent>
                 )}
               </Dialog>
-
               {isFormFilled && (
                 <Button type="button" variant="secondary" onClick={clear}>
                   Reset

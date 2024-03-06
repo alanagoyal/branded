@@ -6,8 +6,18 @@ import { Input } from "./ui/input"
 
 
 export function Share({idString}: {idString: string}) {
-  console.log(idString)
   const defaultValue = `https://namebase.vercel.app/${idString}`
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(defaultValue)
+      .then(() => {
+        console.log('Text copied to clipboard');
+      })
+      .catch((err) => {
+        console.error('Unable to copy text: ', err);
+      });
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -32,7 +42,7 @@ export function Share({idString}: {idString: string}) {
               className="h-9"
             />
           </div>
-          <Button type="submit" size="sm" className="px-3">
+          <Button type="submit" size="sm" onClick={handleCopy} className="px-3">
             <span className="sr-only">Copy</span>
             <CopyIcon className="h-4 w-4" />
           </Button>

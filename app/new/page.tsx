@@ -10,7 +10,7 @@ export default async function GenerateName() {
   return (
     <div>
       <h1 className="text-4xl font-bold mb-4"></h1>
-      <NameGenerator user={user} />
+      <NameGenerator user={user}/>
     </div>
   );
 }

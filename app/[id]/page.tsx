@@ -1,18 +1,25 @@
 import { FavoritesTable } from "@/components/favorites-table";
+import { NameGenerator } from "@/components/name-generator";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function Names({ params }: { params: { id: string } }) {
   const supabase = createClient();
-  const id = params.id;
-  console.log(id)
-  const decodedIdString = decodeURIComponent(id);
-  const ids = decodedIdString.split(',');
-  console.log(ids)
-
+  const idString = params.id;
+  const idRegex = /.{36}/g;
+  const idsList = idString.match(idRegex);
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
+  const names: string[] = []
+  if (idsList) {
+    for (const id of idsList) {
+        let { data, error } = await supabase.from("names").select().eq("id", id).single()
+        if (error) throw error
+        if (data) {
+            names.push(data?.name)
+        }
+    }
+  }
 
   return (
     <div>
@@ -22,4 +29,3 @@ export default async function Names({ params }: { params: { id: string } }) {
     </div>
   );
 }
-

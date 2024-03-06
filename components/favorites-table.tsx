@@ -15,7 +15,7 @@ import { useState } from "react";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 
-export function FavoritesTable({ favorites }: { favorites: any }) {
+export async function FavoritesTable({ favorites }: { favorites: any }) {
   const router = useRouter();
   const supabase = createClient();
 

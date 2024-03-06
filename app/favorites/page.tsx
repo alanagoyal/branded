@@ -11,6 +11,8 @@ export default async function Favorites() {
     .select()
     .eq("created_by", user?.id)
     .eq("favorited", true);
+
+
   return (
     <div>
       <h1 className="text-4xl font-bold mb-4 text-center">Your Names</h1>
