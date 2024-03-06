@@ -5,7 +5,9 @@ import { Label } from "./ui/label"
 import { Input } from "./ui/input"
 
 
-export function Share() {
+export function Share({idString}: {idString: string}) {
+  console.log(idString)
+  const defaultValue = `https://namebase.vercel.app/${idString}`
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -15,7 +17,7 @@ export function Share() {
         <div className="flex flex-col space-y-2 text-center sm:text-left">
           <h3 className="text-lg font-semibold">Share Name</h3>
           <p className="text-sm text-muted-foreground">
-            Share these names with your friends and teammates.
+            Share these names with your friends and teammates
           </p>
         </div>
         <div className="flex items-center space-x-2 pt-4">
@@ -25,7 +27,7 @@ export function Share() {
             </Label>
             <Input
               id="link"
-              defaultValue="https://platform.openai.com/playground/p/7bbKYQvsVkNmVb8NGcdUOLae?model=text-davinci-003"
+              defaultValue={defaultValue}
               readOnly
               className="h-9"
             />

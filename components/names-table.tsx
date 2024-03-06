@@ -20,6 +20,9 @@ export function NamesTable({ namesList }: { namesList: any }) {
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
   }>({});
+  const idsList = Object.values(namesList)
+  const idString = JSON.stringify(idsList).replace(/["\[\]]/g, '');
+
 
   async function toggleFavoriteName(name: string) {
     try {
@@ -66,7 +69,7 @@ export function NamesTable({ namesList }: { namesList: any }) {
           ))}
         </TableBody>
       </Table>
-      {/* <Share /> */}
+      <Share idString={idString} />
     </div>
   );
 }
