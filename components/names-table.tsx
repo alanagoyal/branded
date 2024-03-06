@@ -25,28 +25,8 @@ export function NamesTable({ namesList,
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
   }>({});
-  // const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
-
- console.log(idsList);
   const idString = idsList.join("");
-  console.log(idString);
-
-/*  for (const id of idsList) {
-    try {
-      let { data, error } = await supabase.from("names").select().eq("id", id).single()
-
-      if (error) throw error;
-
-      if (data) {
-        setNamesList((prevState) => ({
-          ...prevState, [data?.name]: id,
-        }))
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  } */
-
+  console.log(namesList)
   async function toggleFavoriteName(name: string) {
     try {
       const isFavorited = favoritedNames[name] || false;

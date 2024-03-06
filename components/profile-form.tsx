@@ -46,7 +46,7 @@ export default function ProfileForm({
         .from("profiles")
         .update(updates)
         .eq("id", user.id);
-      if (error) throw error;
+      if (error) throw error; 
       toast({
         description: "Profile updated",
       });
