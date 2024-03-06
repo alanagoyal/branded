@@ -24,7 +24,6 @@ export function NamesTable({
   namesList: any;
   idsList: any;
 }) {
-  console.log(isOwner)
   const supabase = createClient();
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
