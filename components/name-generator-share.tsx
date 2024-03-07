@@ -262,6 +262,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                               min={4}
                               max={14}
                               defaultValue={[field.value]}
+                              value={[form.getValues().minLength]}
                               step={1}
                               onValueChange={(vals) => {
                                 const minValue = Math.min(
@@ -301,6 +302,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                               min={4}
                               max={14}
                               defaultValue={[field.value]}
+                              value={[form.getValues().maxLength]}
                               step={1}
                               onValueChange={(vals) => {
                                 const maxValue = Math.max(
