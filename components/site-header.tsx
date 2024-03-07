@@ -41,20 +41,7 @@ export async function SiteHeader() {
             </div>
             <div className="hidden sm:flex">
               <ThemeToggle />
-            </div>
-            <div className="items-center">
-              <Link href="/new">
-                <div
-                  className={buttonVariants({
-                    size: "sm",
-                    variant: "ghost",
-                  })}
-                >
-                  <Icons.new className="h-5 w-5" />
-                  <span className="sr-only">New</span>
-                </div>
-              </Link>
-            </div>
+            </div>       
             <div className="items-center">
               {user ? (
                 <UserNav user={user} />

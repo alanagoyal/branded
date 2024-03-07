@@ -1,6 +1,6 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { Heart, LogOut, User } from "lucide-react";
+import { Heart, LogOut, Plus, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -47,6 +47,12 @@ export default function UserNav({ user }: any) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+        <Link href="/new">
+            <DropdownMenuItem className="cursor-pointer">
+              <Plus className="mr-2 h-4 w-4" />
+              <span>Generate</span>
+            </DropdownMenuItem>
+          </Link>
           <Link href="/profile">
             <DropdownMenuItem className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
