@@ -38,9 +38,11 @@ export async function SiteHeader() {
                   <span className="sr-only">GitHub</span>
                 </div>
               </Link>
+            </div>
+            <div className="hidden sm:flex">
               <ThemeToggle />
             </div>
-            <div className="hidden sm:flex items-center">
+            <div className="items-center">
               <Link href="/new">
                 <div
                   className={buttonVariants({
@@ -52,6 +54,8 @@ export async function SiteHeader() {
                   <span className="sr-only">New</span>
                 </div>
               </Link>
+            </div>
+            <div className="items-center">
               {user ? (
                 <UserNav user={user} />
               ) : (
