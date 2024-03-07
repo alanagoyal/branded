@@ -410,7 +410,7 @@ export function NameGenerator({ user }: { user: any }) {
                   </Button>
                 </DialogTrigger>
                 {!isLoading && (
-                  <DialogContent>
+                  <DialogContent className="flex flex-col">
                     <DialogHeader>
                       {" "}
                       <DialogTitle>Your Names</DialogTitle>
