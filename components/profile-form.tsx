@@ -4,14 +4,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "./ui/use-toast";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
 const profileFormSchema = z.object({
   email: z.string().email(),
-  first_name: z.string().min(2),
-  last_name: z.string().min(2),
+  name: z.string().min(2),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -28,8 +35,7 @@ export default function ProfileForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       email: userData.email || "",
-      first_name: userData.first_name || "",
-      last_name: userData.last_name || "",
+      name: userData.name || "",
     },
   });
 
@@ -37,8 +43,7 @@ export default function ProfileForm({
     try {
       const updates = {
         email: userData.email,
-        first_name: data.first_name,
-        last_name: data.last_name,
+        name: data.name,
         updated_at: new Date(),
       };
 
@@ -46,7 +51,7 @@ export default function ProfileForm({
         .from("profiles")
         .update(updates)
         .eq("id", user.id);
-      if (error) throw error; 
+      if (error) throw error;
       toast({
         description: "Profile updated",
       });
@@ -62,52 +67,40 @@ export default function ProfileForm({
     <div className="flex flex-col">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {" "}
-          <div>
-            
-          </div>
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-sm px-2">Email</FormLabel>
-                </div>
+              <FormItem>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input {...field} disabled />
                 </FormControl>
+                <FormDescription>
+                  This is the email you log in with
+                </FormDescription>
+                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="first_name"
+            name="name"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-sm px-2">First Name</FormLabel>
-                </div>
+              <FormItem>
+                <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input placeholder="Your name" {...field} />
                 </FormControl>
+                <FormDescription>
+                  This is the name that will be displayed on your profile and in
+                  emails
+                </FormDescription>
+                <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="last_name"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-sm px-2">Last Name</FormLabel>
-                </div>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+
           <div className="py-1 flex justify-center w-full">
             <Button type="submit">Update</Button>
           </div>
