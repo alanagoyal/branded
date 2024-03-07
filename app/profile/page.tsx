@@ -20,7 +20,7 @@ export default async function Account() {
 
   return (
     <div className="w-full px-64">
-      <h1 className="text-4xl font-bold mb-4 text-center">Your Profile</h1>
+      <h1 className="text-2xl font-bold mb-4">Profile</h1>
       <ProfileForm user={user} userData={userData} />
     </div>
   );
