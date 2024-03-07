@@ -42,10 +42,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div vaul-drawer-wrapper="">
-            <div className="relative flex min-h-screen flex-col bg-background">
+            <div className="relative flex flex-col bg-background">
               <SiteHeader />
               <main className="flex-1">
-                <div className="flex flex-col items-center min-h-screen pt-10 py-2 max-w-7xl mx-auto">
+                <div className="flex flex-col items-center pt-10 py-2 max-w-5xl mx-auto">
                   {children}
                 </div>
               </main>

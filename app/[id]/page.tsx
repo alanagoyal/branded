@@ -17,7 +17,7 @@ export default async function Names({ params }: { params: { id: string } }) {
     .in("id", idsList!);
 
   return (
-    <div className="w-full px-64">
+    <div className="w-full px-4">
       <h1 className="text-2xl font-bold mb-4">Name Generator</h1>
       <NameGeneratorShare user={user} names={names} />
     </div>

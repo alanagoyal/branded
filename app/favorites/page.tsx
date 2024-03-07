@@ -13,7 +13,7 @@ export default async function Favorites() {
     .eq("favorited", true);
 
   return (
-      <div className="w-full px-64">
+    <div className="w-full px-4">
         <h1 className="text-2xl font-bold mb-4">Favorites</h1>
         <div className="flex">
           <FavoritesTable favorites={names} />
