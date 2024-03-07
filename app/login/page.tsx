@@ -7,7 +7,7 @@ export default async function Login() {
   return (
     <>
       <div className="container mx-auto flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md flex flex-col space-y-6">
+        <div className="w-full min-h-screen max-w-md flex flex-col space-y-6">
           <div className="flex flex-col items-center space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">
               Sign in to your account
