@@ -250,7 +250,9 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                       name="minLength"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel htmlFor="temperature">Minimum Length</FormLabel>
+                          <FormLabel htmlFor="temperature">
+                            Minimum Length
+                          </FormLabel>
                           <FormDescription>
                             <span className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
                               {field.value}
@@ -258,13 +260,13 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                           </FormDescription>
                           <FormControl>
                             <Slider
-                              id="min-length"
                               min={4}
                               max={14}
-                              defaultValue={[5]}
-                              value={[field.value]}
+                              defaultValue={[field.value]}
                               step={1}
-                              onValueChange={field.onChange}
+                              onValueChange={(vals) => {
+                                field.onChange(vals[0]);
+                              }}
                               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                               aria-label="Min Length"
                             />
@@ -281,7 +283,9 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                       name="maxLength"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel htmlFor="temperature">Maximum Length</FormLabel>
+                          <FormLabel htmlFor="temperature">
+                            Maximum Length
+                          </FormLabel>
                           <FormDescription>
                             <span className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
                               {field.value}
@@ -292,10 +296,11 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                               id="max-length"
                               min={4}
                               max={14}
-                              defaultValue={[12]}
-                              value={[field.value]}
+                              defaultValue={[field.value]}
                               step={1}
-                              onValueChange={field.onChange}
+                              onValueChange={(vals) => {
+                                field.onChange(vals[0]);
+                              }}
                               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                               aria-label="Max Length"
                             />

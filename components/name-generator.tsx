@@ -40,11 +40,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { Slider } from "./ui/slider";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
   wordToInclude: z.string().optional(),
   wordPlacement: z.enum(["start", "end", "any"]).optional(),
+  minLength: z
+    .number()
+    .min(4)
+    .max(14)
+    .refine((value) => value <= 14, {
+      message: "Minimum length cannot be greater than maximum length",
+    }),
+  maxLength: z
+    .number()
+    .min(4)
+    .max(14)
+    .refine((value) => value >= 4, {
+      message: "Maximum length cannot be smaller than minimum length",
+    }),
   style: z
     .enum([
       "one_word",
@@ -60,7 +75,7 @@ const formSchema = z.object({
 
 export function NameGenerator({ user }: { user: any }) {
   const supabase = createClient();
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -68,14 +83,16 @@ export function NameGenerator({ user }: { user: any }) {
       wordToInclude: "",
       wordPlacement: "any",
       style: "any",
+      minLength: 5,
+      maxLength: 10,
     },
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [idsList, setIdsList] = useState<string[]>([]);
-  const [minLength, setMinLength] = useState<SliderProps["defaultValue"]>([6]);
-  const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
+
+  console.log(form.getValues().minLength);
 
   async function clear() {
     form.reset();
@@ -85,6 +102,9 @@ export function NameGenerator({ user }: { user: any }) {
   const isFormFilled = form.watch("description");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("in on submit");
+    console.log(form.getValues().minLength);
+    console.log(form.getValues().maxLength);
     setIsLoading(true);
 
     try {
@@ -95,8 +115,8 @@ export function NameGenerator({ user }: { user: any }) {
         },
         body: JSON.stringify({
           description: values.description,
-          minLength: minLength,
-          maxLength: maxLength,
+          minLength: form.getValues().minLength,
+          maxLength: form.getValues().maxLength,
           wordToInclude: values.wordToInclude,
           wordPlacement: values.wordPlacement,
           style: values.style,
@@ -112,7 +132,7 @@ export function NameGenerator({ user }: { user: any }) {
         return line.replace(/^\d+\.\s*/, "").trim();
       });
 
-      const ids: string[] = []; 
+      const ids: string[] = [];
       for (const name of namesArray) {
         try {
           const updates = {
@@ -121,8 +141,8 @@ export function NameGenerator({ user }: { user: any }) {
             word_to_include: values.wordToInclude,
             word_placement: values.wordPlacement,
             word_style: values.style,
-            min_length: minLength![0],
-            max_length: maxLength![0],
+            min_length: form.getValues().minLength,
+            max_length: form.getValues().maxLength,
             created_at: new Date(),
             created_by: user?.id,
           };
@@ -136,7 +156,7 @@ export function NameGenerator({ user }: { user: any }) {
           if (error) throw error;
 
           if (data) {
-            ids.push(data?.id) 
+            ids.push(data?.id);
             setNamesList((prevState) => ({
               ...prevState,
               [name]: data?.id,
@@ -146,7 +166,7 @@ export function NameGenerator({ user }: { user: any }) {
           console.log(error);
         }
       }
-      setIdsList(ids) 
+      setIdsList(ids);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -227,13 +247,74 @@ export function NameGenerator({ user }: { user: any }) {
                   )}
                 />
               </div>
-              <div className="flex-col space-y-4 sm:flex">
-                <LengthSelector
-                  minLength={minLength}
-                  onMinLengthChange={setMinLength}
-                  maxLength={maxLength}
-                  onMaxLengthChange={setMaxLength}
-                />
+              <div className="grid gap-2 pt-2">
+                <div className="grid gap-4">
+                  <div className="w-full">
+                    <FormField
+                      control={form.control}
+                      name="minLength"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="temperature">
+                            Minimum Length
+                          </FormLabel>
+                          <FormDescription>
+                            <span className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
+                              {field.value}
+                            </span>
+                          </FormDescription>
+                          <FormControl>
+                            <Slider
+                              min={4}
+                              max={14}
+                              defaultValue={[field.value]}
+                              step={1}
+                              onValueChange={(vals) => {
+                                field.onChange(vals[0]);
+                              }}
+                              className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                              aria-label="Min Length"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-4">
+                  <div className="w-full">
+                    <FormField
+                      control={form.control}
+                      name="maxLength"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="temperature">
+                            Maximum Length
+                          </FormLabel>
+                          <FormDescription>
+                            <span className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
+                              {field.value}
+                            </span>
+                          </FormDescription>
+                          <FormControl>
+                            <Slider
+                              id="max-length"
+                              min={4}
+                              max={14}
+                              defaultValue={[field.value]}
+                              step={1}
+                              onValueChange={(vals) => {
+                                field.onChange(vals[0]);
+                              }}
+                              className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                              aria-label="Max Length"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
               <div className="flex-col space-y-4 sm:flex">
                 <FormField
@@ -330,7 +411,11 @@ export function NameGenerator({ user }: { user: any }) {
 
                     <div className="flex-col pt-4 space-y-4 sm:flex">
                       {Object.keys(namesList).length > 0 ? (
-                        <NamesTable isOwner={!!user} namesList={namesList} idsList={idsList}/>
+                        <NamesTable
+                          isOwner={!!user}
+                          namesList={namesList}
+                          idsList={idsList}
+                        />
                       ) : null}
                     </div>
                     <Share idString={idsList.join("")} />
