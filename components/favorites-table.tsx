@@ -45,9 +45,9 @@ export async function FavoritesTable({ favorites }: { favorites: any }) {
     <Table>
       <TableBody>
         {favorites.map((favorite: any, index: any) => (
-          <TableRow key={index}>
+          <TableRow key={index} className="flex items-center justify-between">
             <TableCell>{favorite.name}</TableCell>
-            <TableCell>
+            <TableCell className="ml-auto">
               <Button
                 onClick={() => toggleFavoriteName(favorite.id)}
                 variant="ghost"

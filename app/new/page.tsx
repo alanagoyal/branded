@@ -8,7 +8,7 @@ export default async function GenerateName() {
     data: { user },
   } = await supabase.auth.getUser();
   return (
-    <div>
+    <div className="w-full">
       <h1 className="text-4xl font-bold mb-4"></h1>
       <NameGenerator user={user}/>
     </div>

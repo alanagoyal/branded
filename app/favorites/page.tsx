@@ -14,7 +14,7 @@ export default async function Favorites() {
 
 
   return (
-    <div>
+    <div className="w-full">
       <h1 className="text-4xl font-bold mb-4 text-center">Your Names</h1>
       <div className="flex">
         <FavoritesTable favorites={names} />

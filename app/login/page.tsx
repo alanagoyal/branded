@@ -6,7 +6,7 @@ import { LoginForm } from "@/components/login-form";
 export default async function Login() {
   return (
     <>
-      <div className="container mx-auto h-screen flex flex-col items-center justify-center p-4">
+      <div className="container mx-auto flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-md flex flex-col space-y-6">
           <div className="flex flex-col items-center space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">
