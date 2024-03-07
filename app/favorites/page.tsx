@@ -12,13 +12,12 @@ export default async function Favorites() {
     .eq("created_by", user?.id)
     .eq("favorited", true);
 
-
   return (
-    <div className="w-full">
-      <h1 className="text-4xl font-bold mb-4 text-center">Your Names</h1>
-      <div className="flex">
-        <FavoritesTable favorites={names} />
+      <div className="w-full px-64">
+        <h1 className="text-4xl font-bold mb-4 text-center">Your Names</h1>
+        <div className="flex">
+          <FavoritesTable favorites={names} />
+        </div>
       </div>
-    </div>
   );
 }
