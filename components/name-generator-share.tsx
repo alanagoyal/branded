@@ -31,11 +31,27 @@ import {
   SelectValue,
 } from "./ui/select";
 import Link from "next/link";
+import { Label } from "./ui/label";
+import { Slider } from "./ui/slider";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
   wordToInclude: z.string().optional(),
   wordPlacement: z.enum(["start", "end", "any"]).optional(),
+  minLength: z
+    .number()
+    .min(4)
+    .max(14)
+    .refine(value => value <= 14, {
+      message: "Minimum length cannot be greater than maximum length",
+    }),
+  maxLength: z
+    .number()
+    .min(4)
+    .max(14)
+    .refine(value => value >= 4, {
+      message: "Maximum length cannot be smaller than minimum length",
+    }),
   style: z
     .enum([
       "one_word",
@@ -59,22 +75,23 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
       wordToInclude: names[0].word_to_include || "",
       wordPlacement: names[0].word_placement || "any",
       style: names[0].style || "any",
+      minLength: names[0].min_length || 5,
+      maxLength: names[0].max_length || 10,
     },
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [idsList, setIdsList] = useState<string[]>([]);
-  const [minLength, setMinLength] = useState<SliderProps["defaultValue"]>([6]);
-  const [maxLength, setMaxLength] = useState<SliderProps["defaultValue"]>([10]);
   const [isOwner, setIsOwner] = useState<boolean>(false);
+
 
   useEffect(() => {
     const updatedNamesList: { [name: string]: string } = {};
     for (const name of names) {
       updatedNamesList[name.name] = name.id;
       if (user && name.created_by === user.id) {
-        setIsOwner(true)
+        setIsOwner(true);
       }
     }
     setNamesList(updatedNamesList);
@@ -93,8 +110,8 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
         },
         body: JSON.stringify({
           description: values.description,
-          minLength: minLength,
-          maxLength: maxLength,
+          minLength: values.minLength,
+          maxLength: values.maxLength,
           wordToInclude: values.wordToInclude,
           wordPlacement: values.wordPlacement,
           style: values.style,
@@ -119,8 +136,8 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
             word_to_include: values.wordToInclude,
             word_placement: values.wordPlacement,
             word_style: values.style,
-            min_length: minLength![0],
-            max_length: maxLength![0],
+            min_length: values.minLength,
+            max_length: values.maxLength,
             created_at: new Date(),
             created_by: user?.id,
           };
@@ -225,13 +242,69 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                   )}
                 />
               </div>
-              <div className="flex-col space-y-4 sm:flex">
-                <LengthSelector
-                  minLength={minLength}
-                  onMinLengthChange={setMinLength}
-                  maxLength={maxLength}
-                  onMaxLengthChange={setMaxLength}
-                />
+              <div className="grid gap-2 pt-2">
+                <div className="grid gap-4">
+                  <div className="w-full">
+                    <FormField
+                      control={form.control}
+                      name="minLength"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="temperature">Minimum Length</FormLabel>
+                          <FormDescription>
+                            <span className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
+                              {field.value}
+                            </span>
+                          </FormDescription>
+                          <FormControl>
+                            <Slider
+                              id="min-length"
+                              min={4}
+                              max={14}
+                              defaultValue={[5]}
+                              value={[field.value]}
+                              step={1}
+                              onValueChange={field.onChange}
+                              className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                              aria-label="Min Length"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-4">
+                  <div className="w-full">
+                    <FormField
+                      control={form.control}
+                      name="maxLength"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel htmlFor="temperature">Maximum Length</FormLabel>
+                          <FormDescription>
+                            <span className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
+                              {field.value}
+                            </span>
+                          </FormDescription>
+                          <FormControl>
+                            <Slider
+                              id="max-length"
+                              min={4}
+                              max={14}
+                              defaultValue={[12]}
+                              value={[field.value]}
+                              step={1}
+                              onValueChange={field.onChange}
+                              className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                              aria-label="Max Length"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
               <div className="flex-col space-y-4 sm:flex">
                 <FormField
