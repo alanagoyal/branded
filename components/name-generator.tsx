@@ -270,7 +270,12 @@ export function NameGenerator({ user }: { user: any }) {
                               defaultValue={[field.value]}
                               step={1}
                               onValueChange={(vals) => {
-                                field.onChange(vals[0]);
+                                const minValue = Math.min(
+                                  vals[0],
+                                  form.getValues().maxLength
+                                );
+                                const newValue = Math.max(minValue, 4);
+                                field.onChange(newValue);
                               }}
                               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                               aria-label="Min Length"
@@ -304,7 +309,12 @@ export function NameGenerator({ user }: { user: any }) {
                               defaultValue={[field.value]}
                               step={1}
                               onValueChange={(vals) => {
-                                field.onChange(vals[0]);
+                                const maxValue = Math.max(
+                                  vals[0],
+                                  form.getValues().minLength
+                                );
+                                const newValue = Math.min(maxValue, 14);
+                                field.onChange(newValue);
                               }}
                               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                               aria-label="Max Length"

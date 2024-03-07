@@ -42,14 +42,14 @@ const formSchema = z.object({
     .number()
     .min(4)
     .max(14)
-    .refine(value => value <= 14, {
+    .refine((value) => value <= 14, {
       message: "Minimum length cannot be greater than maximum length",
     }),
   maxLength: z
     .number()
     .min(4)
     .max(14)
-    .refine(value => value >= 4, {
+    .refine((value) => value >= 4, {
       message: "Maximum length cannot be smaller than minimum length",
     }),
   style: z
@@ -84,7 +84,6 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [idsList, setIdsList] = useState<string[]>([]);
   const [isOwner, setIsOwner] = useState<boolean>(false);
-
 
   useEffect(() => {
     const updatedNamesList: { [name: string]: string } = {};
@@ -265,7 +264,12 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                               defaultValue={[field.value]}
                               step={1}
                               onValueChange={(vals) => {
-                                field.onChange(vals[0]);
+                                const minValue = Math.min(
+                                  vals[0],
+                                  form.getValues().maxLength
+                                );
+                                const newValue = Math.max(minValue, 4);
+                                field.onChange(newValue);
                               }}
                               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                               aria-label="Min Length"
@@ -299,7 +303,12 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                               defaultValue={[field.value]}
                               step={1}
                               onValueChange={(vals) => {
-                                field.onChange(vals[0]);
+                                const maxValue = Math.max(
+                                  vals[0],
+                                  form.getValues().minLength
+                                );
+                                const newValue = Math.min(maxValue, 14);
+                                field.onChange(newValue);
                               }}
                               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                               aria-label="Max Length"
