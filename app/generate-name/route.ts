@@ -35,28 +35,7 @@ export async function POST(req: Request, res: NextResponse) {
               userMessageContent += `The name should be a synonym for "${wordToInclude}". `;
             }
           }
-          if (style === "two_words") {
-            userMessageContent +=
-              "Each name must be two words written together as one. For example 'Facebook' or 'Snapchat'. ";
 
-            if (wordToInclude) {
-              userMessageContent += `Each name must include the word or phrase "${wordToInclude}". Do not leave this out. `;
-              if (wordPlacement === "start") {
-                userMessageContent +=
-                  "The word or phrase must be at the start of the name.";
-              }
-
-              if (wordPlacement === "end") {
-                userMessageContent +=
-                  "The word or phrase must be at the end of the name.";
-              }
-
-              if (wordPlacement === "any") {
-                userMessageContent +=
-                  "The word or phrase can be placed anywhere in the name.";
-              }
-            }
-          }
           if (style === "portmanteau") {
             userMessageContent +=
               "Each name must be a portmanteau of two words. For example 'Microsoft' is a portmanteau of 'microcomputer' and 'software'. ";

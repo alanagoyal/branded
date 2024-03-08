@@ -327,8 +327,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        {
-                        form.watch("style") === "portmanteau" ||
+                        {form.watch("style") === "portmanteau" ||
                         form.watch("style") === "any"
                           ? "Word to to Include (Optional)"
                           : form.watch("style") === "alternative_spelling" ||
@@ -342,8 +341,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                         <Input {...field} autoComplete="off" />
                       </FormControl>
                       <FormDescription>
-                        {
-                        form.watch("style") === "portmanteau" ||
+                        {form.watch("style") === "portmanteau" ||
                         form.watch("style") === "any"
                           ? "Choose a word to include in your name"
                           : form.watch("style") === "alternative_spelling" ||
@@ -359,8 +357,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                 />
               </div>
               {form.watch("wordToInclude") &&
-                (
-                  form.watch("style") === "portmanteau" ||
+                (form.watch("style") === "portmanteau" ||
                   form.watch("style") === "any") && (
                   <div className="flex-col space-y-4 sm:flex">
                     {" "}
