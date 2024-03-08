@@ -91,16 +91,18 @@ export function NameGenerator({ user }: { user: any }) {
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [idsList, setIdsList] = useState<string[]>([]);
 
-  console.log(form.getValues().minLength);
-
   async function clear() {
     form.reset();
     setNamesList({});
   }
 
-  const isFormFilled = form.watch("description");
+  const isFormFilled = form.watch();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+
+    console.log(values.style)
+    console.log(values.wordToInclude)
+    console.log(values.wordPlacement)
     setIsLoading(true);
 
     try {

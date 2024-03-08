@@ -73,7 +73,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
       description: names[0].description || "",
       wordToInclude: names[0].word_to_include || "",
       wordPlacement: names[0].word_placement || "any",
-      style: names[0].style || "any",
+      style: names[0].word_style || "any",
       minLength: names[0].min_length || 5,
       maxLength: names[0].max_length || 10,
     },
@@ -95,7 +95,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
     setNamesList(updatedNamesList);
   }, [names, user]);
 
-  const isFormFilled = form.watch("description");
+  const isFormFilled = form.watch();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
