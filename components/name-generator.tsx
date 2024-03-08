@@ -63,7 +63,6 @@ const formSchema = z.object({
   style: z
     .enum([
       "one_word",
-      "two_words",
       "portmanteau",
       "alternative_spelling",
       "foreign_language",
@@ -222,7 +221,6 @@ export function NameGenerator({ user }: { user: any }) {
                           <SelectGroup>
                             <SelectLabel>Style</SelectLabel>
                             <SelectItem value="one_word">One Word</SelectItem>
-                            <SelectItem value="two_words">Two Words</SelectItem>
                             <SelectItem value="portmanteau">
                               Portmanteau
                             </SelectItem>
@@ -335,7 +333,7 @@ export function NameGenerator({ user }: { user: any }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        {form.watch("style") === "two_words" ||
+                        {
                         form.watch("style") === "portmanteau" ||
                         form.watch("style") === "any"
                           ? "Word to to Include (Optional)"
@@ -350,7 +348,7 @@ export function NameGenerator({ user }: { user: any }) {
                         <Input {...field} autoComplete="off" />
                       </FormControl>
                       <FormDescription>
-                        {form.watch("style") === "two_words" ||
+                        {
                         form.watch("style") === "portmanteau" ||
                         form.watch("style") === "any"
                           ? "Choose a word to include in your name"
@@ -367,7 +365,7 @@ export function NameGenerator({ user }: { user: any }) {
                 />
               </div>
               {form.watch("wordToInclude") &&
-                (form.watch("style") === "two_words" ||
+                (
                   form.watch("style") === "portmanteau" ||
                   form.watch("style") === "any") && (
                   <div className="flex-col space-y-4 sm:flex">
