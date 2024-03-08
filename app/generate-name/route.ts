@@ -30,10 +30,7 @@ export async function POST(req: Request, res: NextResponse) {
         if (style !== "any") {
           if (style === "one_word") {
             userMessageContent +=
-              "Each name should be one word with one or two syllables. It should be a word that can be found in the English dictionary like 'Thrive', 'Default', or 'Surge'. It should not be a compound word like 'Facebook' or 'Guidewire'. ";
-            if (wordToInclude) {
-              userMessageContent += `The name should be a synonym for "${wordToInclude}". `;
-            }
+              "Each name should be a noun that is used in the everyday English Language. For example 'Thrive', 'Default', or 'Surge'. It should definitely not be a compound word like 'Facebook' or 'Guidewire'. ";
           }
 
           if (style === "portmanteau") {
@@ -41,27 +38,27 @@ export async function POST(req: Request, res: NextResponse) {
               "Each name must be a portmanteau of two words. For example 'Microsoft' is a portmanteau of 'microcomputer' and 'software'. ";
 
             if (wordToInclude) {
-              userMessageContent += `Each name must include the word or phrase "${wordToInclude}" as part of the portmanteau. `;
+              userMessageContent += `Each portmanteau must include the word "${wordToInclude}", `;
               if (wordPlacement === "start") {
                 userMessageContent +=
-                  "The word or phrase must be at the start of the portmanteau.";
+                  "which must be placed at the start of the portmanteau.";
               }
 
               if (wordPlacement === "end") {
                 userMessageContent +=
-                  "The word or phrase must be at the end of the portmanteau.";
+                  "which must be placed at the end of the portmanteau.";
               }
 
               if (wordPlacement === "any") {
                 userMessageContent +=
-                  "The word or phrase can be placed anywhere in the portmanteau.";
+                  "which can be placed anywhere in the portmanteau.";
               }
             }
           }
 
           if (style === "alternative_spelling") {
             if (wordToInclude) {
-              userMessageContent += `Each name should be an alternative spelling of the word "${wordToInclude}". For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. `;
+              userMessageContent += `Each name should be an alternative spelling of "${wordToInclude}". For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. `;
             } else {
               userMessageContent +=
                 "Each name must be an alternative spelling of a word. For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. ";
@@ -78,7 +75,7 @@ export async function POST(req: Request, res: NextResponse) {
 
           if (style === "historical") {
             if (wordToInclude) {
-              userMessageContent += `Each name should be inspired by a historical reference related to the word or phrase "${wordToInclude}". For example 'Da Vinci' is related to 'art' or 'Kepler' is related to 'astronomy'. `;
+              userMessageContent += `Each name should reference a historical figure or concept related to "${wordToInclude}". For example 'Da Vinci' is related to 'art' or 'Kepler' is related to 'astronomy'. `;
             } else {
               userMessageContent +=
                 "Each name should be inspired by a historical reference or figure. For example 'Da Vinci' or 'Tesla'. ";
