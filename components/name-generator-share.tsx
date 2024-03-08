@@ -239,6 +239,70 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                   )}
                 />
               </div>
+              {form.watch("style") !== "one_word" &&
+                form.watch("style") !== "any" && (
+                  <div className="flex-col space-y-4 sm:flex">
+                    <FormField
+                      control={form.control}
+                      name="wordToInclude"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Optional Word</FormLabel>
+                          <FormControl>
+                            <Input {...field} autoComplete="off" />
+                          </FormControl>
+                          <FormDescription>
+                            {form.watch("style") === "portmanteau"
+                              ? "The generated names will include this word"
+                              : form.watch("style") === "alternative_spelling"
+                              ? "The generated names will be an alternative spelling of this word"
+                              : form.watch("style") === "historical"
+                              ? "The generated names will reference a historical figure or concept related to this word"
+                              : form.watch("style") === "foreign_language"
+                              ? "The generated names will reference this word in a foreign language"
+                              : "Choose a word to include in your name"}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              {form.watch("style") === "portmanteau" && (
+                <div className="flex-col space-y-4 sm:flex">
+                  <FormField
+                    control={form.control}
+                    name="wordPlacement"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Placement</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Placement</SelectLabel>
+                              <SelectItem value="start">Start </SelectItem>
+                              <SelectItem value="end">End</SelectItem>
+                              <SelectItem value="any">Anywhere</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Choose the placement of the word to include
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
               <div className="grid gap-2 pt-2">
                 <div className="grid gap-4">
                   <div className="w-full">
@@ -274,12 +338,15 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                               aria-label="Min Length"
                             />
                           </FormControl>
+                          <FormDescription>
+                            Choose the minimum length for your name
+                          </FormDescription>
                         </FormItem>
                       )}
                     />
                   </div>
                 </div>
-                <div className="grid gap-4">
+                <div className="grid gap-4 pt-2">
                   <div className="w-full">
                     <FormField
                       control={form.control}
@@ -314,87 +381,15 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                               aria-label="Max Length"
                             />
                           </FormControl>
+                          <FormDescription>
+                            Choose the maximum length for your name
+                          </FormDescription>
                         </FormItem>
                       )}
                     />
                   </div>
                 </div>
               </div>
-              <div className="flex-col space-y-4 sm:flex">
-                <FormField
-                  control={form.control}
-                  name="wordToInclude"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {form.watch("style") === "portmanteau" ||
-                        form.watch("style") === "any"
-                          ? "Word to to Include (Optional)"
-                          : form.watch("style") === "alternative_spelling" ||
-                            form.watch("style") === "historical" ||
-                            form.watch("style") === "foreign_language" ||
-                            form.watch("style") === "one_word"
-                          ? "Word to Inspire (Optional)"
-                          : "Word to Include (Optional)"}
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} autoComplete="off" />
-                      </FormControl>
-                      <FormDescription>
-                        {form.watch("style") === "portmanteau" ||
-                        form.watch("style") === "any"
-                          ? "Choose a word to include in your name"
-                          : form.watch("style") === "alternative_spelling" ||
-                            form.watch("style") === "historical" ||
-                            form.watch("style") === "foreign_language" ||
-                            form.watch("style") === "one_word"
-                          ? "Choose a word to inspire your name"
-                          : "Choose a word to include in your name"}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              {form.watch("wordToInclude") &&
-                (form.watch("style") === "portmanteau" ||
-                  form.watch("style") === "any") && (
-                  <div className="flex-col space-y-4 sm:flex">
-                    {" "}
-                    <FormField
-                      control={form.control}
-                      name="wordPlacement"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Placement</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>Placement</SelectLabel>
-                                <SelectItem value="start">Start </SelectItem>
-                                <SelectItem value="end">End</SelectItem>
-                                <SelectItem value="any">Anywhere</SelectItem>
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            Choose the placement of the word to include
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
-
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Loading..." : "Go"}
               </Button>
