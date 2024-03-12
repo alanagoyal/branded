@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "./ui/use-toast";
 import { Share } from "./share";
+import { Globe } from "lucide-react";
 
 export function NamesTable({
   isOwner,
@@ -31,7 +32,9 @@ export function NamesTable({
 
   useEffect(() => {
     async function fetchFavoritedStatus() {
-      const { data: favoritedData, error } = await supabase.from("names").select("name, favorited");
+      const { data: favoritedData, error } = await supabase
+        .from("names")
+        .select("name, favorited");
       if (error) {
         console.error("Error fetching favorited status:", error.message);
         return;
@@ -69,31 +72,49 @@ export function NamesTable({
       console.log(error);
     }
   }
+
+  const checkAvailability = async (name: string): Promise<string[]> => {
+    try {
+      const response = await fetch(`/find-domains?query=${name}`);
+       const data = await response.json();
+       console.log(data)
+      if (data.domains) {
+        return data.domains;
+      } else {
+        throw new Error(data.error || "An unknown error occurred");
+      } 
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
   return (
-    <div>
-      <Table>
-        <TableBody>
-          {Object.keys(namesList).map((name, index) => (
-            <TableRow key={index} className="flex items-center justify-between">
-              <TableCell>{name}</TableCell>
-              {isOwner && (
-                <TableCell className="ml-auto">
-                  <Button
-                    onClick={() => toggleFavoriteName(name)}
-                    variant="ghost"
-                  >
-                    {favoritedNames[name] ? (
-                      <Icons.unfavorite />
-                    ) : (
-                      <Icons.favorite />
-                    )}
+<div>
+  <Table className="w-full"> 
+    <TableBody>
+      {Object.keys(namesList).map((name, index) => (
+        <TableRow key={index}>
+          <TableCell className="flex-1">
+            <div className="flex items-center justify-between w-full"> 
+              <span>{name}</span> 
+              <div className="flex items-center"> 
+                <Button variant="ghost" onClick={() => checkAvailability(name)}>
+                  <Icons.domain />
+                </Button>
+                {isOwner && (
+                  <Button onClick={() => toggleFavoriteName(name)} variant="ghost">
+                    {favoritedNames[name] ? <Icons.unfavorite /> : <Icons.favorite />}
                   </Button>
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+                )}
+              </div>
+            </div>
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</div>
+
   );
 }

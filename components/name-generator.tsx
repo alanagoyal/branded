@@ -99,10 +99,6 @@ export function NameGenerator({ user }: { user: any }) {
   const isFormFilled = form.watch();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-
-    console.log(values.style)
-    console.log(values.wordToInclude)
-    console.log(values.wordPlacement)
     setIsLoading(true);
 
     try {
