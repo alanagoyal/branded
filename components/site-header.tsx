@@ -11,7 +11,7 @@ export async function SiteHeader() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
+ 
   return (
     <nav className="">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,10 +41,10 @@ export async function SiteHeader() {
             </div>
             <div className="hidden sm:flex">
               <ThemeToggle />
-            </div>       
+            </div>
             <div className="items-center">
               {user ? (
-                <UserNav user={user} />
+                <UserNav user={user}/>
               ) : (
                 <Link href="login">
                   <Button className="ml-4">Log In</Button>

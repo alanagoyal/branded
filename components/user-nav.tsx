@@ -15,9 +15,34 @@ import {
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Icons } from "./icons";
+import { useEffect, useState } from "react";
 
 export default function UserNav({ user }: any) {
   const router = useRouter();
+  const [profileName, setProfileName] = useState('');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const supabase = createClient();
+      let { data, error } = await supabase
+        .from('profiles') 
+        .select('name')
+        .eq('id', user.id) 
+        .single(); 
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else if (data) {
+        setProfileName(data.name);
+      }
+    };
+
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]); // Re-run the effect when 'user' changes
+
+
   const handleSignOut = async () => {
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();
@@ -39,7 +64,7 @@ export default function UserNav({ user }: any) {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.email}</p>
+            <p className="text-sm font-medium leading-none">{profileName}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
