@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "./ui/use-toast";
 import React from "react";
+import Link from "next/link";
 
 export function NamesTable({
   isOwner,
@@ -28,7 +29,7 @@ export function NamesTable({
     [key: string]: boolean;
   }>({});
   const [availabilityResults, setAvailabilityResults] = useState<{
-    [key: string]: string[];
+    [key: string]: { domain: string; purchaseLink: string }[];
   }>({});
 
   useEffect(() => {
@@ -76,7 +77,7 @@ export function NamesTable({
 
   async function checkAvailability(name: string) {
     try {
-      setProcessingNames((prev) => [...prev, name]); 
+      setProcessingNames((prev) => [...prev, name]);
       const showingAvailability = availabilityResults[name];
       if (showingAvailability && showingAvailability.length > 0) {
         setAvailabilityResults((prev) => ({
@@ -98,7 +99,7 @@ export function NamesTable({
     } catch (error) {
       console.error(error);
     } finally {
-      setProcessingNames((prev) => prev.filter((n) => n !== name)); 
+      setProcessingNames((prev) => prev.filter((n) => n !== name));
     }
   }
 
@@ -140,7 +141,16 @@ export function NamesTable({
               {availabilityResults[name] &&
                 availabilityResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
-                    <TableCell>{result}</TableCell>
+                    <TableCell>
+                      <Link
+                        href={result.purchaseLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue"
+                      >
+                        {result.domain}
+                      </Link>
+                    </TableCell>
                   </TableRow>
                 ))}
             </React.Fragment>
