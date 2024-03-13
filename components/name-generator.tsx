@@ -412,7 +412,6 @@ export function NameGenerator({ user }: { user: any }) {
                         <NamesTable
                           isOwner={!!user}
                           namesList={namesList}
-                          idsList={idsList}
                         />
                       ) : null}
                     </div>

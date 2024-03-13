@@ -406,7 +406,6 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                   <NamesTable
                     isOwner={isOwner}
                     namesList={namesList}
-                    idsList={idsList}
                   />
                 ) : null}
               </div>
