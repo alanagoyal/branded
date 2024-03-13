@@ -23,6 +23,7 @@ export function NamesTable({
   namesList: any;
 }) {
   const supabase = createClient();
+  const [processingNames, setProcessingNames] = useState<string[]>([]);
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
   }>({});
@@ -75,6 +76,7 @@ export function NamesTable({
 
   async function checkAvailability(name: string) {
     try {
+      setProcessingNames((prev) => [...prev, name]); 
       const showingAvailability = availabilityResults[name];
       if (showingAvailability && showingAvailability.length > 0) {
         setAvailabilityResults((prev) => ({
@@ -95,6 +97,8 @@ export function NamesTable({
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setProcessingNames((prev) => prev.filter((n) => n !== name)); 
     }
   }
 
@@ -111,6 +115,7 @@ export function NamesTable({
                     <div className="flex items-center">
                       <Button
                         variant="ghost"
+                        disabled={processingNames.includes(name)}
                         onClick={() => checkAvailability(name)}
                       >
                         <Icons.domain />
