@@ -77,7 +77,11 @@ export function NamesTable({
     try {
       const showingAvailability = availabilityResults[name];
       if (showingAvailability) {
-        setAvailabilityResults({});
+        setAvailabilityResults((prev) => ({
+          ...prev,
+          [name]: [],
+        }));
+        console.log(showingAvailability)
       } else {
         const response = await fetch(`/find-domains?query=${name}`);
         const data = await response.json();
