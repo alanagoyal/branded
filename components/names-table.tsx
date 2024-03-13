@@ -90,7 +90,6 @@ export function NamesTable({
           throw new Error(data.error || "An unknown error occurred");
         }
       }
-      console.log(showingAvailability);
     } catch (error) {
       console.error(error);
     }
