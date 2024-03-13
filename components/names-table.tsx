@@ -76,12 +76,11 @@ export function NamesTable({
   async function checkAvailability(name: string) {
     try {
       const showingAvailability = availabilityResults[name];
-      if (showingAvailability) {
+      if (showingAvailability && showingAvailability.length > 0) {
         setAvailabilityResults((prev) => ({
           ...prev,
           [name]: [],
         }));
-        console.log(showingAvailability)
       } else {
         const response = await fetch(`/find-domains?query=${name}`);
         const data = await response.json();

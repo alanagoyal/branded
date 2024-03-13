@@ -1,4 +1,3 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
 
 const apiKey = process.env.GODADDY_API_KEY;
