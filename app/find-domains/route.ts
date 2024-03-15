@@ -31,7 +31,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     let count = 0;
 
     for (const item of data) {
-      const domain = item.domain;
+      const domain = `www.${item.domain}`;
 
       if (count < 3) {
         const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;

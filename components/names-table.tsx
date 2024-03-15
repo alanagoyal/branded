@@ -1,7 +1,10 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 import { Icons } from "./icons";
+import { IoTerminalOutline } from "react-icons/io5";
+import { BsGlobe2 } from "react-icons/bs";
 import { Button } from "./ui/button";
+import npmName from "npm-name";
 import {
   Table,
   TableBody,
@@ -24,12 +27,16 @@ export function NamesTable({
   namesList: any;
 }) {
   const supabase = createClient();
-  const [processingNames, setProcessingNames] = useState<string[]>([]);
+  const [processingDomains, setProcessingDomains] = useState<string[]>([]);
+  const [processingNpm, setProcessingNpm] = useState<string[]>([]);
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
   }>({});
-  const [availabilityResults, setAvailabilityResults] = useState<{
+  const [domainResults, setDomainResults] = useState<{
     [key: string]: { domain: string; purchaseLink: string }[];
+  }>({});
+  const [npmResults, setNpmResults] = useState<{
+    [key: string]: { npmPackage: string; purchaseLink: string };
   }>({});
 
   useEffect(() => {
@@ -75,12 +82,41 @@ export function NamesTable({
     }
   }
 
+  async function checkNpmAvailability(name: string) {
+    try {
+      setProcessingNpm((prev) => [...prev, name]);
+      const response = await fetch(`/find-npm?query=${name}`);
+      const data = await response.json();
+      if (data.available) {
+        setNpmResults((prev) => ({
+          ...prev,
+          [name]: {
+            npmPackage: `npm i ${name.toLowerCase()}`,
+            purchaseLink: `https://www.npmjs.com/package/${name}`,
+          },
+        }));
+      } else {
+        setNpmResults((prev) => ({
+          ...prev,
+          [name]: {
+            npmPackage: `${name} is not available as an npm package name is not available`,
+            purchaseLink: ``,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setProcessingNpm((prev) => prev.filter((n) => n !== name));
+    }
+  }
+
   async function checkAvailability(name: string) {
     try {
-      setProcessingNames((prev) => [...prev, name]);
-      const showingAvailability = availabilityResults[name];
+      setProcessingDomains((prev) => [...prev, name]);
+      const showingAvailability = domainResults[name];
       if (showingAvailability && showingAvailability.length > 0) {
-        setAvailabilityResults((prev) => ({
+        setDomainResults((prev) => ({
           ...prev,
           [name]: [],
         }));
@@ -88,7 +124,7 @@ export function NamesTable({
         const response = await fetch(`/find-domains?query=${name}`);
         const data = await response.json();
         if (data.domains) {
-          setAvailabilityResults((prev) => ({
+          setDomainResults((prev) => ({
             ...prev,
             [name]: data.domains.slice(0, 3),
           }));
@@ -99,7 +135,7 @@ export function NamesTable({
     } catch (error) {
       console.error(error);
     } finally {
-      setProcessingNames((prev) => prev.filter((n) => n !== name));
+      setProcessingDomains((prev) => prev.filter((n) => n !== name));
     }
   }
 
@@ -116,12 +152,18 @@ export function NamesTable({
                     <div className="flex items-center">
                       <Button
                         variant="ghost"
-                        disabled={processingNames.includes(name)}
+                        disabled={processingDomains.includes(name)}
                         onClick={() => checkAvailability(name)}
                       >
-                        <Icons.domain />
+                        <BsGlobe2 />
                       </Button>
-
+                      <Button
+                        variant="ghost"
+                        disabled={processingNpm.includes(name)}
+                        onClick={() => checkNpmAvailability(name)}
+                      >
+                        <IoTerminalOutline />
+                      </Button>
                       {isOwner && (
                         <Button
                           onClick={() => toggleFavoriteName(name)}
@@ -138,8 +180,22 @@ export function NamesTable({
                   </div>
                 </TableCell>
               </TableRow>
-              {availabilityResults[name] &&
-                availabilityResults[name].map((result, idx) => (
+              {npmResults[name] && (
+                <TableRow>
+                  <TableCell>
+                    <Link
+                      href={npmResults[name].purchaseLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue"
+                    >
+                      {npmResults[name].npmPackage}
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              )}
+              {domainResults[name] &&
+                domainResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
                     <TableCell>
                       <Link
