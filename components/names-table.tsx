@@ -85,24 +85,29 @@ export function NamesTable({
   async function checkNpmAvailability(name: string) {
     try {
       setProcessingNpm((prev) => [...prev, name]);
-      const response = await fetch(`/find-npm?query=${name}`);
-      const data = await response.json();
-      if (data.available) {
-        setNpmResults((prev) => ({
-          ...prev,
-          [name]: {
-            npmPackage: `npm i ${name.toLowerCase()}`,
-            purchaseLink: `https://www.npmjs.com/package/${name}`,
-          },
-        }));
+      const showingAvailability = npmResults[name];
+      if (showingAvailability) {
+        setNpmResults({});
       } else {
-        setNpmResults((prev) => ({
-          ...prev,
-          [name]: {
-            npmPackage: `${name} is not available as an npm package name is not available`,
-            purchaseLink: ``,
-          },
-        }));
+        const response = await fetch(`/find-npm?query=${name}`);
+        const data = await response.json();
+        if (data.available) {
+          setNpmResults((prev) => ({
+            ...prev,
+            [name]: {
+              npmPackage: `npm i ${name.toLowerCase()}`,
+              purchaseLink: `https://www.npmjs.com/package/${name}`,
+            },
+          }));
+        } else {
+          setNpmResults((prev) => ({
+            ...prev,
+            [name]: {
+              npmPackage: `${name} is not available as an npm package name is not available`,
+              purchaseLink: ``,
+            },
+          }));
+        }
       }
     } catch (error) {
       console.error(error);
