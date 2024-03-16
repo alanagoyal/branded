@@ -36,7 +36,7 @@ export function NamesTable({
     [key: string]: { domain: string; purchaseLink: string }[];
   }>({});
   const [npmResults, setNpmResults] = useState<{
-    [key: string]: { npmPackage: string; purchaseLink: string };
+    [key: string]: { npmName: string; purchaseLink: string }[];
   }>({});
 
   useEffect(() => {
@@ -89,56 +89,52 @@ export function NamesTable({
       if (showingAvailability) {
         setNpmResults({});
       } else {
-          const response = await fetch("/find-npm-names", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: name
-            }),
-          });
-    
-          if (!response.ok) {
-            throw new Error("Failed to generate startup name");
-          }
-          const data = await response.json();
-          const npmNames = data.response.split("\n").map((line: any) => {
-            return line.replace(/^\d+\.\s*/, "").trim();
-          });
+        const response = await fetch("/find-npm-names", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name,
+          }),
+        });
 
-          // get npm package availability 
-          console.log(npmNames)
+        if (!response.ok) {
+          throw new Error("Failed to generate startup name");
         }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setProcessingNpm((prev) => prev.filter((n) => n !== name));
-    }
-  }
-
-  async function checkNpmAvailability(name: string) {
-    try {
-    
-        const response = await fetch(`/find-npm-availability?query=${name}`);
         const data = await response.json();
-        if (data.available) {
-          setNpmResults((prev) => ({
-            ...prev,
-            [name]: {
-              npmPackage: `npm i ${name.toLowerCase()}`,
-              purchaseLink: `https://www.npmjs.com/package/${name}`,
-            },
-          }));
-        } else {
-          setNpmResults((prev) => ({
-            ...prev,
-            [name]: {
-              npmPackage: `${name} is not available as an npm package name is not available`,
-              purchaseLink: ``,
-            },
-          }));
+        let npmNames = data.response.split("\n").map((line: any) => {
+          return line.replace(/^\d+\.\s*/, "").trim();
+        });
+
+        npmNames = [
+          name,
+          ...npmNames.filter(
+            (n: string) => n.toLowerCase() !== name.toLowerCase()
+          ),
+        ];
+
+        const npmAvailability: {
+          npmName: string;
+          purchaseLink: string;
+        }[] = [];
+
+        for (const npmName of npmNames) {
+          const response = await fetch(
+            `/find-npm-availability?query=${npmName}`
+          );
+          const data = await response.json();
+          if (data.available) {
+            const npmCommand = `npm i ${npmName.toLowerCase()}`;
+            const purchaseLink = `https://www.npmjs.com/package/${npmName}`;
+            npmAvailability.push({ npmName: npmCommand, purchaseLink });
+          }
         }
+        setNpmResults((prev) => ({
+          ...prev,
+          [name]: npmAvailability,
+        }));
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -195,7 +191,7 @@ export function NamesTable({
                       <Button
                         variant="ghost"
                         disabled={processingNpm.includes(name)}
-                        onClick={() => checkNpmAvailability(name)}
+                        onClick={() => findNpmNames(name)}
                       >
                         <IoTerminalOutline />
                       </Button>
@@ -215,20 +211,7 @@ export function NamesTable({
                   </div>
                 </TableCell>
               </TableRow>
-              {npmResults[name] && (
-                <TableRow>
-                  <TableCell>
-                    <Link
-                      href={npmResults[name].purchaseLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue"
-                    >
-                      {npmResults[name].npmPackage}
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              )}
+
               {domainResults[name] &&
                 domainResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
@@ -242,6 +225,12 @@ export function NamesTable({
                         {result.domain}
                       </Link>
                     </TableCell>
+                  </TableRow>
+                ))}
+              {npmResults[name] &&
+                npmResults[name].map((result, idx) => (
+                  <TableRow>
+                    <TableCell>{result.npmName}</TableCell>
                   </TableRow>
                 ))}
             </React.Fragment>

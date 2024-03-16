@@ -17,10 +17,9 @@ export async function POST(req: Request, res: NextResponse) {
       name
     } = body;
 
-    console.log(name)
     const output = await traced(
       async (span) => {
-        let userMessageContent = `Please come up with 3 npm package names for a startup named ${name}. The first option should be simply the ${name}. `;
+        let userMessageContent = `Please come up with 2 npm package names for a startup named ${name}. You cannot include ${name} as one of the npm package names. `;
 
         const completion = await openai.chat.completions.create({
           model: "gpt-3.5-turbo",
