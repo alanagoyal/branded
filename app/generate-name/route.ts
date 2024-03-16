@@ -4,7 +4,6 @@ import { OpenAI } from "openai";
 import { init, initLogger, traced, wrapOpenAI } from "braintrust";
 
 const logger = initLogger({ projectName: "namebase" });
-// Initialize the OpenAI client with your API key
 const openai = wrapOpenAI(
   new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,

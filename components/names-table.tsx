@@ -82,14 +82,45 @@ export function NamesTable({
     }
   }
 
-  async function checkNpmAvailability(name: string) {
+  async function findNpmNames(name: string) {
     try {
       setProcessingNpm((prev) => [...prev, name]);
       const showingAvailability = npmResults[name];
       if (showingAvailability) {
         setNpmResults({});
       } else {
-        const response = await fetch(`/find-npm?query=${name}`);
+          const response = await fetch("/find-npm-names", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: name
+            }),
+          });
+    
+          if (!response.ok) {
+            throw new Error("Failed to generate startup name");
+          }
+          const data = await response.json();
+          const npmNames = data.response.split("\n").map((line: any) => {
+            return line.replace(/^\d+\.\s*/, "").trim();
+          });
+
+          // get npm package availability 
+          console.log(npmNames)
+        }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setProcessingNpm((prev) => prev.filter((n) => n !== name));
+    }
+  }
+
+  async function checkNpmAvailability(name: string) {
+    try {
+    
+        const response = await fetch(`/find-npm-availability?query=${name}`);
         const data = await response.json();
         if (data.available) {
           setNpmResults((prev) => ({
@@ -108,7 +139,6 @@ export function NamesTable({
             },
           }));
         }
-      }
     } catch (error) {
       console.error(error);
     } finally {
