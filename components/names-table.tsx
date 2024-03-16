@@ -229,7 +229,7 @@ export function NamesTable({
                 ))}
               {npmResults[name] &&
                 npmResults[name].map((result, idx) => (
-                  <TableRow>
+                  <TableRow key={`${name}-availability-${idx}`}>
                     <TableCell>{result.npmName}</TableCell>
                   </TableRow>
                 ))}
