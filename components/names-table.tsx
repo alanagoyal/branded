@@ -230,7 +230,16 @@ export function NamesTable({
               {npmResults[name] &&
                 npmResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
-                    <TableCell>{result.npmName}</TableCell>
+                    <TableCell>
+                      <Link
+                        href="https://docs.npmjs.com/creating-and-publishing-scoped-public-packages"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue"
+                      >
+                        {result.npmName}
+                      </Link>
+                    </TableCell>
                   </TableRow>
                 ))}
             </React.Fragment>
