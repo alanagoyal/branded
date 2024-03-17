@@ -18,6 +18,13 @@ import { useEffect, useState } from "react";
 import { toast } from "./ui/use-toast";
 import React from "react";
 import Link from "next/link";
+import { Label } from "./ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 export function NamesTable({
   isOwner,
@@ -82,6 +89,31 @@ export function NamesTable({
     }
   }
 
+  async function checkAvailability(name: string) {
+    try {
+      setProcessingDomains((prev) => [...prev, name]);
+      const showingAvailability = domainResults[name];
+      if (showingAvailability) {
+        setDomainResults({})
+      } else {
+        const response = await fetch(`/find-domains?query=${name}`);
+        const data = await response.json();
+        if (data.domains) {
+          setDomainResults((prev) => ({
+            ...prev,
+            [name]: data.domains.slice(0, 3),
+          }));
+        } else {
+          throw new Error(data.error || "An unknown error occurred");
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setProcessingDomains((prev) => prev.filter((n) => n !== name));
+    }
+  }
+
   async function findNpmNames(name: string) {
     try {
       setProcessingNpm((prev) => [...prev, name]);
@@ -142,34 +174,6 @@ export function NamesTable({
     }
   }
 
-  async function checkAvailability(name: string) {
-    try {
-      setProcessingDomains((prev) => [...prev, name]);
-      const showingAvailability = domainResults[name];
-      if (showingAvailability && showingAvailability.length > 0) {
-        setDomainResults((prev) => ({
-          ...prev,
-          [name]: [],
-        }));
-      } else {
-        const response = await fetch(`/find-domains?query=${name}`);
-        const data = await response.json();
-        if (data.domains) {
-          setDomainResults((prev) => ({
-            ...prev,
-            [name]: data.domains.slice(0, 3),
-          }));
-        } else {
-          throw new Error(data.error || "An unknown error occurred");
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setProcessingDomains((prev) => prev.filter((n) => n !== name));
-    }
-  }
-
   return (
     <div>
       <Table className="w-full">
@@ -181,31 +185,62 @@ export function NamesTable({
                   <div className="flex items-center justify-between w-full">
                     <span>{name}</span>
                     <div className="flex items-center">
-                      <Button
-                        variant="ghost"
-                        disabled={processingDomains.includes(name)}
-                        onClick={() => checkAvailability(name)}
-                      >
-                        <BsGlobe2 />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        disabled={processingNpm.includes(name)}
-                        onClick={() => findNpmNames(name)}
-                      >
-                        <IoTerminalOutline />
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              disabled={processingDomains.includes(name)}
+                              onClick={() => checkAvailability(name)}
+                            >
+                              <BsGlobe2 />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{domainResults[name] ? "Hide domain names" : "Find available domain names"}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              disabled={processingNpm.includes(name)}
+                              onClick={() => findNpmNames(name)}
+                            >
+                              <IoTerminalOutline />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{npmResults[name] ? "Hide npm package names": "Find available npm package names"}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       {isOwner && (
-                        <Button
-                          onClick={() => toggleFavoriteName(name)}
-                          variant="ghost"
-                        >
-                          {favoritedNames[name] ? (
-                            <Icons.unfavorite />
-                          ) : (
-                            <Icons.favorite />
-                          )}
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => toggleFavoriteName(name)}
+                                variant="ghost"
+                              >
+                                {favoritedNames[name] ? (
+                                  <Icons.unfavorite />
+                                ) : (
+                                  <Icons.favorite />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {favoritedNames[name]
+                                  ? "Remove from favorites"
+                                  : "Add to favorites"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
                     </div>
                   </div>
