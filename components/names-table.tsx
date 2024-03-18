@@ -94,7 +94,7 @@ export function NamesTable({
       setProcessingDomains((prev) => [...prev, name]);
       const showingAvailability = domainResults[name];
       if (showingAvailability) {
-        setDomainResults({})
+        setDomainResults({});
       } else {
         const response = await fetch(`/find-domains?query=${name}`);
         const data = await response.json();
@@ -193,11 +193,19 @@ export function NamesTable({
                               disabled={processingDomains.includes(name)}
                               onClick={() => checkAvailability(name)}
                             >
-                              <BsGlobe2 />
+                              {processingDomains.includes(name) ? (
+                                <Icons.spinner />
+                              ) : (
+                                <BsGlobe2 />
+                              )}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{domainResults[name] ? "Hide domain names" : "Find available domain names"}</p>
+                            <p>
+                              {domainResults[name]
+                                ? "Hide domain names"
+                                : "Find available domain names"}
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -209,11 +217,19 @@ export function NamesTable({
                               disabled={processingNpm.includes(name)}
                               onClick={() => findNpmNames(name)}
                             >
-                              <IoTerminalOutline />
+                              {processingNpm.includes(name) ? (
+                                <Icons.spinner />
+                              ) : (
+                                <IoTerminalOutline />
+                              )}{" "}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{npmResults[name] ? "Hide npm package names": "Find available npm package names"}</p>
+                            <p>
+                              {npmResults[name]
+                                ? "Hide npm package names"
+                                : "Find available npm package names"}
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

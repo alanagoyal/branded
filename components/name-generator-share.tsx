@@ -33,6 +33,7 @@ import {
 import Link from "next/link";
 import { Label } from "./ui/label";
 import { Slider } from "./ui/slider";
+import { Icons } from "./icons";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -391,9 +392,8 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
                 </div>
               </div>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Loading..." : "Go"}
+                {isLoading ? <Icons.spinner /> : "Go"}
               </Button>
-
               {isFormFilled && (
                 <Link href="/new">
                   <Button className="w-full" type="button" variant="secondary">
@@ -403,10 +403,7 @@ export function NameGeneratorShare({ user, names }: { user: any; names: any }) {
               )}
               <div className="flex-col pt-4 space-y-4 sm:flex">
                 {Object.keys(namesList).length > 0 ? (
-                  <NamesTable
-                    isOwner={isOwner}
-                    namesList={namesList}
-                  />
+                  <NamesTable isOwner={isOwner} namesList={namesList} />
                 ) : null}
               </div>
             </div>

@@ -41,6 +41,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Slider } from "./ui/slider";
+import { Icons } from "./icons";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -394,7 +395,7 @@ export function NameGenerator({ user }: { user: any }) {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Loading..." : "Go"}
+                    {isLoading ? <Icons.spinner /> : "Go"}
                   </Button>
                 </DialogTrigger>
                 {!isLoading && (
@@ -409,10 +410,7 @@ export function NameGenerator({ user }: { user: any }) {
 
                     <div className="flex-col pt-4 space-y-4 sm:flex">
                       {Object.keys(namesList).length > 0 ? (
-                        <NamesTable
-                          isOwner={!!user}
-                          namesList={namesList}
-                        />
+                        <NamesTable isOwner={!!user} namesList={namesList} />
                       ) : null}
                     </div>
                     <Share idString={idsList.join("")} />
