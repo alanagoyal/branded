@@ -49,7 +49,7 @@ export function NamesTable({
   }>({});
   const [processingLogo, setProcessingLogo] = useState<string[]>([]);
   const [logoResults, setLogoResults] = useState<{
-    [key: string]: string; 
+    [key: string]: string;
   }>({});
 
   useEffect(() => {
@@ -243,7 +243,7 @@ export function NamesTable({
                               {processingDomains.includes(name) ? (
                                 <Icons.spinner />
                               ) : (
-                                <BsGlobe2 />
+                                <Icons.domain />
                               )}
                             </Button>
                           </TooltipTrigger>
@@ -267,7 +267,7 @@ export function NamesTable({
                               {processingNpm.includes(name) ? (
                                 <Icons.spinner />
                               ) : (
-                                <IoTerminalOutline />
+                                <Icons.npmPackage />
                               )}
                             </Button>
                           </TooltipTrigger>
@@ -291,13 +291,15 @@ export function NamesTable({
                               {processingLogo.includes(name) ? (
                                 <Icons.spinner />
                               ) : (
-                                <BsStars />
+                                <Icons.generate />
                               )}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>
-                              {logoResults[name] ? "Hide logo" : "Find logos"}
+                              {logoResults[name]
+                                ? "Hide logo"
+                                : "Generate logo"}
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -364,7 +366,12 @@ export function NamesTable({
               {logoResults[name] && (
                 <TableRow key={`${name}-logo`}>
                   <TableCell colSpan={2} className="flex justify-center">
-                    <Image src={logoResults[name]} alt={name} width={200} height={200} />
+                    <Image
+                      src={logoResults[name]}
+                      alt={name}
+                      width={200}
+                      height={200}
+                    />
                   </TableCell>
                 </TableRow>
               )}

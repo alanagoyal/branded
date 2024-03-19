@@ -1,18 +1,28 @@
 import { Moon, Plus, SunMedium } from "lucide-react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-import { GrDomain } from "react-icons/gr";
 import { BsStars } from "react-icons/bs";
-
+import { IoTerminalOutline } from "react-icons/io5";
+import { BsGlobe2 } from "react-icons/bs";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
+
+export function IconContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ width: "2em", height: "2em" }}>
+      {children}
+    </div>
+  );
+}
 
 export const Icons = {
   sun: SunMedium,
   moon: Moon,
   new: Plus,
+  generate: BsStars,
+  domain: BsGlobe2,
+  npmPackage: IoTerminalOutline,
   unfavorite: FaHeart,
   favorite: FaRegHeart,
-  domain: GrDomain,
   logo: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" {...props}>
       <rect width="256" height="256" fill="none" />
@@ -145,8 +155,8 @@ export const Icons = {
     <svg
       className="spinner"
       xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
+      width="1em" // Set the width to inherit from parent container
+      height="1em" // Set the height to inherit from parent container
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
