@@ -221,6 +221,22 @@ export function NamesTable({
     }
   }
 
+  const copyToClipboard = (url: string) => {
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        toast({
+          description: "Copied to clipboard",
+        })
+      })
+      .catch((error) => {
+        console.error('Error copying to clipboard: ', error);
+        toast({
+          variant: "destructive",
+          description: "Failed to copy to clipboard",
+        })
+      });
+  };
+
   return (
     <div>
       <Table className="w-full">
@@ -336,42 +352,71 @@ export function NamesTable({
               {domainResults[name] &&
                 domainResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
-                    <TableCell>
-                      <Link
-                        href={result.purchaseLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue"
-                      >
-                        {result.domain}
-                      </Link>
+                    <TableCell className="flex-1">
+                      <div className="flex items-center justify-between w-full">
+                        <Link
+                          href={result.purchaseLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue"
+                        >
+                          {result.domain}
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          onClick={() => copyToClipboard(result.purchaseLink)
+                          }
+                        >
+                          <Icons.copy />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               {npmResults[name] &&
                 npmResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
-                    <TableCell>
-                      <Link
-                        href="https://docs.npmjs.com/creating-and-publishing-scoped-public-packages"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue"
-                      >
-                        {result.npmName}
-                      </Link>
+                    <TableCell className="flex-1">
+                      <div className="flex items-center justify-between w-full">
+                        <Link
+                          href="https://docs.npmjs.com/creating-and-publishing-scoped-public-packages"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue"
+                        >
+                          {result.npmName}
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          onClick={() => copyToClipboard(result.npmName)
+                          }
+                        >
+                          <Icons.copy />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               {logoResults[name] && (
                 <TableRow key={`${name}-logo`}>
                   <TableCell colSpan={2} className="flex justify-center">
-                    <Image
-                      src={logoResults[name]}
-                      alt={name}
-                      width={200}
-                      height={200}
-                    />
+                    <div className="flex items-center justify-between w-full">
+                      <Link href={logoResults[name]}>
+                        <Image
+                          src={logoResults[name]}
+                          alt={name}
+                          width={200}
+                          height={200}
+                        />
+                      </Link>
+                      <Button
+                          variant="ghost"
+                          onClick={() => copyToClipboard(logoResults[name])
+                          }
+                        >
+                          <Icons.copy />
+                        </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

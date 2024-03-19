@@ -3,6 +3,8 @@ import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { IoTerminalOutline } from "react-icons/io5";
 import { BsGlobe2 } from "react-icons/bs";
+import { IoCopyOutline } from "react-icons/io5";
+
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 
@@ -23,6 +25,7 @@ export const Icons = {
   npmPackage: IoTerminalOutline,
   unfavorite: FaHeart,
   favorite: FaRegHeart,
+  copy: IoCopyOutline,
   logo: (props: IconProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" {...props}>
       <rect width="256" height="256" fill="none" />
