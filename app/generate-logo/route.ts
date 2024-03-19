@@ -13,11 +13,14 @@ export async function POST(req: Request, res: NextResponse) {
     const body = await req.json();
     const { name, description } = body;
 
-    const image = await openai.images.generate({ prompt: `A minimalist logo for a company named ${name} whose description is ${description}` });
+    const image = await openai.images.generate({ 
+        model: "dall-e-3",
+        prompt: `A minimalist logo for a company named ${name} whose description is ${description}. The logo should not contain any text or words. It should be black and white.` 
+    });
 
-    console.log(image.data);
+    const imageUrl = image.data[0].url
 
-    return new Response(JSON.stringify({ response: image }), {
+    return new Response(JSON.stringify({ imageUrl }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

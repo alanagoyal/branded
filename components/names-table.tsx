@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Icons } from "./icons";
 import { IoTerminalOutline } from "react-icons/io5";
 import { BsGlobe2 } from "react-icons/bs";
+import { BsStars } from "react-icons/bs";
 import { Button } from "./ui/button";
 import npmName from "npm-name";
 import {
@@ -25,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import Image from "next/image";
 
 export function NamesTable({
   isOwner,
@@ -44,6 +46,10 @@ export function NamesTable({
   }>({});
   const [npmResults, setNpmResults] = useState<{
     [key: string]: { npmName: string; purchaseLink: string }[];
+  }>({});
+  const [processingLogo, setProcessingLogo] = useState<string[]>([]);
+  const [logoResults, setLogoResults] = useState<{
+    [key: string]: string; 
   }>({});
 
   useEffect(() => {
@@ -174,6 +180,47 @@ export function NamesTable({
     }
   }
 
+  async function generateLogo(name: string) {
+    try {
+      setProcessingLogo((prev) => [...prev, name]);
+      const showingAvailability = logoResults[name];
+      if (showingAvailability) {
+        setLogoResults({});
+      } else {
+        const { data: description } = await supabase
+          .from("names")
+          .select()
+          .eq("id", namesList[name])
+          .single();
+        const response = await fetch("/generate-logo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name,
+            description: description.description,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate logo");
+        }
+
+        const data = await response.json();
+
+        setLogoResults((prev) => ({
+          ...prev,
+          [name]: data.imageUrl,
+        }));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setProcessingLogo((prev) => prev.filter((n) => n !== name));
+    }
+  }
+
   return (
     <div>
       <Table className="w-full">
@@ -221,7 +268,7 @@ export function NamesTable({
                                 <Icons.spinner />
                               ) : (
                                 <IoTerminalOutline />
-                              )}{" "}
+                              )}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -229,6 +276,28 @@ export function NamesTable({
                               {npmResults[name]
                                 ? "Hide npm package names"
                                 : "Find available npm package names"}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              disabled={processingLogo.includes(name)}
+                              onClick={() => generateLogo(name)}
+                            >
+                              {processingLogo.includes(name) ? (
+                                <Icons.spinner />
+                              ) : (
+                                <BsStars />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              {logoResults[name] ? "Hide logo" : "Find logos"}
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -262,7 +331,6 @@ export function NamesTable({
                   </div>
                 </TableCell>
               </TableRow>
-
               {domainResults[name] &&
                 domainResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
@@ -293,6 +361,13 @@ export function NamesTable({
                     </TableCell>
                   </TableRow>
                 ))}
+              {logoResults[name] && (
+                <TableRow key={`${name}-logo`}>
+                  <TableCell colSpan={2} className="flex justify-center">
+                    <Image src={logoResults[name]} alt={name} width={200} height={200} />
+                  </TableCell>
+                </TableRow>
+              )}
             </React.Fragment>
           ))}
         </TableBody>

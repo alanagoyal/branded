@@ -1,6 +1,7 @@
 import { Moon, Plus, SunMedium } from "lucide-react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { GrDomain } from "react-icons/gr";
+import { BsStars } from "react-icons/bs";
 
 
 type IconProps = React.HTMLAttributes<SVGElement>;
