@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,10 +16,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "./ui/textarea";
-import { LengthSelector } from "./length-selector";
 import { Input } from "./ui/input";
 import { NamesTable } from "./names-table";
-import { SliderProps } from "@radix-ui/react-slider";
 import { createClient } from "@/utils/supabase/client";
 import {
   Select,
@@ -30,8 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Share } from "./share";
+import Link from "next/link";
+import { Slider } from "./ui/slider";
+import { Icons } from "./icons";
 import {
   Dialog,
   DialogContent,
@@ -40,8 +39,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { Slider } from "./ui/slider";
-import { Icons } from "./icons";
+import { Share } from "./share";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -73,29 +71,57 @@ const formSchema = z.object({
     .optional(),
 });
 
-export function NameGenerator({ user }: { user: any }) {
+export function NameGenerator({ user, names }: { user: any; names: any }) {
   const supabase = createClient();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
+  let defaultValues = {};
+  if (names) {
+    defaultValues = {
+      description: names[0].description,
+      wordToInclude: names[0].word_to_include,
+      wordPlacement: names[0].word_placement,
+      style: names[0].word_style,
+      minLength: names[0].min_length,
+      maxLength: names[0].max_length,
+    };
+  } else {
+    defaultValues = {
       description: "",
       wordToInclude: "",
       wordPlacement: "any",
       style: "any",
       minLength: 5,
       maxLength: 10,
-    },
+    };
+  }
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [idsList, setIdsList] = useState<string[]>([]);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   async function clear() {
     form.reset();
     setNamesList({});
   }
+
+  useEffect(() => {
+    if (names) {
+      const updatedNamesList: { [name: string]: string } = {};
+      for (const name of names) {
+        updatedNamesList[name.name] = name.id;
+        if (user && name.created_by === user.id) {
+          setIsOwner(true);
+        }
+      }
+      setNamesList(updatedNamesList);
+    }
+  }, [names, user]);
 
   const isFormFilled = form.watch();
 
@@ -110,8 +136,8 @@ export function NameGenerator({ user }: { user: any }) {
         },
         body: JSON.stringify({
           description: values.description,
-          minLength: form.getValues().minLength,
-          maxLength: form.getValues().maxLength,
+          minLength: values.minLength,
+          maxLength: values.maxLength,
           wordToInclude: values.wordToInclude,
           wordPlacement: values.wordPlacement,
           style: values.style,
@@ -136,8 +162,8 @@ export function NameGenerator({ user }: { user: any }) {
             word_to_include: values.wordToInclude,
             word_placement: values.wordPlacement,
             word_style: values.style,
-            min_length: form.getValues().minLength,
-            max_length: form.getValues().maxLength,
+            min_length: values.minLength,
+            max_length: values.maxLength,
             created_at: new Date(),
             created_by: user?.id,
           };
@@ -392,35 +418,64 @@ export function NameGenerator({ user }: { user: any }) {
                   </div>
                 </div>
               </div>
-              <Dialog>
-                <DialogTrigger asChild>
+              {names ? (
+                <div className="flex flex-col space-y-2">
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? <Icons.spinner /> : "Go"}
                   </Button>
-                </DialogTrigger>
-                {!isLoading && (
-                  <DialogContent className="flex flex-col">
-                    <DialogHeader>
-                      {" "}
-                      <DialogTitle>Your Names</DialogTitle>
-                      <DialogDescription>
-                        These are the names we generated for you
-                      </DialogDescription>
-                    </DialogHeader>
+                  {isFormFilled && (
+                    <Link href="/new">
+                      <Button
+                        className="w-full"
+                        type="button"
+                        variant="secondary"
+                      >
+                        Reset
+                      </Button>
+                    </Link>
+                  )}
+                  <div className="flex-col pt-4 space-y-4 sm:flex">
+                    {Object.keys(namesList).length > 0 ? (
+                      <NamesTable isOwner={isOwner} namesList={namesList} />
+                    ) : null}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button type="submit" disabled={isLoading}>
+                        {isLoading ? <Icons.spinner /> : "Go"}
+                      </Button>
+                    </DialogTrigger>
+                    {!isLoading && (
+                      <DialogContent className="flex flex-col">
+                        <DialogHeader>
+                          {" "}
+                          <DialogTitle>Your Names</DialogTitle>
+                          <DialogDescription>
+                            These are the names we generated for you
+                          </DialogDescription>
+                        </DialogHeader>
 
-                    <div className="flex-col pt-4 space-y-4 sm:flex">
-                      {Object.keys(namesList).length > 0 ? (
-                        <NamesTable isOwner={!!user} namesList={namesList} />
-                      ) : null}
-                    </div>
-                    <Share idString={idsList.join("")} />
-                  </DialogContent>
-                )}
-              </Dialog>
-              {isFormFilled && (
-                <Button type="button" variant="secondary" onClick={clear}>
-                  Reset
-                </Button>
+                        <div className="flex-col pt-4 space-y-4 sm:flex">
+                          {Object.keys(namesList).length > 0 ? (
+                            <NamesTable
+                              isOwner={!!user}
+                              namesList={namesList}
+                            />
+                          ) : null}
+                        </div>
+                        <Share idString={idsList.join("")} />
+                      </DialogContent>
+                    )}
+                  </Dialog>
+                  {isFormFilled && (
+                    <Button type="button" variant="secondary" onClick={clear}>
+                      Reset
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           </form>
