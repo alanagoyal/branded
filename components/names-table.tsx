@@ -100,7 +100,11 @@ export function NamesTable({
       setProcessingDomains((prev) => [...prev, name]);
       const showingAvailability = domainResults[name];
       if (showingAvailability) {
-        setDomainResults({});
+        setDomainResults((prev) => {
+          const updatedResults = { ...prev };
+          delete updatedResults[name];
+          return updatedResults;
+        });
       } else {
         const response = await fetch(`/find-domains?query=${name}`);
         const data = await response.json();
@@ -125,7 +129,11 @@ export function NamesTable({
       setProcessingNpm((prev) => [...prev, name]);
       const showingAvailability = npmResults[name];
       if (showingAvailability) {
-        setNpmResults({});
+        setNpmResults((prev) => {
+          const updatedResults = { ...prev };
+          delete updatedResults[name];
+          return updatedResults;
+        });
       } else {
         const response = await fetch("/find-npm-names", {
           method: "POST",
@@ -185,7 +193,11 @@ export function NamesTable({
       setProcessingLogo((prev) => [...prev, name]);
       const showingAvailability = logoResults[name];
       if (showingAvailability) {
-        setLogoResults({});
+        setLogoResults((prev) => {
+          const updatedResults = { ...prev };
+          delete updatedResults[name];
+          return updatedResults;
+        });
       } else {
         const { data: description } = await supabase
           .from("names")
@@ -222,18 +234,19 @@ export function NamesTable({
   }
 
   const copyToClipboard = (url: string) => {
-    navigator.clipboard.writeText(url)
+    navigator.clipboard
+      .writeText(url)
       .then(() => {
         toast({
           description: "Copied to clipboard",
-        })
+        });
       })
       .catch((error) => {
-        console.error('Error copying to clipboard: ', error);
+        console.error("Error copying to clipboard: ", error);
         toast({
           variant: "destructive",
           description: "Failed to copy to clipboard",
-        })
+        });
       });
   };
 
@@ -364,8 +377,7 @@ export function NamesTable({
                         </Link>
                         <Button
                           variant="ghost"
-                          onClick={() => copyToClipboard(result.purchaseLink)
-                          }
+                          onClick={() => copyToClipboard(result.purchaseLink)}
                         >
                           <Icons.copy />
                         </Button>
@@ -388,8 +400,7 @@ export function NamesTable({
                         </Link>
                         <Button
                           variant="ghost"
-                          onClick={() => copyToClipboard(result.npmName)
-                          }
+                          onClick={() => copyToClipboard(result.npmName)}
                         >
                           <Icons.copy />
                         </Button>
@@ -410,12 +421,11 @@ export function NamesTable({
                         />
                       </Link>
                       <Button
-                          variant="ghost"
-                          onClick={() => copyToClipboard(logoResults[name])
-                          }
-                        >
-                          <Icons.copy />
-                        </Button>
+                        variant="ghost"
+                        onClick={() => copyToClipboard(logoResults[name])}
+                      >
+                        <Icons.copy />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
