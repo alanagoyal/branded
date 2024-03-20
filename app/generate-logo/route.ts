@@ -15,11 +15,11 @@ export async function POST(req: Request, res: NextResponse) {
 
     const image = await openai.images.generate({ 
         model: "dall-e-3",
-        prompt: `Generate a minimalistic vector logo for a company called ${name} whose description is ${description}. The logo should be simple and abstract with a clean, modern look and feel. The background should be white.`,
+        prompt: `You are a brand designer tasked with designing a sleek, minimalistic logo for a company named ${name}. Please generate a simple vector logo on a white background. The simpler, the better. Remember, it should be modern, minimalist, and sleek. Consider, for example, the logos of OpenAI, Stripe, Airbnb, and Uber.`,
         n: 1,
         quality: "hd",
         size: "1024x1024",
-        style: "natural",
+        style: "vivid",
     });
 
     const imageUrl = image.data[0].url
