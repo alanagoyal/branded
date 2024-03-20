@@ -1,4 +1,3 @@
-// generate-name/route.ts
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 import { init, initLogger, traced, wrapOpenAI } from "braintrust";
