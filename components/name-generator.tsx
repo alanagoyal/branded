@@ -436,7 +436,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                   )}
                   <div className="flex-col pt-4 space-y-4 sm:flex">
                     {Object.keys(namesList).length > 0 ? (
-                      <NamesTable isOwner={isOwner} namesList={namesList} />
+                      <NamesTable
+                        namesList={namesList}
+                        user={user}
+                      />
                     ) : null}
                   </div>
                 </div>
@@ -461,8 +464,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         <div className="flex-col pt-4 space-y-4 sm:flex">
                           {Object.keys(namesList).length > 0 ? (
                             <NamesTable
-                              isOwner={!!user}
                               namesList={namesList}
+                              user={user}
                             />
                           ) : null}
                         </div>

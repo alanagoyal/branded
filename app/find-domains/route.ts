@@ -23,6 +23,10 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     const response = await fetch(url, options);
     const data = await response.json();
 
+    if (data.code === "ACCESS_DENIED") {
+      return Response.json({ error: "Access denied" });
+    }
+
     const domains: {
         domain: string;
         purchaseLink: string
@@ -39,6 +43,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
         count++; 
       }
     }
+    console.log(domains)
 
     return Response.json({ domains });
   } catch (error) {

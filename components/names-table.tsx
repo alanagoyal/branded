@@ -28,13 +28,7 @@ import {
 } from "./ui/tooltip";
 import Image from "next/image";
 
-export function NamesTable({
-  isOwner,
-  namesList,
-}: {
-  isOwner: boolean;
-  namesList: any;
-}) {
+export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const supabase = createClient();
   const [processingDomains, setProcessingDomains] = useState<string[]>([]);
   const [processingNpm, setProcessingNpm] = useState<string[]>([]);
@@ -51,8 +45,24 @@ export function NamesTable({
   const [logoResults, setLogoResults] = useState<{
     [key: string]: string;
   }>({});
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   useEffect(() => {
+    async function getOwner() {
+      for (const name in namesList) {
+        const { data: createdBy, error } = await supabase
+          .from("names")
+          .select()
+          .eq("id", namesList[name])
+          .single()
+        if (createdBy?.created_by === user.id) {
+          setIsOwner(true);
+          break;
+        }
+      }
+    }
+    getOwner();
+
     async function fetchFavoritedStatus() {
       const { data: favoritedData, error } = await supabase
         .from("names")
@@ -70,7 +80,9 @@ export function NamesTable({
       }
     }
     fetchFavoritedStatus();
-  }, []);
+  }, [namesList, user]);
+
+
 
   async function toggleFavoriteName(name: string) {
     try {
@@ -108,6 +120,12 @@ export function NamesTable({
       } else {
         const response = await fetch(`/find-domains?query=${name}`);
         const data = await response.json();
+        if (data.error) {
+          toast({
+            variant: "destructive",
+            description: "Error authenticating to GoDaddy API",
+          });
+        }
         if (data.domains) {
           setDomainResults((prev) => ({
             ...prev,
