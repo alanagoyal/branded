@@ -1,6 +1,4 @@
-import Image from "next/image";
-
-export function BusinessCard({
+export function OnePager({
   nameData,
   userData,
   content,

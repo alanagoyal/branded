@@ -45,10 +45,10 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const [logoResults, setLogoResults] = useState<{
     [key: string]: string;
   }>({});
-  const [processingBusinessCard, setProcessingBusinessCard] = useState<
+  const [processingOnePager, setProcessingOnePager] = useState<
     string[]
   >([]);
-  const [businessCard, setBusinessCard] = useState<{ [key: string]: string }>(
+  const [onePager, setOnePager] = useState<{ [key: string]: string }>(
     {}
   );
   const [isOwner, setIsOwner] = useState<boolean>(false);
@@ -257,10 +257,10 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
 
   async function createBusinessCard(name: string) {
     try {
-      setProcessingBusinessCard((prev) => [...prev, name]);
-      const showingAvailability = businessCard[name];
+      setProcessingOnePager((prev) => [...prev, name]);
+      const showingAvailability = onePager[name];
       if (showingAvailability) {
-        setBusinessCard((prev) => {
+        setOnePager((prev) => {
           const updatedResults = { ...prev };
           delete updatedResults[name];
           return updatedResults;
@@ -298,7 +298,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
 
         if (content) {
           const response = await fetch(
-            `/business-card?content=${encodeURIComponent(JSON.stringify(content))}&nameData=${encodeURIComponent(
+            `/one-pager?content=${encodeURIComponent(JSON.stringify(content))}&nameData=${encodeURIComponent(
               JSON.stringify(nameData)
             )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
           );
@@ -311,7 +311,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
 
           window.open(data.link, "_blank");
 
-          setBusinessCard((prev) => ({
+          setOnePager((prev) => ({
             ...prev,
             [name]: data.link,
           }));
@@ -320,7 +320,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     } catch (error) {
       console.log(error);
     } finally {
-      setProcessingBusinessCard((prev) => prev.filter((n) => n !== name));
+      setProcessingOnePager((prev) => prev.filter((n) => n !== name));
     }
   }
 
@@ -432,20 +432,20 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                               <TooltipTrigger asChild>
                                 <Button
                                   variant="ghost"
-                                  disabled={processingBusinessCard.includes(
+                                  disabled={processingOnePager.includes(
                                     name
                                   )}
                                   onClick={() => createBusinessCard(name)}
                                 >
-                                  {processingBusinessCard.includes(name) ? (
+                                  {processingOnePager.includes(name) ? (
                                     <Icons.spinner />
                                   ) : (
-                                    <Icons.businessCard />
+                                    <Icons.onePager />
                                   )}
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Generate business card</p>
+                                <p>Generate one pager</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
