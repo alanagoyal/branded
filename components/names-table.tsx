@@ -28,13 +28,7 @@ import {
 } from "./ui/tooltip";
 import Image from "next/image";
 
-export function NamesTable({
-  isOwner,
-  namesList,
-}: {
-  isOwner: boolean;
-  namesList: any;
-}) {
+export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const supabase = createClient();
   const [processingDomains, setProcessingDomains] = useState<string[]>([]);
   const [processingNpm, setProcessingNpm] = useState<string[]>([]);
@@ -51,8 +45,30 @@ export function NamesTable({
   const [logoResults, setLogoResults] = useState<{
     [key: string]: string;
   }>({});
+  const [processingOnePager, setProcessingOnePager] = useState<
+    string[]
+  >([]);
+  const [onePager, setOnePager] = useState<{ [key: string]: string }>(
+    {}
+  );
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   useEffect(() => {
+    async function getOwner() {
+      for (const name in namesList) {
+        const { data: createdBy, error } = await supabase
+          .from("names")
+          .select()
+          .eq("id", namesList[name])
+          .single();
+        if (createdBy?.created_by === user.id) {
+          setIsOwner(true);
+          break;
+        }
+      }
+    }
+    getOwner();
+
     async function fetchFavoritedStatus() {
       const { data: favoritedData, error } = await supabase
         .from("names")
@@ -70,7 +86,7 @@ export function NamesTable({
       }
     }
     fetchFavoritedStatus();
-  }, []);
+  }, [namesList, user]);
 
   async function toggleFavoriteName(name: string) {
     try {
@@ -108,6 +124,12 @@ export function NamesTable({
       } else {
         const response = await fetch(`/find-domains?query=${name}`);
         const data = await response.json();
+        if (data.error) {
+          toast({
+            variant: "destructive",
+            description: "Error accessing domain data",
+          });
+        }
         if (data.domains) {
           setDomainResults((prev) => ({
             ...prev,
@@ -146,7 +168,7 @@ export function NamesTable({
         });
 
         if (!response.ok) {
-          throw new Error("Failed to generate startup name");
+          throw new Error("Failed to generate npm names");
         }
         const data = await response.json();
         let npmNames = data.response.split("\n").map((line: any) => {
@@ -230,6 +252,75 @@ export function NamesTable({
       console.error(error);
     } finally {
       setProcessingLogo((prev) => prev.filter((n) => n !== name));
+    }
+  }
+
+  async function createBusinessCard(name: string) {
+    try {
+      setProcessingOnePager((prev) => [...prev, name]);
+      const showingAvailability = onePager[name];
+      if (showingAvailability) {
+        setOnePager((prev) => {
+          const updatedResults = { ...prev };
+          delete updatedResults[name];
+          return updatedResults;
+        });
+      } else {
+        const { data: nameData } = await supabase
+          .from("names")
+          .select()
+          .eq("id", namesList[name])
+          .single();
+
+        const { data: userData } = await supabase
+          .from("profiles")
+          .select()
+          .eq("id", user.id)
+          .single();
+
+        const response = await fetch("/generate-one-pager-content", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name,
+            description: nameData.description,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate one pager content");
+        }
+        const data = await response.json();
+
+        const content = data.response
+
+        if (content) {
+          const response = await fetch(
+            `/one-pager?content=${encodeURIComponent(JSON.stringify(content))}&nameData=${encodeURIComponent(
+              JSON.stringify(nameData)
+            )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to generate pdf");
+          }
+
+          const data = await response.json();
+
+          window.open(data.link, "_blank");
+
+          setOnePager((prev) => ({
+            ...prev,
+            [name]: data.link,
+          }));
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setProcessingOnePager((prev) => prev.filter((n) => n !== name));
     }
   }
 
@@ -333,30 +424,55 @@ export function NamesTable({
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
+
                       {isOwner && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                onClick={() => toggleFavoriteName(name)}
-                                variant="ghost"
-                              >
-                                {favoritedNames[name] ? (
-                                  <Icons.unfavorite />
-                                ) : (
-                                  <Icons.favorite />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {favoritedNames[name]
-                                  ? "Remove from favorites"
-                                  : "Add to favorites"}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  disabled={processingOnePager.includes(
+                                    name
+                                  )}
+                                  onClick={() => createBusinessCard(name)}
+                                >
+                                  {processingOnePager.includes(name) ? (
+                                    <Icons.spinner />
+                                  ) : (
+                                    <Icons.onePager />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Generate one pager</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => toggleFavoriteName(name)}
+                                  variant="ghost"
+                                >
+                                  {favoritedNames[name] ? (
+                                    <Icons.unfavorite />
+                                  ) : (
+                                    <Icons.favorite />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {favoritedNames[name]
+                                    ? "Remove from favorites"
+                                    : "Add to favorites"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       )}
                     </div>
                   </div>

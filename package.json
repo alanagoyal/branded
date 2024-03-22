@@ -11,6 +11,8 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@million/lint": "^0.0.73",
+    "@onedoc/client": "^0.1.29",
+    "@onedoc/react-print": "^0.1.126",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
