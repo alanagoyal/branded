@@ -168,7 +168,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to generate startup name");
+          throw new Error("Failed to generate npm names");
         }
         const data = await response.json();
         let npmNames = data.response.split("\n").map((line: any) => {
@@ -278,24 +278,44 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           .eq("id", user.id)
           .single();
 
-        const response = await fetch(
-          `/business-card?nameData=${encodeURIComponent(
-            JSON.stringify(nameData)
-          )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
-        );
+        const response = await fetch("/generate-one-pager-content", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name,
+            description: nameData.description,
+          }),
+        });
 
         if (!response.ok) {
-          throw new Error("Failed to generate pdf");
+          throw new Error("Failed to generate one pager content");
         }
-
         const data = await response.json();
 
-        window.open(data.link, "_blank");
+        const content = data.response
 
-        setBusinessCard((prev) => ({
-          ...prev,
-          [name]: data.link,
-        }));
+        if (content) {
+          const response = await fetch(
+            `/business-card?content=${encodeURIComponent(JSON.stringify(content))}&nameData=${encodeURIComponent(
+              JSON.stringify(nameData)
+            )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to generate pdf");
+          }
+
+          const data = await response.json();
+
+          window.open(data.link, "_blank");
+
+          setBusinessCard((prev) => ({
+            ...prev,
+            [name]: data.link,
+          }));
+        }
       }
     } catch (error) {
       console.log(error);

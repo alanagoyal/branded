@@ -10,15 +10,16 @@ const openai = wrapOpenAI(
   })
 );
 export async function POST(req: Request, res: NextResponse) {
+    console.log("in generate content")
   try {
     const body = await req.json();
     const {
-      name
+      name, description
     } = body;
 
     const output = await traced(
       async (span) => {
-        let userMessageContent = `Please come up with 2 npm package names for a startup named ${name}. You cannot include ${name} as one of the npm package names. `;
+        let userMessageContent = `Please write one paragraph pitching a startup named ${name} that has the following description: ${description}`;
 
         const completion = await openai.chat.completions.create({
           model: "gpt-3.5-turbo",
@@ -27,7 +28,7 @@ export async function POST(req: Request, res: NextResponse) {
             {
               role: "system",
               content:
-                "You are a naming assistant tasked with suggesting npm package names for a startup, given the startup's name.",
+                "You are a startup founder tasked with creating a one-page document to describe your company to potential customers and investors.",
             },
             {
               role: "user",
@@ -41,7 +42,7 @@ export async function POST(req: Request, res: NextResponse) {
         return output;
       },
       {
-        name: "find-npm-names",
+        name: "generate-one-pager-content",
         event: {
           input: {
             ...body,

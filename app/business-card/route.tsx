@@ -9,10 +9,12 @@ const onedoc = new Onedoc(process.env.ONEDOC_API_KEY!);
 export async function GET(req: NextRequest) {
   const nameData = JSON.parse(req.nextUrl.searchParams.get("nameData")!);
   const userData = JSON.parse(req.nextUrl.searchParams.get("userData")!);
+  const content = JSON.parse(req.nextUrl.searchParams.get("content")!);
+
 
   const { link, error } = await onedoc.render({
     html: await compile(
-      <BusinessCard nameData={nameData} userData={userData}/>
+      <BusinessCard nameData={nameData} userData={userData} content={content}/>
     ),
     save: true,
   });
