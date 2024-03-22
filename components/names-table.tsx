@@ -45,6 +45,12 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const [logoResults, setLogoResults] = useState<{
     [key: string]: string;
   }>({});
+  const [processingBusinessCard, setProcessingBusinessCard] = useState<
+    string[]
+  >([]);
+  const [businessCard, setBusinessCard] = useState<{ [key: string]: string }>(
+    {}
+  );
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
   useEffect(() => {
@@ -54,7 +60,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           .from("names")
           .select()
           .eq("id", namesList[name])
-          .single()
+          .single();
         if (createdBy?.created_by === user.id) {
           setIsOwner(true);
           break;
@@ -81,8 +87,6 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     }
     fetchFavoritedStatus();
   }, [namesList, user]);
-
-
 
   async function toggleFavoriteName(name: string) {
     try {
@@ -123,7 +127,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         if (data.error) {
           toast({
             variant: "destructive",
-            description: "Error authenticating to GoDaddy API",
+            description: "Error accessing domain data",
           });
         }
         if (data.domains) {
@@ -251,6 +255,55 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     }
   }
 
+  async function createBusinessCard(name: string) {
+    try {
+      setProcessingBusinessCard((prev) => [...prev, name]);
+      const showingAvailability = businessCard[name];
+      if (showingAvailability) {
+        setBusinessCard((prev) => {
+          const updatedResults = { ...prev };
+          delete updatedResults[name];
+          return updatedResults;
+        });
+      } else {
+        const { data: nameData } = await supabase
+          .from("names")
+          .select()
+          .eq("id", namesList[name])
+          .single();
+
+        const { data: userData } = await supabase
+          .from("profiles")
+          .select()
+          .eq("id", user.id)
+          .single();
+
+        const response = await fetch(
+          `/business-card?nameData=${encodeURIComponent(
+            JSON.stringify(nameData)
+          )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to generate pdf");
+        }
+
+        const data = await response.json();
+
+        window.open(data.link, "_blank");
+
+        setBusinessCard((prev) => ({
+          ...prev,
+          [name]: data.link,
+        }));
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setProcessingBusinessCard((prev) => prev.filter((n) => n !== name));
+    }
+  }
+
   const copyToClipboard = (url: string) => {
     navigator.clipboard
       .writeText(url)
@@ -351,30 +404,55 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
+
                       {isOwner && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                onClick={() => toggleFavoriteName(name)}
-                                variant="ghost"
-                              >
-                                {favoritedNames[name] ? (
-                                  <Icons.unfavorite />
-                                ) : (
-                                  <Icons.favorite />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {favoritedNames[name]
-                                  ? "Remove from favorites"
-                                  : "Add to favorites"}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  disabled={processingBusinessCard.includes(
+                                    name
+                                  )}
+                                  onClick={() => createBusinessCard(name)}
+                                >
+                                  {processingBusinessCard.includes(name) ? (
+                                    <Icons.spinner />
+                                  ) : (
+                                    <Icons.businessCard />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Generate business card</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => toggleFavoriteName(name)}
+                                  variant="ghost"
+                                >
+                                  {favoritedNames[name] ? (
+                                    <Icons.unfavorite />
+                                  ) : (
+                                    <Icons.favorite />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {favoritedNames[name]
+                                    ? "Remove from favorites"
+                                    : "Add to favorites"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       )}
                     </div>
                   </div>
