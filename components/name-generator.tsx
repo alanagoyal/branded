@@ -242,18 +242,18 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         <SelectContent>
                           <SelectGroup>
                             <SelectLabel>Style</SelectLabel>
-                            <SelectItem value="one_word">One Word</SelectItem>
+                            <SelectItem value="one_word">One Word (e.g. "Lattice")</SelectItem>
                             <SelectItem value="portmanteau">
-                              Portmanteau
+                              Portmanteau (e.g. "Pinterest")
                             </SelectItem>
                             <SelectItem value="alternative_spelling">
-                              Alternative Spelling
+                              Alternative Spelling (e.g. "Deel")
                             </SelectItem>
                             <SelectItem value="foreign_language">
-                              Foreign Language
+                              Foreign Language (e.g. "Samsara")
                             </SelectItem>
                             <SelectItem value="historical">
-                              Historical Reference
+                              Historical Reference (e.g. "Tesla")
                             </SelectItem>
                             <SelectItem value="any">Surprise Me</SelectItem>
                           </SelectGroup>
