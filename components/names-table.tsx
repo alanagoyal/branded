@@ -71,6 +71,10 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         .from("names")
         .select("name, favorited");
       if (error) {
+        toast({
+          variant: "destructive",
+          description: "Error fetching favorited status",
+        });
         console.error("Error fetching favorited status:", error.message);
         return;
       }
@@ -104,7 +108,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           : "Added to favorites",
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -123,12 +127,29 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         const response = await fetch(
           `/find-domain-availability?query=${parsedName}`
         );
+
+        if (!response.ok) {
+          toast({
+            variant: "destructive",
+            description: "Error finding domain availability",
+          });
+          throw new Error("Error finding domain availability");
+        }
+
         const data = await response.json();
-  
+
+        if (data.error) {
+          toast({
+            variant: "destructive",
+            description: "Error finding domain availability",
+          });
+          throw new Error("Error finding domain availability");
+        }
+
         const updatedResults: {
           [key: string]: { domain: string; purchaseLink: string }[];
         } = { ...domainResults };
-  
+
         for (const result of data.availabilityResults) {
           if (result.available) {
             const domain = result.domain;
@@ -140,9 +161,9 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
             }
           }
         }
-  
+
         setDomainResults(updatedResults);
-  
+
         if (Object.keys(updatedResults).length === 0) {
           toast({
             description: "No available domain results for this name",
@@ -155,7 +176,6 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
       setProcessingDomains((prev) => prev.filter((n) => n !== name));
     }
   }
-  
 
   async function findNpmNames(name: string) {
     try {
@@ -179,9 +199,23 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to generate npm names");
+          toast({
+            variant: "destructive",
+            description: "Error finding npm package names",
+          });
+          throw new Error("Error finding npm package names");
         }
+
         const data = await response.json();
+
+        if (data.error) {
+          toast({
+            variant: "destructive",
+            description: "Error finding npm package names",
+          });
+          throw new Error("Error finding npm package names");
+        }
+
         let npmNames = data.response.split("\n").map((line: any) => {
           return line.replace(/^\d+\.\s*/, "").trim();
         });
@@ -202,7 +236,25 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           const response = await fetch(
             `/find-npm-availability?query=${npmName}`
           );
+
+          if (!response.ok) {
+            toast({
+              variant: "destructive",
+              description: "Error finding npm package availability",
+            });
+            throw new Error("Error finding npm package availability");
+          }
+
           const data = await response.json();
+
+          if (data.error) {
+            toast({
+              variant: "destructive",
+              description: "Error finding npm package availability",
+            });
+            throw new Error("Error finding npm package availability");
+          }
+
           if (data.available) {
             const npmCommand = `npm i ${npmName.toLowerCase()}`;
             const purchaseLink = `https://www.npmjs.com/package/${npmName}`;
@@ -213,6 +265,12 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           ...prev,
           [name]: npmAvailability,
         }));
+
+        if (Object.keys(npmAvailability).length === 0) {
+          toast({
+            description: "No available npm package results for this name",
+          });
+        }
       }
     } catch (error) {
       console.error(error);
@@ -249,10 +307,22 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to generate logo");
+          toast({
+            variant: "destructive",
+            description: "Error generating logo",
+          });
+          throw new Error("Error generating logo");
         }
 
         const data = await response.json();
+
+        if (data.error) {
+          toast({
+            variant: "destructive",
+            description: "Error generating logo",
+          });
+          throw new Error("Error generating logo");
+        }
 
         setLogoResults((prev) => ({
           ...prev,
@@ -301,9 +371,22 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to generate one pager content");
+          toast({
+            variant: "destructive",
+            description: "Error generating one pager content",
+          });
+          throw new Error("Error generating one pager content");
         }
+
         const data = await response.json();
+
+        if (data.error) {
+          toast({
+            variant: "destructive",
+            description: "Error generating one pager content",
+          });
+          throw new Error("Error generating one pager content");
+        }
 
         const content = data.response;
 
@@ -317,10 +400,22 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           );
 
           if (!response.ok) {
-            throw new Error("Failed to generate pdf");
+            toast({
+              variant: "destructive",
+              description: "Error generating PDF",
+            });
+            throw new Error("Error generating PDF");
           }
 
           const data = await response.json();
+
+          if(data.error) {
+            toast({
+              variant: "destructive",
+              description: "Error generating PDF",
+            });
+            throw new Error("Error generating PDF");
+          }
 
           window.open(data.link, "_blank");
 
@@ -331,7 +426,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setProcessingOnePager((prev) => prev.filter((n) => n !== name));
     }
@@ -489,7 +584,8 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                   </div>
                 </TableCell>
               </TableRow>
-              {domainResults[name] && Object.keys(domainResults).length > 0 &&
+              {domainResults[name] &&
+                Object.keys(domainResults).length > 0 &&
                 domainResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
                     <TableCell className="flex-1">
