@@ -64,7 +64,9 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         }
       }
     }
-    getOwner();
+    if (user) {
+      getOwner();
+    }
 
     async function fetchFavoritedStatus() {
       const { data: favoritedData, error } = await supabase
@@ -409,7 +411,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
 
           const data = await response.json();
 
-          if(data.error) {
+          if (data.error) {
             toast({
               variant: "destructive",
               description: "Error generating PDF",
@@ -459,128 +461,129 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                 <TableCell className="flex-1">
                   <div className="flex items-center justify-between w-full">
                     <span>{name}</span>
-                    <div className="flex items-center">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              disabled={processingDomains.includes(name)}
-                              onClick={() => findDomainNames(name)}
-                            >
-                              {processingDomains.includes(name) ? (
-                                <Icons.spinner />
-                              ) : (
-                                <Icons.domain />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {domainResults[name]
-                                ? "Hide domain names"
-                                : "Find available domain names"}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              disabled={processingNpm.includes(name)}
-                              onClick={() => findNpmNames(name)}
-                            >
-                              {processingNpm.includes(name) ? (
-                                <Icons.spinner />
-                              ) : (
-                                <Icons.npmPackage />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {npmResults[name]
-                                ? "Hide npm package names"
-                                : "Find available npm package names"}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              disabled={processingLogo.includes(name)}
-                              onClick={() => generateLogo(name)}
-                            >
-                              {processingLogo.includes(name) ? (
-                                <Icons.spinner />
-                              ) : (
-                                <Icons.generate />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {logoResults[name]
-                                ? "Hide logo"
-                                : "Generate logo"}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-
-                      {isOwner && (
-                        <div>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  disabled={processingOnePager.includes(name)}
-                                  onClick={() => createOnePager(name)}
-                                >
-                                  {processingOnePager.includes(name) ? (
-                                    <Icons.spinner />
-                                  ) : (
-                                    <Icons.onePager />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Generate one pager</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  onClick={() => toggleFavoriteName(name)}
-                                  variant="ghost"
-                                >
-                                  {favoritedNames[name] ? (
-                                    <Icons.unfavorite />
-                                  ) : (
-                                    <Icons.favorite />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>
-                                  {favoritedNames[name]
-                                    ? "Remove from favorites"
-                                    : "Add to favorites"}
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      )}
-                    </div>
+                    {user && (
+                      <div className="flex items-center">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                disabled={processingDomains.includes(name)}
+                                onClick={() => findDomainNames(name)}
+                              >
+                                {processingDomains.includes(name) ? (
+                                  <Icons.spinner />
+                                ) : (
+                                  <Icons.domain />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {domainResults[name]
+                                  ? "Hide domain names"
+                                  : "Find available domain names"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                disabled={processingNpm.includes(name)}
+                                onClick={() => findNpmNames(name)}
+                              >
+                                {processingNpm.includes(name) ? (
+                                  <Icons.spinner />
+                                ) : (
+                                  <Icons.npmPackage />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {npmResults[name]
+                                  ? "Hide npm package names"
+                                  : "Find available npm package names"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                disabled={processingLogo.includes(name)}
+                                onClick={() => generateLogo(name)}
+                              >
+                                {processingLogo.includes(name) ? (
+                                  <Icons.spinner />
+                                ) : (
+                                  <Icons.generate />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {logoResults[name]
+                                  ? "Hide logo"
+                                  : "Generate logo"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        {isOwner && (
+                          <div>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    disabled={processingOnePager.includes(name)}
+                                    onClick={() => createOnePager(name)}
+                                  >
+                                    {processingOnePager.includes(name) ? (
+                                      <Icons.spinner />
+                                    ) : (
+                                      <Icons.onePager />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Generate one pager</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    onClick={() => toggleFavoriteName(name)}
+                                    variant="ghost"
+                                  >
+                                    {favoritedNames[name] ? (
+                                      <Icons.unfavorite />
+                                    ) : (
+                                      <Icons.favorite />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {favoritedNames[name]
+                                      ? "Remove from favorites"
+                                      : "Add to favorites"}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -609,6 +612,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                   </TableRow>
                 ))}
               {npmResults[name] &&
+                Object.keys(npmResults).length > 0 &&
                 npmResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
                     <TableCell className="flex-1">
