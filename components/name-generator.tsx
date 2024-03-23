@@ -152,7 +152,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           description: "Error generating startup names",
         });
         throw new Error("Failed to generate startup names");
-      } 
+      }
 
       const data = await response.json();
 
@@ -162,7 +162,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           description: "Error generating startup names",
         });
         throw new Error("Failed to generate startup names");
-      } 
+      }
       const namesArray = data.response.split("\n").map((line: any) => {
         return line.replace(/^\d+\.\s*/, "").trim();
       });
@@ -456,9 +456,9 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                     </Link>
                   )}
                   <div className="flex-col pt-4 space-y-4 sm:flex">
-                    {Object.keys(namesList).length > 0 ? (
+                    {Object.keys(namesList).length > 0 && (
                       <NamesTable namesList={namesList} user={user} />
-                    ) : null}
+                    )}
                   </div>
                 </div>
               ) : (
@@ -469,25 +469,21 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         {isLoading ? <Icons.spinner /> : "Go"}
                       </Button>
                     </DialogTrigger>
-
                     {!isLoading && Object.keys(namesList).length > 0 && (
                       <DialogContent className="flex flex-col">
                         <DialogHeader>
-                          {" "}
                           <DialogTitle>Your Names</DialogTitle>
                           <DialogDescription>
                             These are the names we generated for you
                           </DialogDescription>
                         </DialogHeader>
-
-                        <div className="flex-col pt-4 space-y-4 sm:flex">
+                        <div className="flex-col space-y-4 sm:flex">
                           <NamesTable namesList={namesList} user={user} />
                         </div>
                         <Share idString={idsList.join("")} />
                       </DialogContent>
                     )}
                   </Dialog>
-
                   {isFormFilled && (
                     <Button type="button" variant="secondary" onClick={clear}>
                       Reset

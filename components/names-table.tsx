@@ -126,8 +126,9 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         });
       } else {
         const parsedName = name.split(" ")[0];
+        const sanitizedName = parsedName.replace(/[^\w\s]/gi, '')
         const response = await fetch(
-          `/find-domain-availability?query=${parsedName}`
+          `/find-domain-availability?query=${sanitizedName}`
         );
 
         if (!response.ok) {
@@ -151,6 +152,8 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         const updatedResults: {
           [key: string]: { domain: string; purchaseLink: string }[];
         } = { ...domainResults };
+
+        console.log(data.availabilityResults)
 
         for (const result of data.availabilityResults) {
           if (result.available) {
@@ -536,51 +539,51 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                           </Tooltip>
                         </TooltipProvider>
                         {isOwner && (
-                          <div>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    disabled={processingOnePager.includes(name)}
-                                    onClick={() => createOnePager(name)}
-                                  >
-                                    {processingOnePager.includes(name) ? (
-                                      <Icons.spinner />
-                                    ) : (
-                                      <Icons.onePager />
-                                    )}
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Generate one pager</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    onClick={() => toggleFavoriteName(name)}
-                                    variant="ghost"
-                                  >
-                                    {favoritedNames[name] ? (
-                                      <Icons.unfavorite />
-                                    ) : (
-                                      <Icons.favorite />
-                                    )}
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>
-                                    {favoritedNames[name]
-                                      ? "Remove from favorites"
-                                      : "Add to favorites"}
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  disabled={processingOnePager.includes(name)}
+                                  onClick={() => createOnePager(name)}
+                                >
+                                  {processingOnePager.includes(name) ? (
+                                    <Icons.spinner />
+                                  ) : (
+                                    <Icons.onePager />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Generate one pager</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                        {isOwner && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  onClick={() => toggleFavoriteName(name)}
+                                  variant="ghost"
+                                >
+                                  {favoritedNames[name] ? (
+                                    <Icons.unfavorite />
+                                  ) : (
+                                    <Icons.favorite />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {favoritedNames[name]
+                                    ? "Remove from favorites"
+                                    : "Add to favorites"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
                       </div>
                     )}
@@ -661,6 +664,15 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           ))}
         </TableBody>
       </Table>
+      {!user && (
+        <div className="py-2 text-sm text-center text-muted-foreground">
+          Want to discover available domain and npm package names or generate
+          marketing collateral for these names?{" "}
+          <a href="/signup" className="underline">
+            Create an account
+          </a>
+        </div>
+      )}
     </div>
   );
 }
