@@ -15,9 +15,7 @@ export async function GET(req: NextRequest) {
 
   const tlds = [
     ".com",
-    ".ai",
-    ".co",
-    ".dev",
+    ".co"
   ];
 
   const fullTlds = [

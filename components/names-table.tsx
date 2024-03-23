@@ -120,27 +120,34 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         });
       } else {
         const parsedName = name.split(" ")[0];
-        const response = await fetch(`/find-domain-availability?query=${parsedName}`);
+        const response = await fetch(
+          `/find-domain-availability?query=${parsedName}`
+        );
         const data = await response.json();
-        console.log(data);
-
-        setDomainResults((prev) => {
-          const updatedResults: {
-            [key: string]: { domain: string; purchaseLink: string }[];
-          } = { ...prev };
-          for (const result of data.availabilityResults) {
-            if (result.available) {
-              const domain = result.domain;
-              const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
-              if (!updatedResults[name]) {
-                updatedResults[name] = [{ domain, purchaseLink }];
-              } else {
-                updatedResults[name].push({ domain, purchaseLink });
-              }
+  
+        const updatedResults: {
+          [key: string]: { domain: string; purchaseLink: string }[];
+        } = { ...domainResults };
+  
+        for (const result of data.availabilityResults) {
+          if (result.available) {
+            const domain = result.domain;
+            const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
+            if (!updatedResults[name]) {
+              updatedResults[name] = [{ domain, purchaseLink }];
+            } else {
+              updatedResults[name].push({ domain, purchaseLink });
             }
           }
-          return updatedResults;
-        });
+        }
+  
+        setDomainResults(updatedResults);
+  
+        if (Object.keys(updatedResults).length === 0) {
+          toast({
+            description: "No available domain results for this name",
+          });
+        }
       }
     } catch (error) {
       console.error(error);
@@ -148,6 +155,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
       setProcessingDomains((prev) => prev.filter((n) => n !== name));
     }
   }
+  
 
   async function findNpmNames(name: string) {
     try {
@@ -481,7 +489,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                   </div>
                 </TableCell>
               </TableRow>
-              {domainResults[name] &&
+              {domainResults[name] && Object.keys(domainResults).length > 0 &&
                 domainResults[name].map((result, idx) => (
                   <TableRow key={`${name}-availability-${idx}`}>
                     <TableCell className="flex-1">
