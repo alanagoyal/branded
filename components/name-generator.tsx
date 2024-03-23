@@ -40,6 +40,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Share } from "./share";
+import { toast } from "./ui/use-toast";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -130,7 +131,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/generate-name", {
+      const response = await fetch("/generate-names", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -146,10 +147,22 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate startup name");
-      }
+        toast({
+          variant: "destructive",
+          description: "Error generating startup names",
+        });
+        throw new Error("Failed to generate startup names");
+      } 
 
       const data = await response.json();
+
+      if (!data) {
+        toast({
+          variant: "destructive",
+          description: "Error generating startup names",
+        });
+        throw new Error("Failed to generate startup names");
+      } 
       const namesArray = data.response.split("\n").map((line: any) => {
         return line.replace(/^\d+\.\s*/, "").trim();
       });
@@ -456,7 +469,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         {isLoading ? <Icons.spinner /> : "Go"}
                       </Button>
                     </DialogTrigger>
-                    {!isLoading && (
+
+                    {!isLoading && Object.keys(namesList).length > 0 && (
                       <DialogContent className="flex flex-col">
                         <DialogHeader>
                           {" "}
@@ -467,14 +481,13 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         </DialogHeader>
 
                         <div className="flex-col pt-4 space-y-4 sm:flex">
-                          {Object.keys(namesList).length > 0 ? (
-                            <NamesTable namesList={namesList} user={user} />
-                          ) : null}
+                          <NamesTable namesList={namesList} user={user} />
                         </div>
                         <Share idString={idsList.join("")} />
                       </DialogContent>
                     )}
                   </Dialog>
+
                   {isFormFilled && (
                     <Button type="button" variant="secondary" onClick={clear}>
                       Reset
