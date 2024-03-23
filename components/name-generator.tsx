@@ -66,6 +66,7 @@ const formSchema = z.object({
       "alternative_spelling",
       "foreign_language",
       "historical",
+      "literary",
       "any",
     ])
     .optional(),
@@ -242,18 +243,23 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         <SelectContent>
                           <SelectGroup>
                             <SelectLabel>Style</SelectLabel>
-                            <SelectItem value="one_word">One Word (e.g. "Lattice")</SelectItem>
+                            <SelectItem value="one_word">
+                              {`One Word (e.g. "Lattice")`}
+                            </SelectItem>
                             <SelectItem value="portmanteau">
-                              Portmanteau (e.g. "Pinterest")
+                              {`Portmanteau (e.g. "Pinterest")`}
                             </SelectItem>
                             <SelectItem value="alternative_spelling">
-                              Alternative Spelling (e.g. "Deel")
+                              {`Alternative Spelling (e.g. "Deel")`}
                             </SelectItem>
                             <SelectItem value="foreign_language">
-                              Foreign Language (e.g. "Samsara")
+                              {`Foreign Language (e.g. "Samsara")`}
                             </SelectItem>
                             <SelectItem value="historical">
-                              Historical Reference (e.g. "Tesla")
+                              {`Historical Reference (e.g. "Tesla")`}
+                            </SelectItem>
+                            <SelectItem value="literary">
+                              {`Literary Reference (e.g. "Palantir")`}
                             </SelectItem>
                             <SelectItem value="any">Surprise Me</SelectItem>
                           </SelectGroup>
@@ -285,7 +291,9 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                               : form.watch("style") === "alternative_spelling"
                               ? "The generated names will be an alternative spelling of this word"
                               : form.watch("style") === "historical"
-                              ? "The generated names will reference a historical figure or concept related to this word"
+                              ? "The generated names will a historical reference related to this word"
+                              : form.watch("style") === "literary"
+                              ? "The generated names will be a literary reference related to this word"
                               : form.watch("style") === "foreign_language"
                               ? "The generated names will reference this word in a foreign language"
                               : "Choose a word to include in your name"}
@@ -436,10 +444,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                   )}
                   <div className="flex-col pt-4 space-y-4 sm:flex">
                     {Object.keys(namesList).length > 0 ? (
-                      <NamesTable
-                        namesList={namesList}
-                        user={user}
-                      />
+                      <NamesTable namesList={namesList} user={user} />
                     ) : null}
                   </div>
                 </div>
@@ -463,10 +468,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
                         <div className="flex-col pt-4 space-y-4 sm:flex">
                           {Object.keys(namesList).length > 0 ? (
-                            <NamesTable
-                              namesList={namesList}
-                              user={user}
-                            />
+                            <NamesTable namesList={namesList} user={user} />
                           ) : null}
                         </div>
                         <Share idString={idsList.join("")} />

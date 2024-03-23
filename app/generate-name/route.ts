@@ -79,6 +79,15 @@ export async function POST(req: Request, res: NextResponse) {
                 "Each name should be inspired by a historical reference or figure. For example 'Da Vinci' or 'Tesla'. ";
             }
           }
+
+          if (style === "literary") {
+            if (wordToInclude) {
+              userMessageContent += `Each name should be a literary reference related to "${wordToInclude}". For example 'Palantir' is a 'seeing-stone' from Lord of the Rings. `;
+            } else {
+              userMessageContent +=
+                "Each name should be inspired by a historical reference or figure. For example 'Palantir' or 'Anduril' are references from Lord of the Rings. ";
+            }
+          }
         }
 
         userMessageContent +=
