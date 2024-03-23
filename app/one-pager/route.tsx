@@ -4,6 +4,9 @@ import { compile } from "@onedoc/react-print";
 import { Onedoc } from "@onedoc/client";
 import { OnePager } from "../documents/one-pager";
 
+export const maxDuration = 20; 
+export const dynamic = 'force-dynamic';
+
 const onedoc = new Onedoc(process.env.ONEDOC_API_KEY!);
 
 export async function GET(req: NextRequest) {
