@@ -1,4 +1,5 @@
 import { FavoritesTable } from "@/components/favorites-table";
+import { NamesTable } from "@/components/names-table";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function Favorites() {
@@ -6,18 +7,24 @@ export default async function Favorites() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { data: names, error } = await supabase
-    .from("names")
-    .select()
-    .eq("created_by", user?.id)
-    .eq("favorited", true);
+
+  const {data: names} = await supabase.from("names").select().eq("created_by", user?.id).eq("favorited", true)
+
+  const namesList: { [name: string]: string } = {};
+
+  if (names) {
+    for (const name of names) {
+      namesList[name.name] = name.id;
+    }
+  }
+ 
 
   return (
-    <div className="w-full px-4 min-h-screen">
-        <h1 className="text-2xl font-bold mb-4">Favorites</h1>
-        <div className="flex">
-          <FavoritesTable favorites={names} />
-        </div>
+    <div className="w-full px-4 min-h-screen flex justify-center items-center flex-col">
+      <h1 className="text-2xl font-bold mb-4">Favorites</h1>
+      <div>
+        <NamesTable namesList={namesList} user={user}/>
       </div>
-  );
+    </div>
+  );  
 }
