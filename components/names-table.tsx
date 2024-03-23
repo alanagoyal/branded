@@ -27,6 +27,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import Image from "next/image";
+import { parse } from "path";
 
 export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const supabase = createClient();
@@ -45,12 +46,8 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const [logoResults, setLogoResults] = useState<{
     [key: string]: string;
   }>({});
-  const [processingOnePager, setProcessingOnePager] = useState<
-    string[]
-  >([]);
-  const [onePager, setOnePager] = useState<{ [key: string]: string }>(
-    {}
-  );
+  const [processingOnePager, setProcessingOnePager] = useState<string[]>([]);
+  const [onePager, setOnePager] = useState<{ [key: string]: string }>({});
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
   useEffect(() => {
@@ -111,7 +108,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     }
   }
 
-  async function checkAvailability(name: string) {
+  async function findDomainNames(name: string) {
     try {
       setProcessingDomains((prev) => [...prev, name]);
       const showingAvailability = domainResults[name];
@@ -122,22 +119,28 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           return updatedResults;
         });
       } else {
-        const response = await fetch(`/find-domains?query=${name}`);
+        const parsedName = name.split(" ")[0];
+        const response = await fetch(`/find-domain-availability?query=${parsedName}`);
         const data = await response.json();
-        if (data.error) {
-          toast({
-            variant: "destructive",
-            description: "Error accessing domain data",
-          });
-        }
-        if (data.domains) {
-          setDomainResults((prev) => ({
-            ...prev,
-            [name]: data.domains.slice(0, 3),
-          }));
-        } else {
-          throw new Error(data.error || "An unknown error occurred");
-        }
+        console.log(data);
+
+        setDomainResults((prev) => {
+          const updatedResults: {
+            [key: string]: { domain: string; purchaseLink: string }[];
+          } = { ...prev };
+          for (const result of data.availabilityResults) {
+            if (result.available) {
+              const domain = result.domain;
+              const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
+              if (!updatedResults[name]) {
+                updatedResults[name] = [{ domain, purchaseLink }];
+              } else {
+                updatedResults[name].push({ domain, purchaseLink });
+              }
+            }
+          }
+          return updatedResults;
+        });
       }
     } catch (error) {
       console.error(error);
@@ -255,7 +258,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     }
   }
 
-  async function createBusinessCard(name: string) {
+  async function createOnePager(name: string) {
     try {
       setProcessingOnePager((prev) => [...prev, name]);
       const showingAvailability = onePager[name];
@@ -294,11 +297,13 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         }
         const data = await response.json();
 
-        const content = data.response
+        const content = data.response;
 
         if (content) {
           const response = await fetch(
-            `/one-pager?content=${encodeURIComponent(JSON.stringify(content))}&nameData=${encodeURIComponent(
+            `/one-pager?content=${encodeURIComponent(
+              JSON.stringify(content)
+            )}&nameData=${encodeURIComponent(
               JSON.stringify(nameData)
             )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
           );
@@ -358,7 +363,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                             <Button
                               variant="ghost"
                               disabled={processingDomains.includes(name)}
-                              onClick={() => checkAvailability(name)}
+                              onClick={() => findDomainNames(name)}
                             >
                               {processingDomains.includes(name) ? (
                                 <Icons.spinner />
@@ -432,10 +437,8 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                               <TooltipTrigger asChild>
                                 <Button
                                   variant="ghost"
-                                  disabled={processingOnePager.includes(
-                                    name
-                                  )}
-                                  onClick={() => createBusinessCard(name)}
+                                  disabled={processingOnePager.includes(name)}
+                                  onClick={() => createOnePager(name)}
                                 >
                                   {processingOnePager.includes(name) ? (
                                     <Icons.spinner />
