@@ -25,9 +25,9 @@ export default async function Favorites() {
  
 
   return (
-    <div className="w-full px-4 min-h-screen flex justify-center items-center flex-col">
+    <div className="w-full px-4 flex justify-center items-center flex-col">
       <h1 className="text-2xl font-bold mb-4">Favorites</h1>
-      <div>
+      <div className="min-h-screen">
         <NamesTable namesList={namesList} user={user}/>
       </div>
     </div>
