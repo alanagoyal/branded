@@ -308,6 +308,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                 .insert(updates);
               if (error) throw error;
               npmAvailability.push({ npmName: npmCommand, purchaseLink });
+
               if (npmAvailability.length === 0) {
                 toast({
                   description: "No available npm package results for this name",
@@ -345,7 +346,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         const { data: logoData, error } = await supabase
           .from("logos")
           .select()
-          .eq("name_id", namesList[name])
+          .eq("name_id", namesList[name]);
 
         if (logoData && logoData.length > 0) {
           logoUrl = logoData[0].logo_url;
@@ -376,21 +377,21 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
               description: "Error generating logo",
             });
             throw new Error("Error generating logo");
+          } else {
+            logoUrl = data.imageUrl;
+
+            const updates = {
+              logo_url: logoUrl,
+              created_at: new Date(),
+              name_id: namesList[name],
+              created_by: user.id,
+            };
+
+            let { data: insertData, error } = await supabase
+              .from("logos")
+              .insert(updates);
+            if (error) throw error;
           }
-
-          logoUrl = data.imageUrl;
-
-          const updates = {
-            logo_url: logoUrl,
-            created_at: new Date(),
-            name_id: namesList[name],
-            created_by: user.id,
-          };
-
-          let { data: insertData, error: insertError } = await supabase
-            .from("logos")
-            .insert(updates);
-          if (insertError) throw error;
         }
 
         setLogoResults((prev) => ({
@@ -416,64 +417,45 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           return updatedResults;
         });
       } else {
-        const { data: nameData } = await supabase
-          .from("names")
+        let onePagerUrl = "";
+
+        const { data: onePagerData } = await supabase
+          .from("one_pagers")
           .select()
-          .eq("id", namesList[name])
-          .single();
+          .eq("name_id", namesList[name]);
 
-        const { data: userData } = await supabase
-          .from("profiles")
-          .select()
-          .eq("id", user.id)
-          .single();
+        if (onePagerData && onePagerData.length > 0) {
+          onePagerUrl = onePagerData[0].pdf_url;
+        } else {
+          const { data: nameData } = await supabase
+            .from("names")
+            .select()
+            .eq("id", namesList[name])
+            .single();
 
-        const response = await fetch("/generate-one-pager-content", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: name,
-            description: nameData.description,
-          }),
-        });
+          const { data: userData } = await supabase
+            .from("profiles")
+            .select()
+            .eq("id", user.id)
+            .single();
 
-        if (!response.ok) {
-          toast({
-            variant: "destructive",
-            description: "Error generating one pager content",
+          const response = await fetch("/generate-one-pager-content", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: name,
+              description: nameData.description,
+            }),
           });
-          throw new Error("Error generating one pager content");
-        }
-
-        const data = await response.json();
-
-        if (data.error) {
-          toast({
-            variant: "destructive",
-            description: "Error generating one pager content",
-          });
-          throw new Error("Error generating one pager content");
-        }
-
-        const content = data.response;
-
-        if (content) {
-          const response = await fetch(
-            `/one-pager?content=${encodeURIComponent(
-              JSON.stringify(content)
-            )}&nameData=${encodeURIComponent(
-              JSON.stringify(nameData)
-            )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
-          );
 
           if (!response.ok) {
             toast({
               variant: "destructive",
-              description: "Error generating PDF",
+              description: "Error generating one pager content",
             });
-            throw new Error("Error generating PDF");
+            throw new Error("Error generating one pager content");
           }
 
           const data = await response.json();
@@ -481,18 +463,63 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           if (data.error) {
             toast({
               variant: "destructive",
-              description: "Error generating PDF",
+              description: "Error generating one pager content",
             });
-            throw new Error("Error generating PDF");
+            throw new Error("Error generating one pager content");
           }
 
-          window.open(data.link, "_blank");
+          const content = data.response;
 
-          setOnePager((prev) => ({
-            ...prev,
-            [name]: data.link,
-          }));
+          if (content) {
+            const response = await fetch(
+              `/one-pager?content=${encodeURIComponent(
+                JSON.stringify(content)
+              )}&nameData=${encodeURIComponent(
+                JSON.stringify(nameData)
+              )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
+            );
+
+            if (!response.ok) {
+              toast({
+                variant: "destructive",
+                description: "Error generating PDF",
+              });
+              throw new Error("Error generating PDF");
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+              toast({
+                variant: "destructive",
+                description: "Error generating PDF",
+              });
+              throw new Error("Error generating PDF");
+            } else {
+              onePagerUrl = data.link;
+
+              const updates = {
+                pdf_url: onePagerUrl,
+                created_at: new Date(),
+                name_id: namesList[name],
+                created_by: user.id,
+              };
+
+              let { data: insertData, error } = await supabase
+                .from("one_pagers")
+                .insert(updates);
+
+              if (error) throw error;
+            }
+          }
         }
+
+        window.open(onePagerUrl, "_blank");
+
+        setOnePager((prev) => ({
+          ...prev,
+          [name]: onePagerUrl,
+        }));
       }
     } catch (error) {
       console.error(error);
