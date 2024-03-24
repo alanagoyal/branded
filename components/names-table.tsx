@@ -332,6 +332,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     try {
       setProcessingLogo((prev) => [...prev, name]);
       const showingAvailability = logoResults[name];
+
       if (showingAvailability) {
         setLogoResults((prev) => {
           const updatedResults = { ...prev };
@@ -339,43 +340,62 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           return updatedResults;
         });
       } else {
-        const { data: description } = await supabase
-          .from("names")
+        let logoUrl = "";
+
+        const { data: logoData, error } = await supabase
+          .from("logos")
           .select()
-          .eq("id", namesList[name])
-          .single();
-        const response = await fetch("/generate-logo", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: name,
-            description: description.description,
-          }),
-        });
+          .eq("name_id", namesList[name])
 
-        if (!response.ok) {
-          toast({
-            variant: "destructive",
-            description: "Error generating logo",
+        if (logoData && logoData.length > 0) {
+          logoUrl = logoData[0].logo_url;
+        } else {
+          const response = await fetch("/generate-logo", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: name,
+            }),
           });
-          throw new Error("Error generating logo");
-        }
 
-        const data = await response.json();
+          if (!response.ok) {
+            toast({
+              variant: "destructive",
+              description: "Error generating logo",
+            });
+            throw new Error("Error generating logo");
+          }
 
-        if (data.error) {
-          toast({
-            variant: "destructive",
-            description: "Error generating logo",
-          });
-          throw new Error("Error generating logo");
+          const data = await response.json();
+
+          if (data.error) {
+            toast({
+              variant: "destructive",
+              description: "Error generating logo",
+            });
+            throw new Error("Error generating logo");
+          }
+
+          logoUrl = data.imageUrl;
+
+          const updates = {
+            logo_url: logoUrl,
+            created_at: new Date(),
+            name_id: namesList[name],
+            created_by: user.id,
+          };
+
+          let { data: insertData, error: insertError } = await supabase
+            .from("logos")
+            .insert(updates);
+          if (insertError) throw error;
         }
 
         setLogoResults((prev) => ({
           ...prev,
-          [name]: data.imageUrl,
+          [name]: logoUrl,
         }));
       }
     } catch (error) {

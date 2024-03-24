@@ -13,7 +13,7 @@ const openai = new OpenAI({
 export async function POST(req: Request, res: NextResponse) {
   try {
     const body = await req.json();
-    const { name, description } = body;
+    const { name } = body;
 
     const image = await openai.images.generate({ 
         model: "dall-e-3",
