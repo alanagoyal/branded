@@ -79,13 +79,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const supabase = createClient();
 
   useEffect(() => {
-    if (!localStorage.getItem("session_id")) {
-      console.log("session_id not found, setting now");
+    if (!user && !localStorage.getItem("session_id")) {
       localStorage.setItem("session_id", uuidv4());
-    } else {
-      console.log("session_id exists:", localStorage.getItem("session_id"));
     }
-  }, []);
+  }, [user]);
 
   let defaultValues = {};
   if (names) {
@@ -164,7 +161,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         if (count! >= 5) {
           toast({
             title: "Uh oh! Out of generations.",
-            description: "You've reached the limit for name generations. Sign up for an account to continue.",
+            description:
+              "You've reached the limit for name generations. Sign up for an account to continue.",
           });
           return;
         }

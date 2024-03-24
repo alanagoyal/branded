@@ -1,11 +1,7 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 import { Icons } from "./icons";
-import { IoTerminalOutline } from "react-icons/io5";
-import { BsGlobe2 } from "react-icons/bs";
-import { BsStars } from "react-icons/bs";
 import { Button } from "./ui/button";
-import npmName from "npm-name";
 import {
   Table,
   TableBody,
@@ -19,7 +15,6 @@ import { useEffect, useState } from "react";
 import { toast } from "./ui/use-toast";
 import React from "react";
 import Link from "next/link";
-import { Label } from "./ui/label";
 import {
   Tooltip,
   TooltipContent,
@@ -27,7 +22,6 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import Image from "next/image";
-import { parse } from "path";
 
 export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const supabase = createClient();
@@ -115,9 +109,14 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   }
 
   async function findDomainNames(name: string) {
+    const updatedResults: {
+      [key: string]: { domain: string; purchaseLink: string }[];
+    } = { ...domainResults };
+
     try {
       setProcessingDomains((prev) => [...prev, name]);
       const showingAvailability = domainResults[name];
+
       if (showingAvailability) {
         setDomainResults((prev) => {
           const updatedResults = { ...prev };
@@ -125,59 +124,82 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           return updatedResults;
         });
       } else {
-        const parsedName = name.split(" ")[0];
-        const sanitizedName = parsedName.replace(/[^\w\s]/gi, '')
-        const response = await fetch(
-          `/find-domain-availability?query=${sanitizedName}`
-        );
+        const { data: domainData, error } = await supabase
+          .from("domains")
+          .select()
+          .eq("name_id", namesList[name]);
 
-        if (!response.ok) {
-          toast({
-            variant: "destructive",
-            description: "Error finding domain availability",
-          });
-          throw new Error("Error finding domain availability");
-        }
+        if (domainData && domainData.length > 0) {
+          console.log("retrieving from db");
+          for (const result of domainData) {
+            const domain = result.domain_name;
+            const purchaseLink = result.purchase_link;
 
-        const data = await response.json();
-
-        if (data.error) {
-          toast({
-            variant: "destructive",
-            description: "Error finding domain availability",
-          });
-          throw new Error("Error finding domain availability");
-        }
-
-        const updatedResults: {
-          [key: string]: { domain: string; purchaseLink: string }[];
-        } = { ...domainResults };
-
-        console.log(data.availabilityResults)
-
-        for (const result of data.availabilityResults) {
-          if (result.available) {
-            const domain = result.domain;
-            const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
             if (!updatedResults[name]) {
               updatedResults[name] = [{ domain, purchaseLink }];
             } else {
               updatedResults[name].push({ domain, purchaseLink });
             }
           }
-        }
+        } else {
+          const parsedName = name.split(" ")[0];
+          const sanitizedName = parsedName.replace(/[^\w\s]/gi, "");
+          const response = await fetch(
+            `/find-domain-availability?query=${sanitizedName}`
+          );
 
+          if (!response.ok) {
+            toast({
+              variant: "destructive",
+              description: "Error finding domain availability",
+            });
+            throw new Error("Error finding domain availability");
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            toast({
+              variant: "destructive",
+              description: "Error finding domain availability",
+            });
+            throw new Error("Error finding domain availability");
+          }
+
+          for (const result of data.availabilityResults) {
+            if (result.available) {
+              const domain = result.domain;
+              const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
+              const updates = {
+                domain_name: domain,
+                purchase_link: purchaseLink,
+                created_at: new Date(),
+                name_id: namesList[name],
+                created_by: user.id,
+              };
+              let { data, error } = await supabase
+                .from("domains")
+                .insert(updates);
+              if (error) throw error;
+
+              if (!updatedResults[name]) {
+                updatedResults[name] = [{ domain, purchaseLink }];
+              } else {
+                updatedResults[name].push({ domain, purchaseLink });
+              }
+            }
+          }
+        }
         setDomainResults(updatedResults);
-
-        if (Object.keys(updatedResults).length === 0) {
-          toast({
-            description: "No available domain results for this name",
-          });
-        }
       }
     } catch (error) {
       console.error(error);
     } finally {
+      if (Object.keys(updatedResults).length === 0) {
+        toast({
+          description: "No available domain results for this name",
+        });
+      }
       setProcessingDomains((prev) => prev.filter((n) => n !== name));
     }
   }
@@ -668,7 +690,9 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         <div className="py-2 text-sm text-center text-muted-foreground">
           <a href="/signup" className="underline">
             Create an account
-          </a>{" "}to find available domain names & npm package names and generate logos & marketing collateral for your favorite names
+          </a>{" "}
+          to find available domain names & npm package names and generate logos
+          & marketing collateral for your favorite names
         </div>
       )}
     </div>

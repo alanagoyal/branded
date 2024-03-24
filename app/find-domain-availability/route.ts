@@ -15,11 +15,6 @@ export async function GET(req: NextRequest) {
 
   const tlds = [
     ".com",
-    ".co"
-  ];
-
-  const fullTlds = [
-    ".com",
     ".ai",
     ".io",
     ".co",
@@ -57,6 +52,10 @@ export async function GET(req: NextRequest) {
         availabilityResults.push({ domain, available: true });
       } else {
         availabilityResults.push({ domain, available: false });
+      }
+
+      if (availabilityResults.filter(result => result.available).length === 3) {
+        break;
       }
     } catch (error) {
       return new NextResponse(
