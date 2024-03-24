@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -77,6 +78,15 @@ const formSchema = z.object({
 export function NameGenerator({ user, names }: { user: any; names: any }) {
   const supabase = createClient();
 
+  useEffect(() => {
+    if (!localStorage.getItem("session_id")) {
+      console.log("session_id not found, setting now");
+      localStorage.setItem("session_id", uuidv4());
+    } else {
+      console.log("session_id exists:", localStorage.getItem("session_id"));
+    }
+  }, []);
+
   let defaultValues = {};
   if (names) {
     defaultValues = {
@@ -132,17 +142,32 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     setIsLoading(true);
 
     try {
-      const { count, error } = await supabase
-        .from("names")
-        .select("*", { count: "exact", head: true })
-        .eq("created_by", user.id);
+      if (user) {
+        const { count, error } = await supabase
+          .from("names")
+          .select("*", { count: "exact", head: true })
+          .eq("created_by", user.id);
 
-      if (count! >= 10) {
-        toast({
-          title: "Uh oh! Out of generations.",
-          description: "You've reached the limit for name generations.",
-        });
-        return;
+        if (count! >= 10) {
+          toast({
+            title: "Uh oh! Out of generations.",
+            description: "You've reached the limit for name generations.",
+          });
+          return;
+        }
+      } else {
+        const { count, error } = await supabase
+          .from("names")
+          .select("*", { count: "exact", head: true })
+          .eq("session_id", localStorage.getItem("session_id"));
+
+        if (count! >= 5) {
+          toast({
+            title: "Uh oh! Out of generations.",
+            description: "You've reached the limit for name generations. Sign up for an account to continue.",
+          });
+          return;
+        }
       }
 
       const response = await fetch("/generate-names", {
@@ -194,6 +219,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             max_length: values.maxLength,
             created_at: new Date(),
             created_by: user?.id,
+            session_id: localStorage.getItem("session_id"),
           };
 
           let { data, error } = await supabase
@@ -455,7 +481,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
               </div>
               {names ? (
                 <div className="flex flex-col space-y-2">
-{/*                   <Button type="submit" disabled={isLoading}>
+                  {/*                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? <Icons.spinner /> : "Go"}
                   </Button>
                   <Link href="/new">

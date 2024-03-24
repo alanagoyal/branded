@@ -668,7 +668,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
         <div className="py-2 text-sm text-center text-muted-foreground">
           <a href="/signup" className="underline">
             Create an account
-          </a>{" "}to generate your own startup names, find available domain names & npm package names, and generate logos & marketing collateral
+          </a>{" "}to find available domain names & npm package names and generate logos & marketing collateral for your favorite names
         </div>
       )}
     </div>

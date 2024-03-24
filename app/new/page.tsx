@@ -8,9 +8,9 @@ export default async function GenerateName() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+/*   if (!user) {
     redirect("/signup");
-  }
+  } */
 
   return (
     <div className="w-full px-4">
