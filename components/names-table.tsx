@@ -109,10 +109,6 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   }
 
   async function findDomainNames(name: string) {
-    const updatedResults: {
-      [key: string]: { domain: string; purchaseLink: string }[];
-    } = { ...domainResults };
-
     try {
       setProcessingDomains((prev) => [...prev, name]);
       const showingAvailability = domainResults[name];
@@ -124,13 +120,16 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           return updatedResults;
         });
       } else {
+        const updatedResults: {
+          [key: string]: { domain: string; purchaseLink: string }[];
+        } = { ...domainResults };
+
         const { data: domainData, error } = await supabase
           .from("domains")
           .select()
           .eq("name_id", namesList[name]);
 
         if (domainData && domainData.length > 0) {
-          console.log("retrieving from db");
           for (const result of domainData) {
             const domain = result.domain_name;
             const purchaseLink = result.purchase_link;
@@ -187,6 +186,11 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
               } else {
                 updatedResults[name].push({ domain, purchaseLink });
               }
+              if (Object.keys(updatedResults).length === 0) {
+                toast({
+                  description: "No available domain results for this name",
+                });
+              }
             }
           }
         }
@@ -195,11 +199,6 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     } catch (error) {
       console.error(error);
     } finally {
-      if (Object.keys(updatedResults).length === 0) {
-        toast({
-          description: "No available domain results for this name",
-        });
-      }
       setProcessingDomains((prev) => prev.filter((n) => n !== name));
     }
   }
@@ -215,61 +214,39 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           return updatedResults;
         });
       } else {
-        const response = await fetch("/find-npm-names", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: name,
-          }),
-        });
-
-        if (!response.ok) {
-          toast({
-            variant: "destructive",
-            description: "Error finding npm package names",
-          });
-          throw new Error("Error finding npm package names");
-        }
-
-        const data = await response.json();
-
-        if (data.error) {
-          toast({
-            variant: "destructive",
-            description: "Error finding npm package names",
-          });
-          throw new Error("Error finding npm package names");
-        }
-
-        let npmNames = data.response.split("\n").map((line: any) => {
-          return line.replace(/^\d+\.\s*/, "").trim();
-        });
-
-        npmNames = [
-          name,
-          ...npmNames.filter(
-            (n: string) => n.toLowerCase() !== name.toLowerCase()
-          ),
-        ];
-
         const npmAvailability: {
           npmName: string;
           purchaseLink: string;
         }[] = [];
 
-        for (const npmName of npmNames) {
-          const response = await fetch(
-            `/find-npm-availability?query=${npmName}`
-          );
+        const { data: npmData, error } = await supabase
+          .from("npm_names")
+          .select()
+          .eq("name_id", namesList[name]);
+
+        if (npmData && npmData.length > 0) {
+          for (const result of npmData) {
+            const npmCommand = result.npm_name;
+            const purchaseLink = result.purchase_link;
+            npmAvailability.push({ npmName: npmCommand, purchaseLink });
+          }
+        } else {
+          const response = await fetch("/find-npm-names", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: name,
+            }),
+          });
 
           if (!response.ok) {
             toast({
               variant: "destructive",
-              description: "Error finding npm package availability",
+              description: "Error finding npm package names",
             });
-            throw new Error("Error finding npm package availability");
+            throw new Error("Error finding npm package names");
           }
 
           const data = await response.json();
@@ -277,27 +254,72 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           if (data.error) {
             toast({
               variant: "destructive",
-              description: "Error finding npm package availability",
+              description: "Error finding npm package names",
             });
-            throw new Error("Error finding npm package availability");
+            throw new Error("Error finding npm package names");
           }
 
-          if (data.available) {
-            const npmCommand = `npm i ${npmName.toLowerCase()}`;
-            const purchaseLink = `https://www.npmjs.com/package/${npmName}`;
-            npmAvailability.push({ npmName: npmCommand, purchaseLink });
+          let npmNames = data.response.split("\n").map((line: any) => {
+            return line.replace(/^\d+\.\s*/, "").trim();
+          });
+
+          npmNames = [
+            name,
+            ...npmNames.filter(
+              (n: string) => n.toLowerCase() !== name.toLowerCase()
+            ),
+          ];
+
+          for (const npmName of npmNames) {
+            const response = await fetch(
+              `/find-npm-availability?query=${npmName}`
+            );
+
+            if (!response.ok) {
+              toast({
+                variant: "destructive",
+                description: "Error finding npm package availability",
+              });
+              throw new Error("Error finding npm package availability");
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+              toast({
+                variant: "destructive",
+                description: "Error finding npm package availability",
+              });
+              throw new Error("Error finding npm package availability");
+            }
+
+            if (data.available) {
+              const npmCommand = `npm i ${npmName.toLowerCase()}`;
+              const purchaseLink = `https://www.npmjs.com/package/${npmName}`;
+              const updates = {
+                npm_name: npmCommand,
+                purchase_link: purchaseLink,
+                created_at: new Date(),
+                name_id: namesList[name],
+                created_by: user.id,
+              };
+              let { data, error } = await supabase
+                .from("npm_names")
+                .insert(updates);
+              if (error) throw error;
+              npmAvailability.push({ npmName: npmCommand, purchaseLink });
+              if (npmAvailability.length === 0) {
+                toast({
+                  description: "No available npm package results for this name",
+                });
+              }
+            }
           }
         }
         setNpmResults((prev) => ({
           ...prev,
           [name]: npmAvailability,
         }));
-
-        if (Object.keys(npmAvailability).length === 0) {
-          toast({
-            description: "No available npm package results for this name",
-          });
-        }
       }
     } catch (error) {
       console.error(error);
