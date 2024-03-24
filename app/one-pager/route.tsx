@@ -14,10 +14,13 @@ export async function GET(req: NextRequest) {
   const userData = JSON.parse(req.nextUrl.searchParams.get("userData")!);
   const content = JSON.parse(req.nextUrl.searchParams.get("content")!);
 
+  const name = nameData.name;
+
   const { link, error } = await onedoc.render({
     html: await compile(
       <OnePager nameData={nameData} userData={userData} content={content}/>
     ),
+    title: name,
     save: true,
   });
 
