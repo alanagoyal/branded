@@ -133,8 +133,6 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     }
   }, [names, user]);
 
-  const isFormFilled = form.watch();
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
@@ -144,8 +142,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .from("names")
           .select("*", { count: "exact", head: true })
           .eq("created_by", user.id);
-
-        if (count! >= 10) {
+        if (count! >= 12) {
           toast({
             title: "Uh oh! Out of generations.",
             description: "You've reached the limit for name generations.",
@@ -158,7 +155,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .select("*", { count: "exact", head: true })
           .eq("session_id", localStorage.getItem("session_id"));
 
-        if (count! >= 5) {
+        if (count! >= 6) {
           toast({
             title: "Uh oh! Out of generations.",
             description:
@@ -479,7 +476,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
               </div>
               {names ? (
                 <div className="flex flex-col space-y-2">
-                  {/*                   <Button type="submit" disabled={isLoading}>
+                  <Button type="submit" disabled={isLoading}>
                     {isLoading ? <Icons.spinner /> : "Go"}
                   </Button>
                   <Link href="/new">
@@ -490,7 +487,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                     >
                       Reset
                     </Button>
-                  </Link> */}
+                  </Link>
                   <div className="flex-col pt-4 space-y-4 sm:flex">
                     {Object.keys(namesList).length > 0 && (
                       <NamesTable namesList={namesList} user={user} />
