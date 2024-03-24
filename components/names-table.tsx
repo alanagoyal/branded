@@ -666,11 +666,9 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
       </Table>
       {!user && (
         <div className="py-2 text-sm text-center text-muted-foreground">
-          Want to discover available domain and npm package names or generate
-          marketing collateral for these names?{" "}
           <a href="/signup" className="underline">
             Create an account
-          </a>
+          </a>{" "}to generate your own startup names, find available domain names & npm package names, and generate logos & marketing collateral
         </div>
       )}
     </div>

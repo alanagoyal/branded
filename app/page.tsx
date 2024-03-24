@@ -21,8 +21,7 @@ export default async function Home() {
           Namebase helps founders generate creative and relevant name ideas for
           their next startup
         </p>
-        <Link href="/new">
-          {" "}
+        <Link href="/signup">
           <Button className="mt-4">Get Started</Button>
         </Link>
       </div>

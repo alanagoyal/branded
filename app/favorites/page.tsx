@@ -1,12 +1,17 @@
 import { FavoritesTable } from "@/components/favorites-table";
 import { NamesTable } from "@/components/names-table";
 import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function Favorites() {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
 
   const {data: names} = await supabase.from("names").select().eq("created_by", user?.id).eq("favorited", true)
 
