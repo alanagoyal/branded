@@ -41,6 +41,7 @@ import {
 } from "./ui/dialog";
 import { Share } from "./share";
 import { toast } from "./ui/use-toast";
+import { ToastAction } from "./ui/toast";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -131,6 +132,19 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     setIsLoading(true);
 
     try {
+      const { count, error } = await supabase
+        .from("names")
+        .select("*", { count: "exact", head: true })
+        .eq("created_by", user.id);
+
+      if (count! >= 3) {
+        toast({
+          title: "Uh oh! Out of generations.",
+          description: "You've reached the limit for name generations.",
+        });
+        return;
+      }
+
       const response = await fetch("/generate-names", {
         method: "POST",
         headers: {
@@ -444,17 +458,16 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? <Icons.spinner /> : "Go"}
                   </Button>
-                  {isFormFilled && (
-                    <Link href="/new">
-                      <Button
-                        className="w-full"
-                        type="button"
-                        variant="secondary"
-                      >
-                        Reset
-                      </Button>
-                    </Link>
-                  )}
+                  <Link href="/new">
+                    <Button
+                      className="w-full"
+                      type="button"
+                      variant="secondary"
+                    >
+                      Reset
+                    </Button>
+                  </Link>
+
                   <div className="flex-col pt-4 space-y-4 sm:flex">
                     {Object.keys(namesList).length > 0 && (
                       <NamesTable namesList={namesList} user={user} />
@@ -484,11 +497,9 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                       </DialogContent>
                     )}
                   </Dialog>
-                  {isFormFilled && (
-                    <Button type="button" variant="secondary" onClick={clear}>
-                      Reset
-                    </Button>
-                  )}
+                  <Button type="button" variant="secondary" onClick={clear}>
+                    Reset
+                  </Button>
                 </div>
               )}
             </div>
