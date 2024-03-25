@@ -34,7 +34,7 @@ export default async function Favorites() {
         {namesList && Object.keys(namesList).length > 0 ? (
           <NamesTable namesList={namesList} user={user} />
         ) : (
-          <p className="text-sm pt-10">You haven't favorited any names yet</p>
+          <p className="text-sm pt-10">You haven&apos;t favorited any names yet</p>
         )}
       </div>
     </div>
