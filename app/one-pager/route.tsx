@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 import { compile } from "@onedoc/react-print";
 import { Onedoc } from "@onedoc/client";
 import { OnePager } from "../documents/one-pager";
+import React from "react";
 
-export const maxDuration = 20; 
-export const dynamic = 'force-dynamic';
+export const maxDuration = 20;
+export const dynamic = "force-dynamic";
 
 const onedoc = new Onedoc(process.env.ONEDOC_API_KEY!);
 
@@ -13,12 +14,17 @@ export async function GET(req: NextRequest) {
   const nameData = JSON.parse(req.nextUrl.searchParams.get("nameData")!);
   const userData = JSON.parse(req.nextUrl.searchParams.get("userData")!);
   const content = JSON.parse(req.nextUrl.searchParams.get("content")!);
-
+  const logoUrl = JSON.parse(req.nextUrl.searchParams.get("logoUrl")!);
   const name = nameData.name;
 
   const { link, error } = await onedoc.render({
     html: await compile(
-      <OnePager nameData={nameData} userData={userData} content={content}/>
+      <OnePager
+        nameData={nameData}
+        userData={userData}
+        content={content}
+        logoUrl={logoUrl}
+      />
     ),
     title: name,
     save: true,
@@ -28,5 +34,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error }, { status: 500 });
   }
 
-  return Response.json({link})
+  return Response.json({ link });
 }

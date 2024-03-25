@@ -43,8 +43,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
         count++; 
       }
     }
-    console.log(domains)
-
+    
     return Response.json({ domains });
   } catch (error) {
     console.log(error);

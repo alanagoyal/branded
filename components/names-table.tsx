@@ -439,6 +439,17 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
             .eq("id", user.id)
             .single();
 
+          let logoUrl = null;
+
+          const { data: logoData } = await supabase
+            .from("logos")
+            .select()
+            .eq("name_id", namesList[name])
+
+            if (logoData && logoData[0].logo_url) {
+              logoUrl = logoData[0].logo_url;
+            }
+
           const response = await fetch("/generate-one-pager-content", {
             method: "POST",
             headers: {
@@ -476,7 +487,11 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                 JSON.stringify(content)
               )}&nameData=${encodeURIComponent(
                 JSON.stringify(nameData)
-              )}&userData=${encodeURIComponent(JSON.stringify(userData))}`
+              )}&userData=${encodeURIComponent(
+                JSON.stringify(userData)
+              )}&logoUrl=${encodeURIComponent(
+                JSON.stringify(logoUrl)
+              )}`
             );
 
             if (!response.ok) {
