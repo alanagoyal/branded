@@ -1,8 +1,6 @@
-const MillionLint = require('@million/lint');
 /** @type {import('next').NextConfig} */
-module.exports = MillionLint.next({
-  rsc: true
-})({
+const nextConfig = {
+  reactStrictMode: true,
   images: {
     remotePatterns: [{
       protocol: 'https',
@@ -11,4 +9,6 @@ module.exports = MillionLint.next({
       pathname: '/private/org-g9DVzuADwPF6yY20DMk2rHLx/user-EfSGctBkCrEQElitCVJLZNWA/**'
     }]
   }
-});
+};
+
+module.exports = nextConfig;
