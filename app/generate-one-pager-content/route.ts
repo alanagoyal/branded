@@ -10,7 +10,6 @@ const openai = wrapOpenAI(
   })
 );
 export async function POST(req: Request, res: NextResponse) {
-    console.log("in generate content")
   try {
     const body = await req.json();
     const {
