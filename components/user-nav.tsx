@@ -40,7 +40,7 @@ export default function UserNav({ user }: any) {
     if (user) {
       fetchProfile();
     }
-  }, [user]); // Re-run the effect when 'user' changes
+  }, [user]); 
 
 
   const handleSignOut = async () => {
