@@ -17,6 +17,10 @@ export function Share({idString}: {idString: string}) {
         })
       })
       .catch((err) => {
+        toast({
+          variant: "destructive",
+          description: "Unable to copy to clipboard"
+        })
         console.error('Unable to copy text: ', err);
       });
   };
