@@ -158,9 +158,9 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         if (count! >= 6) {
           toast({
             title: "Uh oh! Out of generations.",
-            description:
-              "You've reached the limit for name generations. Sign up for an account to continue.",
-          });
+            description: "You've reached the limit for name generations. Sign up for an account to continue.",
+            action: <ToastAction altText="Sign up"><Link href="/signup">Sign up</Link></ToastAction>,
+          })
           return;
         }
       }
