@@ -43,6 +43,7 @@ import {
 import { Share } from "./share";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -77,6 +78,7 @@ const formSchema = z.object({
 
 export function NameGenerator({ user, names }: { user: any; names: any }) {
   const supabase = createClient();
+  const router = useRouter()
 
   useEffect(() => {
     if (!user && !localStorage.getItem("session_id")) {
@@ -159,7 +161,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           toast({
             title: "Uh oh! Out of generations.",
             description: "You've reached the limit for name generations. Sign up for an account to continue.",
-            action: <ToastAction altText="Sign up"><Link href="/signup">Sign up</Link></ToastAction>,
+            action: <ToastAction onClick={() => router.push("/signup")} altText="Sign up">Sign up</ToastAction>,
           })
           return;
         }
