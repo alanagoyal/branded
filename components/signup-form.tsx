@@ -15,6 +15,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
 import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export interface SignupFormData {
   email: string;
@@ -23,7 +24,9 @@ export interface SignupFormData {
 
 interface SignupFormProps {
   signup: (formData: SignupFormData) => Promise<void>;
+  idString: string;
 }
+
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(6, {
@@ -31,8 +34,10 @@ const formSchema = z.object({
   }),
 });
 
-export function SignupForm({ signup }: SignupFormProps) {
+export function SignupForm({ signup, idString }: SignupFormProps) {
   const supabase = createClient();
+  const router = useRouter()
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,6 +65,7 @@ export function SignupForm({ signup }: SignupFormProps) {
       });
       await signup(data);
     }
+    router.push(`/new?ids=${idString}`);
   };
 
   return (

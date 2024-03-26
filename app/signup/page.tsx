@@ -3,8 +3,14 @@ import Link from "next/link";
 import { SignupForm } from "@/components/signup-form";
 import { createClient } from "@/utils/supabase/server";
 
-export default async function Signup() {
+export default async function Signup({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = createClient();
+  const idString = searchParams.ids as string;
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -20,7 +26,7 @@ export default async function Signup() {
               Enter your email below to create your account
             </p>
           </div>
-          <SignupForm signup={signup} />
+          <SignupForm signup={signup} idString={idString} />
           <p className="px-8 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
@@ -28,7 +34,7 @@ export default async function Signup() {
               className="underline underline-offset-4 hover:text-primary"
             >
               Sign In
-            </Link>{" "}
+            </Link>
           </p>
         </div>
       </div>

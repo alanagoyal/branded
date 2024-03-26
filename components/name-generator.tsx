@@ -162,7 +162,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .eq("session_id", localStorage.getItem("session_id"))
           .gte("created_at", oneDayAgo);
   
-        if (names!.length >= 3) {
+        if (names!.length >= 6) {
           toast({
             title: "Uh oh! Out of generations.",
             description: "You've reached your daily limit for name generations. Sign up for an account to continue.",

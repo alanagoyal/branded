@@ -43,6 +43,9 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const [processingOnePager, setProcessingOnePager] = useState<string[]>([]);
   const [onePager, setOnePager] = useState<{ [key: string]: string }>({});
   const [isOwner, setIsOwner] = useState<boolean>(false);
+  const idString = Object.values(namesList).join(',');
+
+  const signUpLink = `/signup?ids=${idString.replace(/,/g, '')}`;
 
   useEffect(() => {
     async function getOwner() {
@@ -772,7 +775,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
       </Table>
       {!user && (
         <div className="py-2 text-sm text-center text-muted-foreground">
-          <a href="/signup" className="underline">
+          <a href={signUpLink} className="underline">
             Create an account
           </a>{" "}
           to find available domain names & npm package names and generate logos
