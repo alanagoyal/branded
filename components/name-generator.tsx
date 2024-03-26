@@ -138,31 +138,36 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
+    const oneDayAgo = new Date(new Date().getTime() - (24 * 60 * 60 * 1000)).toISOString(); 
+  
     try {
       if (user) {
-        const { count, error } = await supabase
+        const { data: names, error } = await supabase
           .from("names")
-          .select("*", { count: "exact", head: true })
-          .eq("created_by", user.id);
-        if (count! >= 12) {
+          .select("*", { count: "exact" })
+          .eq("created_by", user.id)
+          .gte("created_at", oneDayAgo); 
+  
+        if (names!.length >= 6) {
           toast({
             title: "Uh oh! Out of generations.",
-            description: "You've reached the limit for name generations.",
+            description: "You've reached your daily limit for name generations.",
           });
           return;
         }
       } else {
-        const { count, error } = await supabase
+        const { data: names, error } = await supabase
           .from("names")
-          .select("*", { count: "exact", head: true })
-          .eq("session_id", localStorage.getItem("session_id"));
-
-        if (count! >= 6) {
+          .select("*", { count: "exact" })
+          .eq("session_id", localStorage.getItem("session_id"))
+          .gte("created_at", oneDayAgo);
+  
+        if (names!.length >= 3) {
           toast({
             title: "Uh oh! Out of generations.",
-            description: "You've reached the limit for name generations. Sign up for an account to continue.",
+            description: "You've reached your daily limit for name generations. Sign up for an account to continue.",
             action: <ToastAction onClick={() => router.push("/signup")} altText="Sign up">Sign up</ToastAction>,
-          })
+          });
           return;
         }
       }
