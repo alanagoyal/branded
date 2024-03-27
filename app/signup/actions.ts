@@ -16,4 +16,6 @@ export async function signup(formData: SignupFormData) {
   }
 
   revalidatePath('/', 'layout')
+/*   redirect('/new')
+ */
 }
