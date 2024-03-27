@@ -23,7 +23,7 @@ export interface SignupFormData {
 }
 
 interface SignupFormProps {
-  signup: (formData: SignupFormData) => Promise<void>;
+  signup: (formData: SignupFormData, idString: string, origin: string) => Promise<void>;
   idString: string;
 }
 
@@ -37,6 +37,7 @@ const formSchema = z.object({
 export function SignupForm({ signup, idString }: SignupFormProps) {
   const supabase = createClient();
   const router = useRouter()
+  const origin = window.location.origin
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,7 +64,7 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
         title: "Confirm your account",
         description: `An email has been sent to ${data.email}`,
       });
-      await signup(data);
+      await signup(data, idString, origin);
     }
     router.push(`/new?ids=${idString}`);
   };

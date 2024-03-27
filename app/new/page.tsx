@@ -1,3 +1,4 @@
+import AuthRefresh from "@/components/auth-refresh";
 import { NameGenerator } from "@/components/name-generator";
 import { createClient } from "@/utils/supabase/server";
 
@@ -30,6 +31,7 @@ export default async function GenerateName({
   return (
     <div className="w-full px-4">
       <h1 className="text-2xl font-bold mb-4">Name Generator</h1>
+      <AuthRefresh/>
       <NameGenerator user={user} names={names ?? null} />
     </div>
   );
