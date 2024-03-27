@@ -7,7 +7,7 @@ import { toast } from "./ui/use-toast"
 
 
 export function Share({idString}: {idString: string}) {
-  const defaultValue = `https://namebase.vercel.app/${idString}`
+  const defaultValue = `https://namebase.ai/${idString}`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(defaultValue)

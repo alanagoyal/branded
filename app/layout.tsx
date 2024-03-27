@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta property="og:image" content="https://namebase.vercel.app/og/" />
+        <meta property="og:image" content="https://namebase.ai/og/" />
       </head>
       <body
         className={cn(
