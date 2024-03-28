@@ -6,6 +6,8 @@ import { BsGlobe2 } from "react-icons/bs";
 import { TiBusinessCard } from "react-icons/ti";
 import { IoCopyOutline } from "react-icons/io5";
 import { GrDocumentPdf } from "react-icons/gr";
+import { MdOutlineMarkEmailRead } from "react-icons/md";
+
 
 
 type IconProps = React.HTMLAttributes<SVGElement>;
@@ -22,6 +24,7 @@ export const Icons = {
   sun: SunMedium,
   moon: Moon,
   new: Plus,
+  mail: MdOutlineMarkEmailRead,
   onePager: GrDocumentPdf,
   businessCard: TiBusinessCard,
   generate: BsStars,

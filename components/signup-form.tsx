@@ -16,6 +16,7 @@ import { Button } from "./ui/button";
 import { toast } from "./ui/use-toast";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export interface SignupFormData {
   email: string;
@@ -37,7 +38,11 @@ const formSchema = z.object({
 export function SignupForm({ signup, idString }: SignupFormProps) {
   const supabase = createClient();
   const router = useRouter()
-  const origin = window.location.origin
+  const [origin, setOrigin] = useState<string>("")
+
+  useEffect(() => {
+    setOrigin(window.location.origin)
+  }, [])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,7 +71,6 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
       });
       await signup(data, idString, origin);
     }
-    router.push(`/new?ids=${idString}`);
   };
 
   return (
