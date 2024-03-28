@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/server'
 import { SignupFormData } from '@/components/signup-form';
 
 export async function signup(formData: SignupFormData, idString: string, origin: string) {
+  console.log(origin + `/new?ids=${idString}`)
   const supabase = createClient()
   const { email, password } = formData;
   const { error } = await supabase.auth.signUp({email, password, options: {
@@ -18,5 +19,5 @@ export async function signup(formData: SignupFormData, idString: string, origin:
   }
 
   revalidatePath('/', 'layout')
-  redirect(`/new?ids=${idString}`)
+  redirect(`/confirm-email`)
 }
