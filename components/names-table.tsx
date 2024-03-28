@@ -43,9 +43,9 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const [processingOnePager, setProcessingOnePager] = useState<string[]>([]);
   const [onePager, setOnePager] = useState<{ [key: string]: string }>({});
   const [isOwner, setIsOwner] = useState<boolean>(false);
-  const idString = Object.values(namesList).join(',');
+  const idString = Object.values(namesList).join(",");
 
-  const signUpLink = `/signup?ids=${idString.replace(/,/g, '')}`;
+  const signUpLink = `/signup?ids=${idString.replace(/,/g, "")}`;
 
   useEffect(() => {
     async function getOwner() {
@@ -447,11 +447,12 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           const { data: logoData } = await supabase
             .from("logos")
             .select()
-            .eq("name_id", namesList[name])
+            .eq("name_id", namesList[name]);
 
-            if (logoData && logoData[0].logo_url) {
-              logoUrl = logoData[0].logo_url;
-            }
+          if (logoData && logoData.length > 0) {
+            console.log("logoData", logoData);
+            logoUrl = logoData[0].logo_url;
+          }
 
           const response = await fetch("/generate-one-pager-content", {
             method: "POST",
@@ -492,9 +493,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                 JSON.stringify(nameData)
               )}&userData=${encodeURIComponent(
                 JSON.stringify(userData)
-              )}&logoUrl=${encodeURIComponent(
-                JSON.stringify(logoUrl)
-              )}`
+              )}&logoUrl=${encodeURIComponent(JSON.stringify(logoUrl))}`
             );
 
             if (!response.ok) {
