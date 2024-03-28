@@ -38,7 +38,7 @@ export async function FavoritesTable({ favorites }: { favorites: any }) {
 
       router.refresh();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
   return (

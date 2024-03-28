@@ -78,7 +78,7 @@ const formSchema = z.object({
 
 export function NameGenerator({ user, names }: { user: any; names: any }) {
   const supabase = createClient();
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     if (!user && !localStorage.getItem("session_id")) {
@@ -138,20 +138,23 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    const oneDayAgo = new Date(new Date().getTime() - (24 * 60 * 60 * 1000)).toISOString(); 
-  
+    const oneDayAgo = new Date(
+      new Date().getTime() - 24 * 60 * 60 * 1000
+    ).toISOString();
+
     try {
       if (user) {
         const { data: names, error } = await supabase
           .from("names")
           .select("*", { count: "exact" })
           .eq("created_by", user.id)
-          .gte("created_at", oneDayAgo); 
-  
-        if (names!.length >= 6) {
+          .gte("created_at", oneDayAgo);
+
+        if (names!.length >= 20) {
           toast({
             title: "Uh oh! Out of generations.",
-            description: "You've reached your daily limit for name generations.",
+            description:
+              "You've reached your daily limit for name generations.",
           });
           return;
         }
@@ -161,12 +164,20 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .select("*", { count: "exact" })
           .eq("session_id", localStorage.getItem("session_id"))
           .gte("created_at", oneDayAgo);
-  
+
         if (names!.length >= 6) {
           toast({
             title: "Uh oh! Out of generations.",
-            description: "You've reached your daily limit for name generations. Sign up for an account to continue.",
-            action: <ToastAction onClick={() => router.push("/signup")} altText="Sign up">Sign up</ToastAction>,
+            description:
+              "You've reached your daily limit for name generations. Sign up for an account to continue.",
+            action: (
+              <ToastAction
+                onClick={() => router.push("/signup")}
+                altText="Sign up"
+              >
+                Sign up
+              </ToastAction>
+            ),
           });
           return;
         }
@@ -240,7 +251,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             }));
           }
         } catch (error) {
-          console.log(error);
+          console.error(error);
         }
       }
       setIdsList(ids);
@@ -481,27 +492,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                   </div>
                 </div>
               </div>
-              {names ? (
-                <div className="flex flex-col space-y-2">
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? <Icons.spinner /> : "Go"}
-                  </Button>
-                  <Link href="/new">
-                    <Button
-                      className="w-full"
-                      type="button"
-                      variant="secondary"
-                    >
-                      Reset
-                    </Button>
-                  </Link>
-                  <div className="flex-col pt-4 space-y-4 sm:flex">
-                    {Object.keys(namesList).length > 0 && (
-                      <NamesTable namesList={namesList} user={user} />
-                    )}
-                  </div>
-                </div>
-              ) : (
+              {!names && (
                 <div className="flex flex-col space-y-2">
                   <Dialog>
                     <DialogTrigger asChild>
@@ -532,6 +523,25 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             </div>
           </form>
         </Form>
+        {names && (
+          <div>
+            <div className="flex flex-col space-y-2">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? <Icons.spinner /> : "Go"}
+              </Button>
+              <Link href="/new">
+                <Button className="w-full" type="button" variant="secondary">
+                  Reset
+                </Button>
+              </Link>
+            </div>
+            <div className="flex-col pt-4 space-y-4 sm:flex">
+              {Object.keys(namesList).length > 0 && (
+                <NamesTable namesList={namesList} user={user} />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

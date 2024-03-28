@@ -56,7 +56,7 @@ export default function ProfileForm({
         description: "Profile updated",
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast({
         variant: "destructive",
         description: "Error updating profile",

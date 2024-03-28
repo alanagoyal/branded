@@ -46,7 +46,7 @@ export async function GET(req: NextRequest, res: NextResponse<Data>) {
     
     return Response.json({ domains });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return Response.json({ error });
   }
 }

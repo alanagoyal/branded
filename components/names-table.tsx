@@ -66,6 +66,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     }
 
     async function fetchFavoritedStatus() {
+      console.log("fetching favorited status")
       const { data: favoritedData, error } = await supabase
         .from("names")
         .select("name, favorited");
@@ -99,7 +100,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
       const { error } = await supabase
         .from("names")
         .update({ favorited: !isFavorited })
-        .eq("id", namesList[name]);
+        .eq("id", namesList[name])
 
       toast({
         description: isFavorited

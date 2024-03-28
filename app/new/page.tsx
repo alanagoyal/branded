@@ -13,25 +13,26 @@ export default async function GenerateName({
   } = await supabase.auth.getUser();
 
   let names;
+  let idsList;
 
   if (searchParams && searchParams.ids) {
     const idString = searchParams.ids as string;
     const idRegex = /.{36}/g;
-    const idsList = idString.match(idRegex);
+    idsList = idString.match(idRegex); 
 
     const { data, error } = await supabase
-    .from("names")
-    .select()
-    .in("id", idsList!);
-    names = data
+      .from("names")
+      .select()
+      .in("id", idsList!);
+    names = data;
   } else {
-    names = null
+    names = null;
   }
 
   return (
     <div className="w-full px-4">
       <h1 className="text-2xl font-bold mb-4">Name Generator</h1>
-      <AuthRefresh/>
+      <AuthRefresh idsList={idsList ?? []} />
       <NameGenerator user={user} names={names ?? null} />
     </div>
   );
