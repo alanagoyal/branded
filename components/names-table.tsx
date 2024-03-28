@@ -66,7 +66,6 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
     }
 
     async function fetchFavoritedStatus() {
-      console.log("fetching favorited status")
       const { data: favoritedData, error } = await supabase
         .from("names")
         .select("name, favorited");
@@ -451,7 +450,6 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
             .eq("name_id", namesList[name]);
 
           if (logoData && logoData.length > 0) {
-            console.log("logoData", logoData);
             logoUrl = logoData[0].logo_url;
           }
 
