@@ -132,6 +132,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         }
       }
       setNamesList(updatedNamesList);
+
+      for (const name of names) {
+        setIdsList((prevState) => [...prevState, name.id]);
+      }
     }
   }, [names, user]);
 
@@ -492,30 +496,28 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                   </div>
                 </div>
               </div>
-              <div className="pt-2">
-                <div className="flex flex-col space-y-2">
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? <Icons.spinner /> : "Go"}
-                  </Button>
-                  <Link href="/new">
-                    <Button
-                      className="w-full"
-                      type="button"
-                      variant="secondary"
-                    >
-                      Reset
-                    </Button>
-                  </Link>
-                </div>
-                <div className="flex-col pt-4 space-y-4 sm:flex">
-                  {Object.keys(namesList).length > 0 && (
-                    <NamesTable namesList={namesList} user={user} />
-                  )}
-                </div>
+              <div className="flex flex-col space-y-2">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? <Icons.spinner /> : "Go"}
+                </Button>
+                <Button
+                  onClick={clear}
+                  className="w-full"
+                  type="button"
+                  variant="secondary"
+                >
+                  Reset
+                </Button>
               </div>
             </div>
           </form>
         </Form>
+        <div className="flex-col pt-4 space-y-4 sm:flex">
+          {Object.keys(namesList).length > 0 && (
+            <NamesTable namesList={namesList} user={user} />
+          )}
+          <Share idString={idsList.join("")} />
+        </div>
       </div>
     </>
   );
