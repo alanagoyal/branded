@@ -492,58 +492,30 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                   </div>
                 </div>
               </div>
-              {!names && (
-                <div>
-                  <div className="flex flex-col space-y-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button type="submit" disabled={isLoading}>
-                          {isLoading ? <Icons.spinner /> : "Go"}
-                        </Button>
-                      </DialogTrigger>
-                      {!isLoading && Object.keys(namesList).length > 0 && (
-                        <DialogContent className="flex flex-col">
-                          <DialogHeader>
-                            <DialogTitle>Your Names</DialogTitle>
-                            <DialogDescription>
-                              These are the names we generated for you
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="flex-col space-y-4 sm:flex">
-                            <NamesTable namesList={namesList} user={user} />
-                          </div>
-                          <Share idString={idsList.join("")} />
-                        </DialogContent>
-                      )}
-                    </Dialog>
-                    <Button type="button" variant="secondary" onClick={clear}>
+              <div className="pt-2">
+                <div className="flex flex-col space-y-2">
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? <Icons.spinner /> : "Go"}
+                  </Button>
+                  <Link href="/new">
+                    <Button
+                      className="w-full"
+                      type="button"
+                      variant="secondary"
+                    >
                       Reset
                     </Button>
-                  </div>
+                  </Link>
                 </div>
-              )}
+                <div className="flex-col pt-4 space-y-4 sm:flex">
+                  {Object.keys(namesList).length > 0 && (
+                    <NamesTable namesList={namesList} user={user} />
+                  )}
+                </div>
+              </div>
             </div>
           </form>
         </Form>
-        {names && (
-          <div className="pt-2">
-            <div className="flex flex-col space-y-2">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <Icons.spinner /> : "Go"}
-              </Button>
-              <Link href="/new">
-                <Button className="w-full" type="button" variant="secondary">
-                  Reset
-                </Button>
-              </Link>
-            </div>
-            <div className="flex-col pt-4 space-y-4 sm:flex">
-              {Object.keys(namesList).length > 0 && (
-                <NamesTable namesList={namesList} user={user} />
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </>
   );
