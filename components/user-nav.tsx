@@ -19,19 +19,19 @@ import { useEffect, useState } from "react";
 
 export default function UserNav({ user }: any) {
   const router = useRouter();
-  const [profileName, setProfileName] = useState('');
+  const [profileName, setProfileName] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
       const supabase = createClient();
       let { data, error } = await supabase
-        .from('profiles') 
-        .select('name')
-        .eq('id', user.id) 
-        .single(); 
+        .from("profiles")
+        .select("name")
+        .eq("id", user.id)
+        .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error("Error fetching profile:", error);
       } else if (data) {
         setProfileName(data.name);
       }
@@ -40,8 +40,7 @@ export default function UserNav({ user }: any) {
     if (user) {
       fetchProfile();
     }
-  }, [user]); 
-
+  }, [user]);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -55,7 +54,11 @@ export default function UserNav({ user }: any) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarFallback>
+            <AvatarFallback
+              style={{
+                background: "linear-gradient(135deg, #ffcc70 0%, #c850c0 100%)",
+              }}
+            >
               {user.email?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -72,7 +75,7 @@ export default function UserNav({ user }: any) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-        <Link href="/new">
+          <Link href="/new">
             <DropdownMenuItem className="cursor-pointer">
               <Plus className="mr-2 h-4 w-4" />
               <span>Generate</span>
