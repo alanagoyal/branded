@@ -79,6 +79,11 @@ const formSchema = z.object({
 export function NameGenerator({ user, names }: { user: any; names: any }) {
   const supabase = createClient();
   const router = useRouter();
+  const [isScreenWide, setIsScreenWide] = useState(false);
+
+  useEffect(() => {
+    setIsScreenWide(window.innerWidth >= 768);
+  }, []);
 
   useEffect(() => {
     if (!user && !localStorage.getItem("session_id")) {
@@ -500,11 +505,32 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? <Icons.spinner /> : "Go"}
                 </Button>
+                {isScreenWide &&
+                  !names &&
+                  Object.keys(namesList).length > 0 && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button disabled={true}>Go</Button>
+                      </DialogTrigger>
+                      <DialogContent className="flex flex-col">
+                        <DialogHeader>
+                          <DialogTitle>Your Names</DialogTitle>
+                          <DialogDescription>
+                            These are the names we generated for you
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex-col space-y-4 sm:flex">
+                          <NamesTable namesList={namesList} user={user} />
+                        </div>
+                        <Share idString={idsList.join("")} />
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 <Button
                   onClick={clear}
                   className="w-full"
                   type="button"
-                  variant="secondary"
+                  variant="ghost"
                 >
                   Reset
                 </Button>
@@ -512,12 +538,12 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             </div>
           </form>
         </Form>
-        <div className="flex-col pt-4 space-y-4 sm:flex">
-          {Object.keys(namesList).length > 0 && (
+        {(names || !isScreenWide) && Object.keys(namesList).length > 0 && (
+          <div className="flex-col pt-4 space-y-4 sm:flex">
             <NamesTable namesList={namesList} user={user} />
-          )}
-          <Share idString={idsList.join("")} />
-        </div>
+            <Share idString={idsList.join("")} />
+          </div>
+        )}
       </div>
     </>
   );
