@@ -9,14 +9,17 @@ import { SignupFormData } from '@/components/signup-form';
 export async function signup(formData: SignupFormData, idString: string, origin: string) {
   const supabase = createClient()
   const { email, password } = formData;
-  const { error } = await supabase.auth.signUp({email, password, options: {
-    emailRedirectTo: origin + `/new?ids=${idString}`
-  }})
+  const { error } = await supabase.auth.signUp({
+    email, 
+    password, 
+    options: {
+      emailRedirectTo: idString ? origin + `/new?ids=${idString}` : origin + '/new'
+    }
+  })
 
   if (error) {
     redirect('/error')
   }
 
   revalidatePath('/', 'layout')
-  // redirect(`/confirm-email`)
 }

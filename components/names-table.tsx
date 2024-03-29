@@ -45,7 +45,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const idString = Object.values(namesList).join(",");
 
-  const signUpLink = `/signup?ids=${idString.replace(/,/g, "")}`;
+  const signUpLink = idString ? `/signup?ids=${idString.replace(/,/g, "")}` : "/signup";
 
   useEffect(() => {
     async function getOwner() {
