@@ -1,6 +1,7 @@
-import { FavoritesTable } from "@/components/favorites-table";
 import { NamesTable } from "@/components/names-table";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Favorites() {
@@ -34,7 +35,12 @@ export default async function Favorites() {
         {namesList && Object.keys(namesList).length > 0 ? (
           <NamesTable namesList={namesList} user={user} />
         ) : (
-          <p className="text-sm pt-10">You haven&apos;t favorited any names yet</p>
+          <>
+            <p className="text-base pt-4">You haven&apos;t favorited any names yet</p>
+            <Link className="flex justify-center pt-2" href="/new">
+              <Button variant="ghost">Get Started</Button>
+            </Link>{" "}
+          </>
         )}
       </div>
     </div>
