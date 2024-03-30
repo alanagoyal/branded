@@ -776,8 +776,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           <a href={signUpLink} className="underline">
             Create an account
           </a>{" "}
-          to find available domain names & npm package names and generate logos
-          & marketing collateral for your favorite names
+          to see available domain names, create a unique logo, and generate branded marketing materials for these names and more.
         </div>
       )}
     </div>
