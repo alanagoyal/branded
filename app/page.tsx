@@ -10,6 +10,21 @@ import Link from "next/link";
 export default async function Home() {
   const supabase = createClient();
 
+  const sections = [
+    {
+      title: "Startup Names",
+      subtitle: `"Deel", "Lattice", "Samsara" - we love &apos;em, but we don&apos;t know how to choose them. Namebase helps you go from idea to startup name in one click.`,
+    },
+    {
+      title: "Domain Availability",
+      subtitle: `Tired of being stuck with a crappy, unmemorable domain name? Secure the perfect domain name for your startup in seconds with our AI-assisted domain availability lookup.`,
+    },
+    {
+      title: "Branded Content",
+      subtitle: `Use Namebase to generate custom branded content - including logos and one-pagers - for your startup without the headaches.`,
+    },
+  ];
+
   return (
     <div className="w-full pt-10 min-h-screen">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,30 +51,18 @@ export default async function Home() {
           </Link>
         </div>
       </div>
-      <div className="flex justify-around items-stretch mt-20">
-        <div className="flex flex-col w-1/3 p-4 shadow-lg rounded-lg">
-          <h2 className="text-xl font-bold">Startup Names</h2>
-          <p className="mt-2 text-sm flex-grow">
-            "Deel", "Lattice", "Samsara" - we love &apos;em, but we don&apos;t
-            know how to choose them. Namebase helps you go from idea to startup
-            name in one click.
-          </p>
-        </div>
-        <div className="flex flex-col w-1/3 p-4 shadow-lg rounded-lg mx-4">
-          <h2 className="text-xl font-bold">Domain Availability</h2>
-          <p className="mt-2 text-sm flex-grow">
-            Tired of being stuck with a crappy, unmemorable domain name? Secure
-            the perfect domain name for your startup in seconds with our
-            AI-assisted domain availability lookup.
-          </p>
-        </div>
-        <div className="flex flex-col w-1/3 p-4 shadow-lg rounded-lg">
-          <h2 className="text-xl font-bold">Branded Content</h2>
-          <p className="mt-2 text-sm flex-grow">
-            Use Namebase to generate custom branded content - including logos
-            and one-pagers - for your startup without the headaches.
-          </p>
-        </div>
+      <div className="flex flex-col md:flex-row justify-around items-stretch mt-20">
+        {sections.map((section, index) => (
+          <div
+            key={index}
+            className={`flex flex-col w-full md:w-1/3 p-4 shadow-lg rounded-lg ${
+              index === 1 ? "md:mx-4 my-4 md:my-0" : "my-4 md:my-0"
+            }`}
+          >
+            <h2 className="text-xl font-bold">{section.title}</h2>
+            <p className="mt-2 text-sm flex-grow">{section.subtitle}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
