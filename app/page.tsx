@@ -34,8 +34,8 @@ export default async function Home() {
       role: "Co-Founder",
       quote: (
         <>
-          "Using Namebase was a game-changer for my startup. When my brother and
-          I decided to start a new company, we didn't want to deal with the
+          &quot;Using Namebase was a game-changer for my startup. When my brother and
+          I decided to start a new company, we didn&apos;t want to deal with the
           headaches of coming up with a name or logo - we wanted to focus on
           building a great product for our customers. Thanks to Namebase, we
           could do just that. With a few clicks, we had a great name and logo in
@@ -43,7 +43,7 @@ export default async function Home() {
           <br />
           <br />
           The process was seamless, and the results were beyond my expectations.
-          Highly recommend!"
+          Highly recommend!&quot;
         </>
       ),
     },
@@ -55,10 +55,10 @@ export default async function Home() {
       role: "Founder",
       quote: (
         <>
-          "Namebase is the product I wish I had when I was starting my company.
-          It's such a challenge to find a good name, and once you do, the domain
+          &quot;Namebase is the product I wish I had when I was starting my company.
+          It&apos;s such a challenge to find a good name, and once you do, the domain
           name may not even be available. Namebase solves this and more by
-          letting founders generate a name and domain name in one click."
+          letting founders generate a name and domain name in one click.&quot;
         </>
       ),
     },
@@ -70,12 +70,12 @@ export default async function Home() {
       role: "Founder",
       quote: (
         <>
-          "Startups live and die by their brand identity. When starting Diagram,
+          &quot;Startups live and die by their brand identity. When starting Diagram,
           we knew we wanted to build a brand that people loved. Namebase is the
           perfect tool for founders who want to do the same without spending
           days or weeks brainstorming, searching for available domains, and then
-          breaking the bank on a professional logo. I'm a huge fan of Namebase
-          and will definitely be using it for side projects."
+          breaking the bank on a professional logo. I&apos;m a huge fan of Namebase
+          and will definitely be using it for side projects.&quot;
         </>
       ),
     },
