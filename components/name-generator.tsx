@@ -501,40 +501,53 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col space-y-2">
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? <Icons.spinner /> : "Go"}
-                </Button>
-                {isScreenWide &&
-                  !names &&
-                  Object.keys(namesList).length > 0 && (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button disabled={true}>Go</Button>
-                      </DialogTrigger>
-                      <DialogContent className="flex flex-col">
-                        <DialogHeader>
-                          <DialogTitle>Your Names</DialogTitle>
-                          <DialogDescription>
-                            These are the names we generated for you
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="flex-col space-y-4 sm:flex">
+              {isScreenWide && !names ? (
+                <div className="flex flex-col space-y-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button type="submit" disabled={isLoading}>
+                        {isLoading ? <Icons.spinner /> : "Go"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="flex flex-col">
+                      <DialogHeader>
+                        <DialogTitle>Your Names</DialogTitle>
+                        <DialogDescription>
+                          These are the names we generated for you
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex-col space-y-4 sm:flex">
+                        {Object.keys(namesList).length > 0 && (
                           <NamesTable namesList={namesList} user={user} />
-                        </div>
-                        <Share idString={idsList.join("")} />
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                <Button
-                  onClick={clear}
-                  className="w-full"
-                  type="button"
-                  variant="ghost"
-                >
-                  Reset
-                </Button>
-              </div>
+                        )}
+                      </div>
+                      <Share idString={idsList.join("")} />
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    onClick={clear}
+                    className="w-full"
+                    type="button"
+                    variant="ghost"
+                  >
+                    Reset
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-2">
+                  <Button type="submit" disabled={isLoading} className="w-full">
+                    {isLoading ? <Icons.spinner /> : "Go"}
+                  </Button>
+                  <Button
+                    onClick={clear}
+                    className="w-full"
+                    type="button"
+                    variant="ghost"
+                  >
+                    Reset
+                  </Button>
+                </div>
+              )}
             </div>
           </form>
         </Form>

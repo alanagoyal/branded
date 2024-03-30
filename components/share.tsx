@@ -28,7 +28,7 @@ export function Share({idString}: {idString: string}) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="w-full" variant="secondary">Share</Button>
+        <Button className="w-full" variant="ghost">Share</Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[350px]">
         <div className="flex flex-col space-y-2 text-center sm:text-left">
