@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/icons";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
@@ -34,12 +35,12 @@ export default async function Home() {
       role: "Co-Founder",
       quote: (
         <>
-          &quot;Using Namebase was a game-changer for my startup. When my brother and
-          I decided to start a new company, we didn&apos;t want to deal with the
-          headaches of coming up with a name or logo - we wanted to focus on
-          building a great product for our customers. Thanks to Namebase, we
-          could do just that. With a few clicks, we had a great name and logo in
-          no time.
+          &quot;Using Namebase was a game-changer for my startup. When my
+          brother and I decided to start a new company, we didn&apos;t want to
+          deal with the headaches of coming up with a name or logo - we wanted
+          to focus on building a great product for our customers. Thanks to
+          Namebase, we could do just that. With a few clicks, we had a great
+          name and logo in no time.
           <br />
           <br />
           The process was seamless, and the results were beyond my expectations.
@@ -55,10 +56,11 @@ export default async function Home() {
       role: "Founder",
       quote: (
         <>
-          &quot;Namebase is the product I wish I had when I was starting my company.
-          It&apos;s such a challenge to find a good name, and once you do, the domain
-          name may not even be available. Namebase solves this and more by
-          letting founders generate a name and domain name in one click.&quot;
+          &quot;Namebase is the product I wish I had when I was starting my
+          company. It&apos;s such a challenge to find a good name, and once you
+          do, the domain name may not even be available. Namebase solves this
+          and more by letting founders generate a name and domain name in one
+          click.&quot;
         </>
       ),
     },
@@ -70,12 +72,13 @@ export default async function Home() {
       role: "Founder",
       quote: (
         <>
-          &quot;Startups live and die by their brand identity. When starting Diagram,
-          we knew we wanted to build a brand that people loved. Namebase is the
-          perfect tool for founders who want to do the same without spending
-          days or weeks brainstorming, searching for available domains, and then
-          breaking the bank on a professional logo. I&apos;m a huge fan of Namebase
-          and will definitely be using it for side projects.&quot;
+          &quot;Startups live and die by their brand identity. When starting
+          Diagram, we knew we wanted to build a brand that people loved.
+          Namebase is the perfect tool for founders who want to do the same
+          without spending days or weeks brainstorming, searching for available
+          domains, and then breaking the bank on a professional logo. I&apos;m a
+          huge fan of Namebase and will definitely be using it for side
+          projects.&quot;
         </>
       ),
     },
@@ -88,14 +91,14 @@ export default async function Home() {
           Transform your idea into a{" "}
           <span style={{ color: "#C850C0" }}>billion-dollar brand</span>
         </h1>
-        <p className="mt-4 max-w-2xl text-xl">
+        <p className="pt-6 max-w-2xl text-xl">
           Namebase helps founders name their startup, secure the domain, and
-          brand it - all in one place.
+          brand it—all in one place.
         </p>
-        <div className="flex pt-4">
+        <div className="flex pt-6 space-x-2">
           <Link href="/new">
             <Button
-              className="mt-4 text-lg"
+              className="text-lg"
               style={{
                 background:
                   "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)",
@@ -104,6 +107,13 @@ export default async function Home() {
             >
               Get Started
             </Button>
+          </Link>
+          <Link
+            href="https://github.com/alanagoyal/namebase"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Button variant="ghost">View on GitHub</Button>
           </Link>
         </div>
         <div className="flex flex-col md:flex-row justify-around items-stretch mt-20">

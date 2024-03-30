@@ -14,7 +14,6 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Icons } from "./icons";
 import { useEffect, useState } from "react";
 
 export default function UserNav({ user }: any) {
