@@ -44,6 +44,7 @@ import { Share } from "./share";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import { useRouter } from "next/navigation";
+import { NamesDisplay } from "./names-display";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -518,7 +519,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                           </DialogDescription>
                         </DialogHeader>
                         <div className="flex-col space-y-4 sm:flex">
-                          <NamesTable namesList={namesList} user={user} />
+                          <NamesDisplay namesList={namesList} user={user} />
                         </div>
                         <Share idString={idsList.join("")} />
                       </DialogContent>
@@ -553,7 +554,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         </Form>
         {(names || !isScreenWide) && Object.keys(namesList).length > 0 && (
           <div className="flex-col pt-4 space-y-4 sm:flex">
-            <NamesTable namesList={namesList} user={user} />
+            <NamesDisplay namesList={namesList} user={user} />
             <Share idString={idsList.join("")} />
           </div>
         )}
