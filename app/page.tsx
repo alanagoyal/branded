@@ -8,6 +8,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Link from "next/link";
+import { Icons } from "@/components/icons";
 
 export default async function Home() {
   const sections = [
@@ -105,6 +106,14 @@ export default async function Home() {
               Get Started
             </Button>
           </Link>
+          <div className="ml-2 sm:ml-4">
+            <Link href="https://github.com/alanagoyal/namebase" target="_blank" rel="noreferrer">
+              <a className="buttonVariants({ size: 'sm', variant: 'ghost' })">
+                <Icons.gitHub className="h-5 w-5" />
+                <span className="sr-only">GitHub</span>
+              </a>
+            </Link>
+          </div>
         </div>
         <div className="flex flex-col md:flex-row justify-around items-stretch mt-20">
           {sections.map((section, index) => (

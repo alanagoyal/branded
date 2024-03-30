@@ -23,23 +23,6 @@ export async function SiteHeader() {
           </div>
           <div className="flex items-center">
             <div className="hidden sm:flex">
-              <Link
-                href="https://github.com/alanagoyal/namebase"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <div
-                  className={buttonVariants({
-                    size: "sm",
-                    variant: "ghost",
-                  })}
-                >
-                  <Icons.gitHub className="h-5 w-5" />
-                  <span className="sr-only">GitHub</span>
-                </div>
-              </Link>
-            </div>
-            <div className="hidden sm:flex">
               <ThemeToggle />
             </div>
             <div className="items-center">
