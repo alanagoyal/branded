@@ -509,20 +509,20 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         {isLoading ? <Icons.spinner /> : "Go"}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="flex flex-col">
-                      <DialogHeader>
-                        <DialogTitle>Your Names</DialogTitle>
-                        <DialogDescription>
-                          These are the names we generated for you
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex-col space-y-4 sm:flex">
-                        {Object.keys(namesList).length > 0 && (
+                    {Object.keys(namesList).length > 0 && (
+                      <DialogContent className="flex flex-col">
+                        <DialogHeader>
+                          <DialogTitle>Your Names</DialogTitle>
+                          <DialogDescription>
+                            These are the names we generated for you
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex-col space-y-4 sm:flex">
                           <NamesTable namesList={namesList} user={user} />
-                        )}
-                      </div>
-                      <Share idString={idsList.join("")} />
-                    </DialogContent>
+                        </div>
+                        <Share idString={idsList.join("")} />
+                      </DialogContent>
+                    )}
                   </Dialog>
                   <Button
                     onClick={clear}
