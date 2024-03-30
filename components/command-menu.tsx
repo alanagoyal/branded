@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -11,15 +11,10 @@ import {
   CommandShortcut,
 } from "./ui/command";
 import {
-  Calculator,
-  Calendar,
-  CreditCard,
   Heart,
   HelpCircle,
   LogOut,
   Plus,
-  Settings,
-  Smile,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,14 +23,16 @@ import { useRouter } from "next/navigation";
 
 export function CommandMenu() {
   const router = useRouter();
+  const supabase = createClient();
   const [open, setOpen] = React.useState(false);
+
 
   const navigateAndCloseDialog = (path: string) => {
     router.push(path);
     setOpen(false); 
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
