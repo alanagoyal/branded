@@ -36,21 +36,28 @@ export default async function Home() {
           </Link>
         </div>
       </div>
-      <div className="flex justify-around items-center mt-20">
-        <div className="w-1/3 p-4 shadow-lg rounded-lg">
+      <div className="flex justify-around items-stretch mt-20">
+        <div className="flex flex-col w-1/3 p-4 shadow-lg rounded-lg">
           <h2 className="text-xl font-bold">Startup Names</h2>
-          <p className="mt-2">Go from idea to startup name in one click.</p>
-        </div>
-        <div className="w-1/3 p-4  shadow-lg rounded-lg mx-4">
-          <h2 className="text-xl font-bold">Domain Names</h2>
-          <p className="mt-2">
-            Secure the perfect domain name for your startup.
+          <p className="mt-2 text-sm flex-grow">
+            "Deel", "Lattice", "Samsara" - we love &apos;em, but we don&apos;t
+            know how to choose them. Namebase helps you go from idea to startup
+            name in one click.
           </p>
         </div>
-        <div className="w-1/3 p-4 shadow-lg rounded-lg">
+        <div className="flex flex-col w-1/3 p-4 shadow-lg rounded-lg mx-4">
+          <h2 className="text-xl font-bold">Domain Availability</h2>
+          <p className="mt-2 text-sm flex-grow">
+            Tired of being stuck with a crappy, unmemorable domain name? Secure
+            the perfect domain name for your startup in seconds with our
+            AI-assisted domain availability lookup.
+          </p>
+        </div>
+        <div className="flex flex-col w-1/3 p-4 shadow-lg rounded-lg">
           <h2 className="text-xl font-bold">Branded Content</h2>
-          <p className="mt-2">
-            Generate custom branded content for your startup.
+          <p className="mt-2 text-sm flex-grow">
+            Use Namebase to generate custom branded content - including logos
+            and one-pagers - for your startup without the headaches.
           </p>
         </div>
       </div>
