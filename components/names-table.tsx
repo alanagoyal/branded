@@ -306,10 +306,10 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                 name_id: namesList[name],
                 created_by: user.id,
               };
-              let { data, error } = await supabase
+              let { data: npmInsertData, error: npmInsertError } = await supabase
                 .from("npm_names")
                 .insert(updates);
-              if (error) throw error;
+              if (npmInsertError) throw npmInsertError;
               npmAvailability.push({ npmName: npmCommand, purchaseLink });
 
               if (npmAvailability.length === 0) {
@@ -597,30 +597,17 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                disabled={processingNpm.includes(name)}
-                                onClick={() => findNpmNames(name)}
-                              >
-                                {processingNpm.includes(name) ? (
-                                  <Icons.spinner />
-                                ) : (
-                                  <Icons.npmPackage />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {npmResults[name]
-                                  ? "Hide npm package names"
-                                  : "Find available npm package names"}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <Button
+                          variant="ghost"
+                          disabled={processingNpm.includes(name)}
+                          onClick={() => findNpmNames(name)}
+                        >
+                          {processingNpm.includes(name) ? (
+                            <Icons.spinner />
+                          ) : (
+                            <Icons.npmPackage />
+                          )}
+                        </Button>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -714,30 +701,6 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                         <Button
                           variant="ghost"
                           onClick={() => copyToClipboard(result.purchaseLink)}
-                        >
-                          <Icons.copy />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              {npmResults[name] &&
-                Object.keys(npmResults).length > 0 &&
-                npmResults[name].map((result, idx) => (
-                  <TableRow key={`${name}-availability-${idx}`}>
-                    <TableCell className="flex-1">
-                      <div className="flex items-center justify-between w-full">
-                        <Link
-                          href="https://docs.npmjs.com/creating-and-publishing-scoped-public-packages"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue"
-                        >
-                          {result.npmName}
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          onClick={() => copyToClipboard(result.npmName)}
                         >
                           <Icons.copy />
                         </Button>
