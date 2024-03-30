@@ -56,11 +56,11 @@ export function CommandMenu() {
             e.preventDefault();
             navigateAndCloseDialog("/favorites");
             break;
-          case "h":
+          case "j":
             e.preventDefault();
             navigateAndCloseDialog("/help");
             break;
-          case "l":
+          case "o":
             e.preventDefault();
             handleSignOut();
             break;
@@ -71,7 +71,7 @@ export function CommandMenu() {
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [router]); // Add router to the dependency array
+  }, [router]); 
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -124,14 +124,14 @@ export function CommandMenu() {
             <CommandItem>
               <HelpCircle className="mr-2 h-4 w-4" />
               <span>Support</span>
-              <CommandShortcut>⌘H</CommandShortcut>
+              <CommandShortcut>⌘J</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
           <CommandSeparator />
           <CommandItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
-            <CommandShortcut>⌘L</CommandShortcut>
+            <CommandShortcut>⌘O</CommandShortcut>
           </CommandItem>
         </CommandGroup>
       </CommandList>
