@@ -597,6 +597,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
+                        {/* Temporarily disabled npm name feature button as per product manager's request
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -620,7 +621,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                               </p>
                             </TooltipContent>
                           </Tooltip>
-                        </TooltipProvider>
+                        </TooltipProvider> */}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -721,6 +722,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                     </TableCell>
                   </TableRow>
                 ))}
+              {/* Temporarily disabled display of npm results as per product manager's request
               {npmResults[name] &&
                 Object.keys(npmResults).length > 0 &&
                 npmResults[name].map((result, idx) => (
@@ -744,7 +746,7 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ))} */}
               {logoResults[name] && (
                 <TableRow key={`${name}-logo`}>
                   <TableCell colSpan={2} className="flex justify-center">
