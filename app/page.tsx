@@ -13,7 +13,7 @@ export default async function Home() {
   const sections = [
     {
       title: "Startup Names",
-      subtitle: `"Deel", "Lattice", "Samsara" - we love &apos;em, but we don&apos;t know how to choose them. Namebase helps you go from idea to startup name in one click.`,
+      subtitle: `"Deel", "Lattice", "Samsara" - we love 'em, but we don't know how to choose them. Namebase helps you go from idea to startup name in one click.`,
     },
     {
       title: "Domain Availability",
