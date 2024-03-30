@@ -28,6 +28,30 @@ export default async function Home() {
 
   const customerQuotes = [
     {
+      avatar: "guillermo.jpeg",
+      name: "Guillermo Rauch",
+      companyUrl: "https://vercel.com",
+      companyName: "Vercel",
+      role: "Founder",
+      quote: (
+        <div className="flex flex-row items-stretch">
+          <div className="flex w-2/3 items-center justify-center">
+            &quot;I used @alanaagoyal&apos;s AI-based brand generation tool and it&apos;s shockingly good.
+            <br />
+            <br />
+            It coined &apos;brainy&apos; and generated this cool logo in a couple seconds 😁. Quite the head-start to get your idea into the world.&quot;
+          </div>
+          <div className="flex w-1/3 items-center justify-center">
+            <img
+              src="brainy.png"
+              alt="Brainy"
+              className="object-cover w-32 h-32"
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
       avatar: "paul.jpeg",
       name: "Paul Dornier",
       companyUrl: "https://alpharun.com",
@@ -45,22 +69,6 @@ export default async function Home() {
           <br />
           The process was seamless, and the results were beyond my expectations.
           Highly recommend!&quot;
-        </>
-      ),
-    },
-    {
-      avatar: "ankur.jpeg",
-      name: "Ankur Goyal",
-      companyUrl: "https://braintrustdata.com",
-      companyName: "Braintrust",
-      role: "Founder",
-      quote: (
-        <>
-          &quot;Namebase is the product I wish I had when I was starting my
-          company. It&apos;s such a challenge to find a good name, and once you
-          do, the domain name may not even be available. Namebase solves this
-          and more by letting founders generate a name and domain name in one
-          click.&quot;
         </>
       ),
     },
@@ -161,7 +169,9 @@ export default async function Home() {
                             </p>
                           </div>
                         </a>
-                        <p className="mt-4 text-sm">{customerQuote.quote}</p>
+                        <div className="mt-4 text-sm">
+                          {customerQuote.quote}
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
