@@ -101,7 +101,7 @@ export default function ProfileForm({
           />
 
           <div className="py-1 flex justify-center w-full">
-            <Button type="submit">Update</Button>
+            <Button className="w-full" type="submit">Update</Button>
           </div>
         </form>
       </Form>
