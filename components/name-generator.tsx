@@ -42,6 +42,8 @@ import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import { useRouter } from "next/navigation";
 import { NamesDisplay } from "./names-display";
+import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -72,6 +74,7 @@ const formSchema = z.object({
       "any",
     ])
     .optional(),
+  tld: z.boolean().optional(),
 });
 
 export function NameGenerator({ user, names }: { user: any; names: any }) {
@@ -98,6 +101,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       style: names[0].word_style,
       minLength: names[0].min_length,
       maxLength: names[0].max_length,
+      tld: names[0].tld,
     };
   } else {
     defaultValues = {
@@ -107,6 +111,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       style: "any",
       minLength: 5,
       maxLength: 10,
+      tld: false,
     };
   }
 
@@ -144,6 +149,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setNamesList({});
+    setIdsList([]);
 
     const oneDayAgo = new Date(
       new Date().getTime() - 24 * 60 * 60 * 1000
@@ -159,7 +166,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
         if (names!.length >= 20) {
           toast({
-            title: "Uh oh! Out of generations.",
+            title: "Uh oh! Out of generations",
             description:
               "You've reached your daily limit for name generations.",
           });
@@ -202,6 +209,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           wordToInclude: values.wordToInclude,
           wordPlacement: values.wordPlacement,
           style: values.style,
+          tld: values.tld,
         }),
       });
 
@@ -215,19 +223,16 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
       const data = await response.json();
 
-      if (!data) {
+      if (!data.response) {
         toast({
           variant: "destructive",
           description: "Error generating startup names",
         });
         throw new Error("Failed to generate startup names");
-      }
-      const namesArray = data.response.split("\n").map((line: any) => {
-        return line.replace(/^\d+\.\s*/, "").trim();
-      });
+      }  
 
       const ids: string[] = [];
-      for (const name of namesArray) {
+      for (const name of data.response) {
         try {
           const updates = {
             name: name,
@@ -419,15 +424,15 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                       control={form.control}
                       name="minLength"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel htmlFor="temperature">
-                            Minimum Length
-                          </FormLabel>
-                          <FormDescription>
+                        <FormItem className="flex flex-col space-y-4 rounded-lg border p-4">
+                          <div className="flex flex-row items-center justify-between">
+                            <FormLabel htmlFor="temperature">
+                              Minimum Length
+                            </FormLabel>
                             <span className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
                               {field.value}
                             </span>
-                          </FormDescription>
+                          </div>
                           <FormControl>
                             <Slider
                               min={4}
@@ -461,15 +466,15 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                       control={form.control}
                       name="maxLength"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel htmlFor="temperature">
-                            Maximum Length
-                          </FormLabel>
-                          <FormDescription>
+                        <FormItem className="flex flex-col space-y-4 rounded-lg border p-4">
+                          <div className="flex flex-row items-center justify-between">
+                            <FormLabel htmlFor="temperature">
+                              Maximum Length
+                            </FormLabel>
                             <span className="w-12 rounded-md border border-transparent px-2 py-0.5 text-right text-sm text-muted-foreground hover:border-border">
                               {field.value}
                             </span>
-                          </FormDescription>
+                          </div>
                           <FormControl>
                             <Slider
                               id="max-length"
@@ -493,6 +498,30 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                           <FormDescription>
                             Choose the maximum length for your name
                           </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="flex h-full flex-col space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="tld"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel>
+                              Domain Availability
+                            </FormLabel>
+                            <FormDescription>
+                              Optimize names for .com availability—this may take a bit longer
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
                         </FormItem>
                       )}
                     />

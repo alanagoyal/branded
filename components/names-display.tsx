@@ -699,7 +699,7 @@ export function NamesDisplay({
                         </>
                       )}
                     </Button>
-                    <Button
+                    {isOwner && <Button
                       onClick={() =>
                         user
                           ? toggleFavoriteName(name)
@@ -718,7 +718,7 @@ export function NamesDisplay({
                           <span className="ml-2">Add to favorites</span>
                         </>
                       )}
-                    </Button>
+                    </Button>}
                   </div>
                 </CardContent>
               </Card>
