@@ -1,3 +1,4 @@
+import { Icons } from "@/components/icons";
 import { NamesTable } from "@/components/names-table";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
@@ -28,21 +29,20 @@ export default async function Favorites() {
     }
   }
 
-  return (
+  return namesList && Object.keys(namesList).length > 0 ? (
     <div className="w-full px-4 flex justify-center items-center flex-col">
       <h1 className="text-2xl font-bold mb-4">Favorites</h1>
       <div className="min-h-screen">
-        {namesList && Object.keys(namesList).length > 0 ? (
-          <NamesTable namesList={namesList} user={user} />
-        ) : (
-          <>
-            <p className="text-base pt-4">You haven&apos;t favorited any names yet</p>
-            <Link className="flex justify-center pt-2" href="/new">
-              <Button variant="ghost">Get Started</Button>
-            </Link>{" "}
-          </>
-        )}
+        <NamesTable namesList={namesList} user={user} />
       </div>
+    </div>
+  ) : (
+    <div className="w-full px-4 flex justify-center items-center flex-col min-h-screen">
+      <Icons.favorite style={{ width: '20px', height: '20px', marginBottom: '16px' }} />
+      <h1 className="text-2xl font-bold mb-4">No favorites to show</h1>
+      <Link className="flex justify-center pt-2" href="/new">
+        <Button variant="outline">Get Started</Button>
+      </Link>
     </div>
   );
 }
