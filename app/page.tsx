@@ -35,7 +35,7 @@ export default async function Home() {
       role: "Founder",
       quote: (
         <div className="flex flex-row items-stretch">
-          <div className="flex w-2/3 items-center justify-center">
+          <div className="flex w-full sm:w-2/3 items-center justify-center">
             &quot;I used @alanaagoyal&apos;s AI-based brand generation tool and
             it&apos;s shockingly good.
             <br />
@@ -45,7 +45,7 @@ export default async function Home() {
             world.&quot;
           </div>
           <div
-            className="flex w-1/3 items-center justify-center mx-4"
+            className="flex sm:w-1/3 items-center justify-center mx-4 hidden sm:flex"
             style={{ marginTop: "-20px" }}
           >
             <img
