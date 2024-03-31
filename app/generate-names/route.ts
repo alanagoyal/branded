@@ -13,9 +13,7 @@ const openai = wrapOpenAI(
 
 function cleanNames(names: string[]): string[] {
   return names.map(name => {
-    // Remove any leading numbers and periods, trim spaces
     const nameNoNumber = name.includes('.') ? name.split('. ')[1].trim() : name.trim();
-    // Remove any content in parentheses, trim spaces again
     const nameCleaned = nameNoNumber.split('(')[0].trim();
     return nameCleaned;
   });
@@ -45,7 +43,7 @@ export async function POST(req: Request, res: NextResponse) {
     let namesFound = 0;
     let attempts = 0;
     const validNames: string[] = [];
-    const previousNames: string[] = []; // Store cleaned names separately
+    const previousNames: string[] = []; 
 
 
     while (namesFound < 3 && attempts < 3) {
@@ -53,10 +51,6 @@ export async function POST(req: Request, res: NextResponse) {
       const output = await traced(
         async (span) => {
           let userMessageContent = `Please provide me with 3 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
-
-          if (previousNames) {
-            userMessageContent += `The names I have already found are ${previousNames.join(", ")}. Please ensure the new names are not in this list.`;
-          }
 
           if (style !== "any") {
             if (style === "one_word") {
@@ -118,9 +112,14 @@ export async function POST(req: Request, res: NextResponse) {
                 userMessageContent += `Each name should be a literary reference related to "${wordToInclude}". For example 'Palantir' is a 'seeing-stone' from Lord of the Rings. `;
               } else {
                 userMessageContent +=
-                  "Each name should be inspired by a historical reference or figure. For example 'Palantir' or 'Anduril' are references from Lord of the Rings. ";
+                  "Each name should be inspired by a literary reference or figure. For example 'Palantir' or 'Anduril' are references from Lord of the Rings. ";
               }
             }
+
+            if (previousNames) {
+              userMessageContent += `The names I have already found are ${previousNames.join(", ")}. Please ensure the new names are not in this list. `;
+            }
+
           }
 
           userMessageContent +=
