@@ -89,7 +89,10 @@ export default async function Home() {
           &quot;I love how Alana builds tools that not only her portfolio
           companies but anyone can use. Namebase is a great example of a simple
           idea to help come up with one of the most critical parts of your
-          company: its name. Namestorming with AI gives you lots of interesting
+          company: its name. 
+          <br />
+          <br />
+          Namestorming with AI gives you lots of interesting
           ideas, and you can make a logo and get your domain too!&quot;
         </>
       ),
@@ -150,7 +153,6 @@ export default async function Home() {
             <CarouselContent>
               {customerQuotes.map((customerQuote, index) => (
                 <CarouselItem key={index}>
-                  <div className="p-1">
                     <Card className="p-4 shadow-lg rounded-lg">
                       <CardContent>
                         <a
@@ -178,7 +180,6 @@ export default async function Home() {
                         </div>
                       </CardContent>
                     </Card>
-                  </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
