@@ -409,28 +409,52 @@ grant truncate on table "public"."profiles" to "service_role";
 
 grant update on table "public"."profiles" to "service_role";
 
-create policy "All users can do everything"
+create policy "All actions based on user_id"
 on "public"."domains"
 as permissive
 for all
 to public
-using (true);
+using ((auth.uid() = created_by));
 
 
-create policy "All users can do everything"
+create policy "All actions based on user_id"
 on "public"."logos"
 as permissive
 for all
 to public
-using (true);
+using ((auth.uid() = created_by));
 
 
-create policy "All users can do everything"
+create policy "Delete based on user_id"
 on "public"."names"
 as permissive
-for all
+for delete
+to public
+using ((auth.uid() = created_by));
+
+
+create policy "Insert based on user_id"
+on "public"."names"
+as permissive
+for insert
+to public
+with check ((auth.uid() = created_by));
+
+
+create policy "Read for anyone"
+on "public"."names"
+as permissive
+for select
 to public
 using (true);
+
+
+create policy "Update based on user_id"
+on "public"."names"
+as permissive
+for update
+to public
+using ((auth.uid() = created_by));
 
 
 create policy "All users can do everything"
@@ -441,12 +465,20 @@ to public
 using (true);
 
 
-create policy "All users can do everything"
+create policy "All actions based on user_id"
 on "public"."one_pagers"
 as permissive
 for all
 to public
-using (true);
+using ((auth.uid() = created_by));
+
+
+create policy "Enable delete for users based on user_id"
+on "public"."profiles"
+as permissive
+for delete
+to public
+using ((auth.uid() = id));
 
 
 create policy "Enable insert for users based on user_id"
@@ -454,24 +486,24 @@ on "public"."profiles"
 as permissive
 for insert
 to public
-with check (true);
+with check ((auth.uid() = id));
 
 
-create policy "Enable read access for all users"
+create policy "Enable read access based on user_id"
 on "public"."profiles"
 as permissive
 for select
 to public
-using (true);
+using ((auth.uid() = id));
 
 
-create policy "Enable update for users based on email"
+create policy "Enable update for users based on user_id"
 on "public"."profiles"
 as permissive
 for update
 to public
-using (((auth.jwt() ->> 'email'::text) = email))
-with check (((auth.jwt() ->> 'email'::text) = email));
+using ((auth.uid() = id))
+with check ((auth.uid() = id));
 
 
 
