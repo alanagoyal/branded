@@ -37,9 +37,14 @@ export default async function Favorites() {
       </div>
     </div>
   ) : (
-    <div className="w-full px-4 flex justify-center items-center flex-col min-h-screen">
-      <Icons.favorite style={{ width: '20px', height: '20px', marginBottom: '16px' }} />
-      <h1 className="text-2xl font-bold mb-4">No favorites to show</h1>
+    <div
+      className="w-full px-4 flex justify-center items-center flex-col min-h-screen"
+      style={{ marginTop: "-100px" }}
+    >
+      <Icons.favorite
+        style={{ width: "20px", height: "20px", marginBottom: "16px" }}
+      />
+      <h1 className="text-2xl text-center font-bold mb-4">You haven&apos;t favorited <br /> any names yet</h1>
       <Link className="flex justify-center pt-2" href="/new">
         <Button variant="outline">Get Started</Button>
       </Link>
