@@ -15,13 +15,13 @@ import { useEffect, useState } from "react";
 import { toast } from "./ui/use-toast";
 import React from "react";
 import Link from "next/link";
+import Image from 'next/image';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   Carousel,
@@ -30,6 +30,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "./ui/carousel";
+import { useRouter } from "next/navigation";
+import { ToastAction } from "./ui/toast";
 
 export function NamesDisplay({
   namesList,
@@ -38,6 +40,7 @@ export function NamesDisplay({
   namesList: any;
   user: any;
 }) {
+  const router = useRouter();
   const supabase = createClient();
   const [processingDomains, setProcessingDomains] = useState<string[]>([]);
   const [processingNpm, setProcessingNpm] = useState<string[]>([]);
@@ -577,139 +580,154 @@ export function NamesDisplay({
       });
   };
 
+  const handleActionForUnauthenticatedUser = (actionType: string) => {
+    toast({
+      title: "Uh oh! You need an account",
+      description: `In order to ${actionType} this name, please sign up for a free account.`,
+      action: (
+        <ToastAction onClick={() => router.push(signUpLink)} altText="Sign up">
+          Sign up
+        </ToastAction>
+      ),
+    });
+    return;
+  };
+
   return (
     <div>
-      {user ? (
-        <Carousel>
-          <CarouselContent>
-            {Object.keys(namesList).map((name, index) => (
-              <CarouselItem key={index} className="h-auto">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-center">{name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col space-y-2">
-                      <Button
-                        variant="ghost"
-                        disabled={processingDomains.includes(name)}
-                        onClick={() => findDomainNames(name)}
-                      >
-                        {processingDomains.includes(name) ? (
-                          <Icons.spinner />
-                        ) : (
-                          <>
-                            <Icons.domain />
-                            <span className="ml-2">
-                              Find available domain names
-                            </span>
-                          </>
-                        )}
-                      </Button>
-                      {domainResults[name] &&
-                        Object.keys(domainResults).length > 0 &&
-                        domainResults[name].map((result, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center justify-center w-full"
-                          >
-                            <Link
-                              href={result.purchaseLink}
-                              target="_blank"
-                              className="text-sm cursor-pointer"
-                            >
-                              {result.domain}
-                            </Link>
-                          </div>
-                        ))}
-                      <Button
-                        variant="ghost"
-                        disabled={processingLogo.includes(name)}
-                        onClick={() => generateLogo(name)}
-                      >
-                        {processingLogo.includes(name) ? (
-                          <Icons.spinner />
-                        ) : (
-                          <>
-                            <Icons.generate />
-                            <span className="ml-2">Generate a logo</span>
-                          </>
-                        )}
-                      </Button>
-                      {logoResults[name] && (
+      <Carousel>
+        <CarouselContent>
+          {Object.keys(namesList).map((name, index) => (
+            <CarouselItem key={index} className="h-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-center">{name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col space-y-2">
+                    <Button
+                      variant="ghost"
+                      disabled={processingDomains.includes(name)}
+                      onClick={() =>
+                        user
+                          ? findDomainNames(name)
+                          : handleActionForUnauthenticatedUser(
+                              "find available domain names for"
+                            )
+                      }
+                    >
+                      {processingDomains.includes(name) ? (
+                        <Icons.spinner />
+                      ) : (
+                        <>
+                          <Icons.domain />
+                          <span className="ml-2">
+                            Find available domain names
+                          </span>
+                        </>
+                      )}
+                    </Button>
+                    {domainResults[name] &&
+                      Object.keys(domainResults).length > 0 &&
+                      domainResults[name].map((result, idx) => (
                         <div
+                          key={idx}
                           className="flex items-center justify-center w-full"
                         >
                           <Link
-                            href={logoResults[name]}
+                            href={result.purchaseLink}
                             target="_blank"
-                            className="cursor-pointer"
+                            className="text-sm cursor-pointer"
                           >
-                            <Image
-                              src={logoResults[name]}
-                              alt={name}
-                              width={200}
-                              height={200}
-                            />
+                            {result.domain}
                           </Link>
                         </div>
+                      ))}
+                    <Button
+                      variant="ghost"
+                      disabled={processingLogo.includes(name)}
+                      onClick={() =>
+                        user
+                          ? generateLogo(name)
+                          : handleActionForUnauthenticatedUser(
+                              "generate a logo for"
+                            )
+                      }
+                    >
+                      {processingLogo.includes(name) ? (
+                        <Icons.spinner />
+                      ) : (
+                        <>
+                          <Icons.generate />
+                          <span className="ml-2">Generate a logo</span>
+                        </>
                       )}
-                      <Button
-                        variant="ghost"
-                        disabled={processingOnePager.includes(name)}
-                        onClick={() => createOnePager(name)}
-                      >
-                        {processingOnePager.includes(name) ? (
-                          <Icons.spinner />
-                        ) : (
-                          <>
-                            <Icons.onePager />
-                            <span className="ml-2">Generate a one-pager</span>
-                          </>
-                        )}
-                      </Button>
-                      {isOwner && (
-                        <Button
-                          onClick={() => toggleFavoriteName(name)}
-                          variant="ghost"
+                    </Button>
+                    {logoResults[name] && (
+                      <div className="flex items-center justify-center w-full">
+                        <Link
+                          href={logoResults[name]}
+                          target="_blank"
+                          className="cursor-pointer"
                         >
-                          {favoritedNames[name] ? (
-                            <>
-                              <Icons.unfavorite />{" "}
-                              <span className="ml-2">
-                                Remove from favorites
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <Icons.favorite />
-                              <span className="ml-2">Add to favorites</span>
-                            </>
-                          )}
-                        </Button>
+                          <Image
+                            src={logoResults[name]}
+                            alt={name}
+                            width={200}
+                            height={200}
+                          />
+                        </Link>
+                      </div>
+                    )}
+                    <Button
+                      variant="ghost"
+                      disabled={processingOnePager.includes(name)}
+                      onClick={() =>
+                        user
+                          ? createOnePager(name)
+                          : handleActionForUnauthenticatedUser(
+                              "generate a one-pager for"
+                            )
+                      }
+                    >
+                      {processingOnePager.includes(name) ? (
+                        <Icons.spinner />
+                      ) : (
+                        <>
+                          <Icons.onePager />
+                          <span className="ml-2">Generate a one-pager</span>
+                        </>
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-      ) : (
-        <div className="space-y-2">
-          {Object.keys(namesList).map((name, index) => (
-            <Card
-              key={index}
-              className="space-y-2 cursor-pointer"
-              onClick={() => copyToClipboard(name)}
-            >
-              <CardHeader className="font-bold text-center">{name}</CardHeader>
-            </Card>
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        user
+                          ? toggleFavoriteName(name)
+                          : handleActionForUnauthenticatedUser("favorite")
+                      }
+                      variant="ghost"
+                    >
+                      {favoritedNames[name] ? (
+                        <>
+                          <Icons.unfavorite />
+                          <span className="ml-2">Remove from favorites</span>
+                        </>
+                      ) : (
+                        <>
+                          <Icons.favorite />
+                          <span className="ml-2">Add to favorites</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
           ))}
-        </div>
-      )}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
       {!user && (
         <div className="py-2 text-sm text-center text-muted-foreground">
           <a href={signUpLink} className="underline">

@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,7 +17,6 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
-import { NamesTable } from "./names-table";
 import { createClient } from "@/utils/supabase/client";
 import {
   Select,
@@ -29,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import Link from "next/link";
 import { Slider } from "./ui/slider";
 import { Icons } from "./icons";
 import {
@@ -177,7 +174,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
         if (names!.length >= 6) {
           toast({
-            title: "Uh oh! Out of generations.",
+            title: "Uh oh! Out of generations",
             description:
               "You've reached your daily limit for name generations. Sign up for an account to continue.",
             action: (
