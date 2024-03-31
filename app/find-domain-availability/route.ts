@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const name = req.nextUrl.searchParams.get("query")?.toLowerCase();
+  const optimizeForCom = req.nextUrl.searchParams.has("optimizeForCom");
 
   if (!name) {
     return new NextResponse(
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const tlds = [
+  let tlds = optimizeForCom ? [".com"] : [
     ".com",
     ".ai",
     ".io",
@@ -50,11 +51,17 @@ export async function GET(req: NextRequest) {
 
       if (data.domain_registered.toLowerCase() === "no") {
         availabilityResults.push({ domain, available: true });
+
+        // If optimize for .com is on and we find a .com domain is available, break early
+        if (optimizeForCom && domain.endsWith('.com')) {
+          break;
+        }
       } else {
         availabilityResults.push({ domain, available: false });
       }
 
-      if (availabilityResults.filter(result => result.available).length === 3) {
+      // Limit results to 3 available domains if not optimizing for .com
+      if (!optimizeForCom && availabilityResults.filter(result => result.available).length === 3) {
         break;
       }
     } catch (error) {

@@ -74,6 +74,7 @@ const formSchema = z.object({
       "any",
     ])
     .optional(),
+  dotComOptimization: z.boolean().optional(),
 });
 
 export function NameGenerator({ user, names }: { user: any; names: any }) {
@@ -100,6 +101,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       style: names[0].word_style,
       minLength: names[0].min_length,
       maxLength: names[0].max_length,
+      dotComOptimization: false,
     };
   } else {
     defaultValues = {
@@ -109,6 +111,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       style: "any",
       minLength: 5,
       maxLength: 10,
+      dotComOptimization: false,
     };
   }
 
@@ -204,6 +207,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           wordToInclude: values.wordToInclude,
           wordPlacement: values.wordPlacement,
           style: values.style,
+          dotComOptimization: values.dotComOptimization,
         }),
       });
 
@@ -500,6 +504,24 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                     />
                   </div>
                 </div>
+              </div>
+              <div className="flex h-full flex-col space-y-4">
+                <FormField
+                  control={form.control}
+                  name="dotComOptimization"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <label>
+                          <input
+                            type="checkbox"
+                            {...field}
+                          /> Optimize for .com domain availability
+                        </label>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
               {isScreenWide && !names ? (
                 <div className="flex flex-col space-y-2">
