@@ -4,13 +4,13 @@ export default function SiteFooter() {
       {" "}
       <div className="text-center text-sm mb-2">
         <p>
-          Built with <span className="text-red-500">❤️</span> by{" "}
+          built with <span className="text-red-500">❤️</span> by{" "}
           <a
             href="https://twitter.com/alanaagoyal"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Alana Goyal
+            basecase
           </a>{" "}
         </p>
       </div>

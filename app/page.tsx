@@ -14,7 +14,7 @@ export default async function Home() {
   const sections = [
     {
       title: "Startup Names",
-      subtitle: `"Deel", "Lattice", "Samsara" - we love 'em, but we don't know how to choose them. Namebase helps you go from idea to startup name in one click.`,
+      subtitle: `"Deel", "Lattice", "Samsara"—we love 'em, but we don't know how to choose 'em. Namebase helps you go from idea to startup name in one click.`,
     },
     {
       title: "Domain Availability",
@@ -22,7 +22,7 @@ export default async function Home() {
     },
     {
       title: "Branded Content",
-      subtitle: `Use Namebase to generate custom branded content - including logos and one-pagers - for your startup without the headaches.`,
+      subtitle: `Use Namebase to generate custom branded content—including logos and one-pagers—for your startup without the headaches.`,
     },
   ];
 
@@ -36,16 +36,22 @@ export default async function Home() {
       quote: (
         <div className="flex flex-row items-stretch">
           <div className="flex w-2/3 items-center justify-center">
-            &quot;I used @alanaagoyal&apos;s AI-based brand generation tool and it&apos;s shockingly good.
+            &quot;I used @alanaagoyal&apos;s AI-based brand generation tool and
+            it&apos;s shockingly good.
             <br />
             <br />
-            It coined &apos;brainy&apos; and generated this cool logo in a couple seconds 😁. Quite the head-start to get your idea into the world.&quot;
+            It coined &apos;brainy&apos; and generated this cool logo in a
+            couple seconds 😁. Quite the head-start to get your idea into the
+            world.&quot;
           </div>
-          <div className="flex w-1/3 items-center justify-center">
+          <div
+            className="flex w-1/3 items-center justify-center mx-4"
+            style={{ marginTop: "-20px" }}
+          >
             <img
               src="brainy.png"
               alt="Brainy"
-              className="object-cover w-32 h-32"
+              className="object-cover w-44 h-44 rounded-md"
             />
           </div>
         </div>
@@ -61,8 +67,8 @@ export default async function Home() {
         <>
           &quot;Using Namebase was a game-changer for my startup. When my
           brother and I decided to start a new company, we didn&apos;t want to
-          deal with the headaches of coming up with a name or logo - we wanted
-          to focus on building a great product for our customers. Thanks to
+          deal with the headaches of coming up with a name or logo—we wanted to
+          focus on building a great product for our customers. Thanks to
           Namebase, we could do just that. With a few clicks, we had a great
           name and logo in no time.
           <br />
@@ -80,13 +86,11 @@ export default async function Home() {
       role: "Founder",
       quote: (
         <>
-          &quot;Startups live and die by their brand identity. When starting
-          Diagram, we knew we wanted to build a brand that people loved.
-          Namebase is the perfect tool for founders who want to do the same
-          without spending days or weeks brainstorming, searching for available
-          domains, and then breaking the bank on a professional logo. I&apos;m a
-          huge fan of Namebase and will definitely be using it for side
-          projects.&quot;
+          &quot;I love how Alana builds tools that not only her portfolio
+          companies but anyone can use. Namebase is a great example of a simple
+          idea to help come up with one of the most critical parts of your
+          company: its name. Namestorming with AI gives you lots of interesting
+          ideas, and you can make a logo and get your domain too!&quot;
         </>
       ),
     },
