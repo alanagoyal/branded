@@ -14,7 +14,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import ThemeToggle from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect, useState } from "react";
 
 export default function UserNav({ user }: any) {
@@ -101,8 +101,9 @@ export default function UserNav({ user }: any) {
               <span>Support</span>
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem className="cursor-pointer flex items-center justify-between">
             <ThemeToggle />
+            <span className="ml-2">Switch theme</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
