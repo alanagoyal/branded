@@ -15,14 +15,17 @@ export default async function Home() {
     {
       title: "Startup Names",
       subtitle: `"Deel", "Lattice", "Samsara"—we love 'em, but we don't know how to choose 'em. Namebase helps you go from idea to startup name in one click.`,
+      image: "names.gif",
     },
     {
       title: "Domain Availability",
       subtitle: `Tired of being stuck with a crappy, unmemorable domain name? Secure the perfect domain name for your startup in seconds with our AI-assisted domain availability lookup.`,
+      image: "domain.png",
     },
     {
       title: "Branded Content",
       subtitle: `Use Namebase to generate custom branded content—including logos and one-pagers—for your startup without the headaches.`,
+      image: "one_pager.png",
     },
   ];
 
@@ -65,12 +68,11 @@ export default async function Home() {
       role: "Co-Founder",
       quote: (
         <>
-          &quot;Using Namebase was a game-changer for my startup. When my
-          brother and I decided to start a new company, we didn&apos;t want to
-          deal with the headaches of coming up with a name or logo—we wanted to
-          focus on building a great product for our customers. Thanks to
-          Namebase, we could do just that. With a few clicks, we had a great
-          name and logo in no time.
+          &quot;When we started our company we knew we needed a simple,
+          memorable name that built trust with our customers. Before Namebase, we
+          spent hours coming up with names and looking up domain availability.
+          With Namebase we found alpharun.com with a click, and haven&apos;t looked
+          back since.
           <br />
           <br />
           The process was seamless, and the results were beyond my expectations.
@@ -89,11 +91,11 @@ export default async function Home() {
           &quot;I love how Alana builds tools that not only her portfolio
           companies but anyone can use. Namebase is a great example of a simple
           idea to help come up with one of the most critical parts of your
-          company: its name. 
+          company: its name.
           <br />
           <br />
-          Namestorming with AI gives you lots of interesting
-          ideas, and you can make a logo and get your domain too!&quot;
+          Namestorming with AI gives you lots of interesting ideas, and you can
+          make a logo and get your domain too!&quot;
         </>
       ),
     },
@@ -144,6 +146,11 @@ export default async function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{section.subtitle}</p>
+                <img
+                  src={section.image}
+                  alt={section.title}
+                  className="mt-4 w-full"
+                />
               </CardContent>
             </Card>
           ))}
@@ -153,33 +160,31 @@ export default async function Home() {
             <CarouselContent>
               {customerQuotes.map((customerQuote, index) => (
                 <CarouselItem key={index}>
-                    <Card className="p-4 shadow-lg rounded-lg">
-                      <CardContent>
-                        <a
-                          href={customerQuote.companyUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full flex items-center"
-                        >
-                          <img
-                            src={customerQuote.avatar}
-                            alt="Customer avatar"
-                            className="w-16 h-16 rounded-full mr-4"
-                          />
-                          <div className="flex flex-col">
-                            <h3 className="text-xl font-bold">
-                              {customerQuote.name}
-                            </h3>
-                            <p className="text-sm">
-                              {customerQuote.role}, {customerQuote.companyName}
-                            </p>
-                          </div>
-                        </a>
-                        <div className="mt-4 text-sm">
-                          {customerQuote.quote}
+                  <Card className="p-4 shadow-lg rounded-lg">
+                    <CardContent>
+                      <a
+                        href={customerQuote.companyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center"
+                      >
+                        <img
+                          src={customerQuote.avatar}
+                          alt="Customer avatar"
+                          className="w-16 h-16 rounded-full mr-4"
+                        />
+                        <div className="flex flex-col">
+                          <h3 className="text-xl font-bold">
+                            {customerQuote.name}
+                          </h3>
+                          <p className="text-sm">
+                            {customerQuote.role}, {customerQuote.companyName}
+                          </p>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </a>
+                      <div className="mt-4 text-sm">{customerQuote.quote}</div>
+                    </CardContent>
+                  </Card>
                 </CarouselItem>
               ))}
             </CarouselContent>
