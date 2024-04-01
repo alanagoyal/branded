@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const supabase = createClient();
@@ -45,7 +46,10 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const idString = Object.values(namesList).join(",");
 
-  const signUpLink = idString ? `/signup?ids=${idString.replace(/,/g, "")}` : "/signup";
+  const signUpLink = idString
+    ? `/signup?ids=${idString.replace(/,/g, "")}`
+    : "/signup";
+  const router = useRouter();
 
   useEffect(() => {
     async function getOwner() {
@@ -99,13 +103,14 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
       const { error } = await supabase
         .from("names")
         .update({ favorited: !isFavorited })
-        .eq("id", namesList[name])
+        .eq("id", namesList[name]);
 
       toast({
         description: isFavorited
           ? "Removed from favorites"
           : "Added to favorites",
       });
+      router.refresh();
     } catch (error) {
       console.error(error);
     }
@@ -778,7 +783,8 @@ export function NamesTable({ namesList, user }: { namesList: any; user: any }) {
           <a href={signUpLink} className="underline">
             Create an account
           </a>{" "}
-          to see available domain names, create a unique logo, and generate branded marketing materials for these names and more.
+          to see available domain names, create a unique logo, and generate
+          branded marketing materials for these names and more.
         </div>
       )}
     </div>
