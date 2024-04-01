@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { Icons } from "@/components/icons";
+import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
 import UserNav from "./user-nav";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export async function SiteHeader() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/">
-              <span className="text-2xl font-bold">namebase</span>
+              <Image src="/wordmark.png" alt="namebase" height={64} width={144} />
             </Link>
           </div>
           <div className="flex items-center">

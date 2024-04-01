@@ -36,7 +36,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta property="og:image" content="https://namebase.ai/og/" />
+        <meta property="og:image" content="/og.png" />
       </head>
       <body
         className={cn(
