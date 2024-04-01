@@ -18,8 +18,10 @@ export async function signup(formData: SignupFormData, idString: string, origin:
   })
 
   if (error) {
-    redirect('/error')
+    return { success: false, errorMessage: error.message };
   }
 
   revalidatePath('/', 'layout')
+  return { success: true };
 }
+

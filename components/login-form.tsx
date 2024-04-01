@@ -16,15 +16,21 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "./ui/use-toast";
 
 export interface LoginFormData {
   email: string;
   password: string;
 }
 
-interface LoginFormProps {
-  login: (formData: LoginFormData) => Promise<void>;
+interface LoginResponse {
+  errorMessage?: string;
 }
+
+interface LoginFormProps {
+  login: (formData: LoginFormData) => Promise<LoginResponse>;
+}
+
 const formSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6, {
@@ -42,7 +48,23 @@ export function LoginForm({ login }: LoginFormProps) {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    await login(data);
+    try {
+      const response = await login(data);
+      if (response && response.errorMessage) {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Error signing in",
+          description: response.errorMessage,
+        });
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Login failed",
+        description: "An unexpected error occurred. Please try again later.",
+      });
+    }
   };
 
   return (

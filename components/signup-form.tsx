@@ -23,8 +23,17 @@ export interface SignupFormData {
   password: string;
 }
 
+interface SignupResponse {
+  success: boolean;
+  errorMessage?: string;
+}
+
 interface SignupFormProps {
-  signup: (formData: SignupFormData, idString: string, origin: string) => Promise<void>;
+  signup: (
+    formData: SignupFormData,
+    idString: string,
+    origin: string
+  ) => Promise<SignupResponse>;
   idString: string;
 }
 
@@ -37,12 +46,12 @@ const formSchema = z.object({
 
 export function SignupForm({ signup, idString }: SignupFormProps) {
   const supabase = createClient();
-  const router = useRouter()
-  const [origin, setOrigin] = useState<string>("")
+  const router = useRouter();
+  const [origin, setOrigin] = useState<string>("");
 
   useEffect(() => {
-    setOrigin(window.location.origin)
-  }, [])
+    setOrigin(window.location.origin);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,23 +62,27 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
   });
 
   const onSubmit = async (data: SignupFormData) => {
-    const { data: emailMatch, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("email", form.getValues("email"));
-
-    if (emailMatch && emailMatch.length > 0) {
+    try {
+      const response = await signup(data, idString, origin);
+      if (response && !response.success) {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Error signing up",
+          description: response.errorMessage,
+        });
+      } else {
+        toast({
+          title: "Confirm your account",
+          description: `An email has been sent to ${data.email}`,
+        });
+      }
+    } catch (error) {
+      console.error("Sign up failed:", error);
       toast({
         variant: "destructive",
-        title: "Account already exists",
-        description: "Please sign in or sign up with another email",
+        title: "Uh oh! Sign up failed",
+        description: "An unexpected error occurred. Please try again later.",
       });
-    } else {
-      toast({
-        title: "Confirm your account",
-        description: `An email has been sent to ${data.email}`,
-      });
-      await signup(data, idString, origin);
     }
   };
 
