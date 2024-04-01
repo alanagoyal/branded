@@ -45,7 +45,6 @@ export default async function RootLayout({
           property="twitter:image"
           content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712009452/i1600x839-BQQvTJy8t3Pk_grpcmh.png"
         ></meta>
-        <meta property="og:title" content="Namebase"></meta>
         <meta
           property="og:description"
           content="Name your startup, secure the domain, and brand it—all in one place"
