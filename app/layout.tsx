@@ -26,7 +26,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   const supabase = createClient();
 
   const {
@@ -36,7 +35,25 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta property="og:image" content="/og.png" />
+        <meta
+          property="og:image"
+          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712009452/i1600x839-BQQvTJy8t3Pk_grpcmh.png"
+        />
+        <meta
+          property="twitter:image"
+          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712009452/i1600x839-BQQvTJy8t3Pk_grpcmh.png"
+        ></meta>
+        <meta property="twitter:card" content="summary_large_image"></meta>
+        <meta
+          property="twitter:description"
+          content="Name your startup, secure the domain, and brand it—all in one place"
+        ></meta>
+        <meta
+          property="twitter:title"
+          content="Namebase"
+        ></meta>
+
+        <meta property="og:description" content="Name your startup, secure the domain, and brand it—all in one place" />
       </head>
       <body
         className={cn(
