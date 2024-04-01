@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
 import { SignupFormData } from '@/components/signup-form';
@@ -17,7 +16,9 @@ export async function signup(formData: SignupFormData, idString: string, origin:
     }
   })
 
+  console.log("in signup action")
   if (error) {
+    console.log(error)
     return { success: false, errorMessage: error.message };
   }
 

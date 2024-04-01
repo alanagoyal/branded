@@ -52,7 +52,6 @@ export function LoginForm({ login }: LoginFormProps) {
       const response = await login(data);
       if (response && response.errorMessage) {
         toast({
-          variant: "destructive",
           title: "Uh oh! Error signing in",
           description: response.errorMessage,
         });
@@ -60,7 +59,6 @@ export function LoginForm({ login }: LoginFormProps) {
     } catch (error) {
       console.error("Login failed:", error);
       toast({
-        variant: "destructive",
         title: "Uh oh! Login failed",
         description: "An unexpected error occurred. Please try again later.",
       });

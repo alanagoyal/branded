@@ -17,6 +17,7 @@ import { toast } from "./ui/use-toast";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ToastAction } from "./ui/toast";
 
 export interface SignupFormData {
   email: string;
@@ -65,11 +66,26 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
     try {
       const response = await signup(data, idString, origin);
       if (response && !response.success) {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Error signing up",
-          description: response.errorMessage,
-        });
+        if (response.errorMessage === "User already registered") {
+          console.log(response.errorMessage)
+          toast({
+            title: "Account already exists",
+            description: "Please sign in or sign up with another email",
+            action: (
+              <ToastAction
+                onClick={() => router.push("/login")}
+                altText="Sign in"
+              >
+                Sign in
+              </ToastAction>
+            ),
+          });
+        } else {
+          toast({
+            title: "Uh oh! Error signing up",
+            description: response.errorMessage,
+          });
+        }
       } else {
         toast({
           title: "Confirm your account",
@@ -79,7 +95,6 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
     } catch (error) {
       console.error("Sign up failed:", error);
       toast({
-        variant: "destructive",
         title: "Uh oh! Sign up failed",
         description: "An unexpected error occurred. Please try again later.",
       });
