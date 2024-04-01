@@ -229,7 +229,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           description: "Error generating startup names",
         });
         throw new Error("Failed to generate startup names");
-      }  
+      }
 
       const ids: string[] = [];
       for (const name of data.response) {
@@ -509,11 +509,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
-                            <FormLabel>
-                              Domain Availability
-                            </FormLabel>
+                            <FormLabel>Domain Availability</FormLabel>
                             <FormDescription>
-                              Optimize names for .com availability—this may take a bit longer and generate fewer names
+                              Optimize names for .com availability—this may take
+                              a bit longer and generate fewer names
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -528,57 +527,23 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                   </div>
                 </div>
               </div>
-              {isScreenWide && !names ? (
-                <div className="flex flex-col space-y-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button type="submit" disabled={isLoading}>
-                        {isLoading ? <Icons.spinner /> : "Go"}
-                      </Button>
-                    </DialogTrigger>
-                    {Object.keys(namesList).length > 0 && (
-                      <DialogContent className="flex flex-col">
-                        <DialogHeader>
-                          <DialogTitle>Your Names</DialogTitle>
-                          <DialogDescription>
-                            These are the names we generated for you
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="flex-col space-y-4 sm:flex">
-                          <NamesDisplay namesList={namesList} user={user} />
-                        </div>
-                        <Share idString={idsList.join("")} />
-                      </DialogContent>
-                    )}
-                  </Dialog>
-                  <Button
-                    onClick={clear}
-                    className="w-full"
-                    type="button"
-                    variant="ghost"
-                  >
-                    Reset
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col space-y-2">
-                  <Button type="submit" disabled={isLoading} className="w-full">
-                    {isLoading ? <Icons.spinner /> : "Go"}
-                  </Button>
-                  <Button
-                    onClick={clear}
-                    className="w-full"
-                    type="button"
-                    variant="ghost"
-                  >
-                    Reset
-                  </Button>
-                </div>
-              )}
+              <div className="flex flex-col space-y-2">
+                <Button type="submit" disabled={isLoading} className="w-full">
+                  {isLoading ? <Icons.spinner /> : "Go"}
+                </Button>
+                <Button
+                  onClick={clear}
+                  className="w-full"
+                  type="button"
+                  variant="ghost"
+                >
+                  Reset
+                </Button>
+              </div>
             </div>
           </form>
         </Form>
-        {(names || !isScreenWide) && Object.keys(namesList).length > 0 && (
+        {Object.keys(namesList).length > 0 && (
           <div className="flex-col pt-4 space-y-4 sm:flex">
             <NamesDisplay namesList={namesList} user={user} />
             <Share idString={idsList.join("")} />
