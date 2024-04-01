@@ -67,7 +67,7 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
       const response = await signup(data, idString, origin);
       if (response && !response.success) {
         if (response.errorMessage === "User already registered") {
-          console.log(response.errorMessage)
+          console.log(response.errorMessage);
           toast({
             title: "Account already exists",
             description: "Please sign in or sign up with another email",
@@ -82,7 +82,7 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
           });
         } else {
           toast({
-            title: "Uh oh! Error signing up",
+            title: "Sign up failed",
             description: response.errorMessage,
           });
         }
@@ -95,7 +95,7 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
     } catch (error) {
       console.error("Sign up failed:", error);
       toast({
-        title: "Uh oh! Sign up failed",
+        title: "Sign up failed",
         description: "An unexpected error occurred. Please try again later.",
       });
     }

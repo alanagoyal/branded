@@ -52,14 +52,14 @@ export function LoginForm({ login }: LoginFormProps) {
       const response = await login(data);
       if (response && response.errorMessage) {
         toast({
-          title: "Uh oh! Error signing in",
+          title: "Login failed",
           description: response.errorMessage,
         });
       }
     } catch (error) {
       console.error("Login failed:", error);
       toast({
-        title: "Uh oh! Login failed",
+        title: "Login failed",
         description: "An unexpected error occurred. Please try again later.",
       });
     }

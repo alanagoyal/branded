@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
-import { Icons } from "@/components/icons";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
 import UserNav from "./user-nav";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export async function SiteHeader() {
   const supabase = createClient();
@@ -12,14 +11,20 @@ export async function SiteHeader() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
- 
+
   return (
     <nav>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/">
-              <Image src="/wordmark.png" alt="namebase" height={64} width={144} />
+              <Image
+                src="/wordmark.png"
+                alt="namebase"
+                width={196}
+                height={64}
+                priority
+              />
             </Link>
           </div>
           <div className="flex items-center">
@@ -28,7 +33,7 @@ export async function SiteHeader() {
             </div>
             <div className="items-center">
               {user ? (
-                <UserNav user={user}/>
+                <UserNav user={user} />
               ) : (
                 <Link href="login">
                   <Button className="ml-4">Log In</Button>
