@@ -14,6 +14,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import ThemeToggle from "@/components/theme-toggle";
 import { useEffect, useState } from "react";
 
 export default function UserNav({ user }: any) {
@@ -100,6 +101,9 @@ export default function UserNav({ user }: any) {
               <span>Support</span>
             </DropdownMenuItem>
           </Link>
+          <DropdownMenuItem className="cursor-pointer">
+            <ThemeToggle />
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
