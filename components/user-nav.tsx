@@ -1,6 +1,6 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { Heart, HelpCircle, LogOut, Plus, User } from "lucide-react";
+import { Heart, HelpCircle, LogOut, Plus, User, Sun } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -101,9 +101,12 @@ export default function UserNav({ user }: any) {
               <span>Support</span>
             </DropdownMenuItem>
           </Link>
-          <div className="block lg:hidden"> {/* Ensures mobile-only visibility */}
+          <div className="block lg:hidden"> {/* Mobile-only visibility */}
             <DropdownMenuItem className="w-full">
-              <ThemeToggle />
+              <div className="flex items-center">
+                <Sun className="mr-2 h-4 w-4" /> {/* Dummy icon for visual consistency */}
+                <ThemeToggle />
+              </div>
             </DropdownMenuItem>
           </div>
         </DropdownMenuGroup>
