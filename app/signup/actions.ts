@@ -16,6 +16,8 @@ export async function signup(formData: SignupFormData, idString: string, origin:
     }
   })
 
+  console.log(error)
+
   console.log("in signup action")
   if (error) {
     console.log(error)
