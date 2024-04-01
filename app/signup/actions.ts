@@ -20,9 +20,9 @@ export async function signup(formData: SignupFormData, idString: string, origin:
   if (error) {
     console.log(error)
     return { success: false, errorMessage: error.message };
+  } else {
+    revalidatePath('/', 'layout')
+    return { success: true };
   }
-
-  revalidatePath('/', 'layout')
-  return { success: true };
 }
 
