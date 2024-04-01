@@ -15,6 +15,7 @@ import {
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useEffect, useState } from "react";
+import { ThemeToggle } from './theme-toggle';
 
 export default function UserNav({ user }: any) {
   const router = useRouter();
@@ -100,6 +101,11 @@ export default function UserNav({ user }: any) {
               <span>Support</span>
             </DropdownMenuItem>
           </Link>
+          <div className="block lg:hidden"> {/* Ensures mobile-only visibility */}
+            <DropdownMenuItem className="w-full">
+              <ThemeToggle />
+            </DropdownMenuItem>
+          </div>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
