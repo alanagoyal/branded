@@ -1,5 +1,5 @@
 import React from 'react';
-import * as Icons from './icons';
+import * as Icons from '@/components/icons';
 
 const ThemeToggle = () => {
   const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
