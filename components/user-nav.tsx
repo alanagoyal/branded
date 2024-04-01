@@ -16,10 +16,12 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 export default function UserNav({ user }: any) {
   const router = useRouter();
   const [profileName, setProfileName] = useState("");
+  const { setTheme, theme } = useTheme();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -48,6 +50,8 @@ export default function UserNav({ user }: any) {
     router.push("/login");
     router.refresh();
   };
+
+  const handleThemeToggle = () => setTheme(theme === "light" ? "dark" : "light");
 
   return (
     <DropdownMenu>
@@ -102,8 +106,10 @@ export default function UserNav({ user }: any) {
             </DropdownMenuItem>
           </Link>
           <DropdownMenuItem className="cursor-pointer flex items-center justify-between">
-            <ThemeToggle />
-            <span className="ml-2">Switch theme</span>
+            <button onClick={handleThemeToggle} className="flex items-center w-full text-left">
+              <ThemeToggle />
+              <span className="ml-2">Switch theme</span>
+            </button>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
