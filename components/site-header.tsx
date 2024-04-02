@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import Image from "next/image";
+import { useTheme } from 'next-themes';
 import { createClient } from "@/utils/supabase/server";
 import UserNav from "./user-nav";
 import { Button } from "@/components/ui/button";
 
 export async function SiteHeader() {
+  const { theme } = useTheme();
+  const wordmarkSrc = theme === 'light' ? "/wordmark_light.png" : "/wordmark_dark.png";
+  
   const supabase = createClient();
 
   const {
@@ -19,7 +23,7 @@ export async function SiteHeader() {
           <div className="flex items-center">
             <Link href="/">
               <Image
-                src="/wordmark.png"
+                src={wordmarkSrc}
                 alt="namebase"
                 width={196}
                 height={64}
