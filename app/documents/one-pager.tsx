@@ -13,10 +13,10 @@ export function OnePager({
 }) {
   return (
     <Tailwind>
-      <div className="py-10 px-10">
+      <div className="py-4 px-4">
         <div className="flex justify-center">
           {logoUrl && (
-            <img src={logoUrl} alt="Logo" className="w-[400px] h-[400px]" />
+            <img src={logoUrl} alt="Logo" className="w-[256px] h-[256px]" />
           )}
         </div>
         <h2 className="font-bold text-xl text-center pt-4">{nameData.name}</h2>
