@@ -96,11 +96,20 @@ export function CommandMenu() {
     const { setTheme, theme } = useTheme();
     return (
       <CommandItem
-        icon={theme === 'light' ? Moon : Sun}
         onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
         title="Switch Theme"
       >
-        {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+        {theme === 'light' ? (
+          <>
+            <Moon className="mr-2 h-4 w-4" />
+            Dark Mode
+          </>
+        ) : (
+          <>
+            <Sun className="mr-2 h-4 w-4" />
+            Light Mode
+          </>
+        )}
       </CommandItem>
     );
   };
