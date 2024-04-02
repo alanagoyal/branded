@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import SiteFooter from "@/components/site-footer";
 import { CommandMenu } from "@/components/command-menu";
 import { createClient } from "@/utils/supabase/server";
+import { Analytics } from "@vercel/analytics/react"
+
 
 const inter = Inter({
   subsets: ["latin"],
@@ -74,6 +76,7 @@ export default async function RootLayout({
               <main className="flex-1">
                 <div className="flex flex-col items-center pt-10 py-2 max-w-5xl mx-auto">
                   {children}
+                  <Analytics />
                 </div>
               </main>
               <SiteFooter />
