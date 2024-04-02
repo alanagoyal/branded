@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { createClient } from "@/utils/supabase/client"; // Updated import path as per the instructions
+import { createClient } from "@/utils/supabase/client"; 
 import UserNav from "./user-nav";
 import { Button } from "@/components/ui/button";
 
