@@ -4,7 +4,7 @@ import { ThemeToggle } from "./theme-toggle";
 import Image from "next/image";
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/client"; // Updated import path as per the instructions
 import UserNav from "./user-nav";
 import { Button } from "@/components/ui/button";
 
