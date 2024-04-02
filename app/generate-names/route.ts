@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 import { init, initLogger, traced, wrapOpenAI } from "braintrust";
-export const maxDuration = 25;
+
+export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 const logger = initLogger({ projectName: "namebase" });
 const openai = wrapOpenAI(
@@ -159,9 +160,7 @@ export async function POST(req: Request, res: NextResponse) {
                 const isAvailable = await checkDomainAvailability(
                   `${name}.com`
                 );
-                console.log(`checking ${name}.com`);
                 if (isAvailable) {
-                  console.log(`${name} is available`);
                   validNames.push(name);
                   namesFound++;
                   break;
