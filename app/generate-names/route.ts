@@ -120,8 +120,6 @@ export async function POST(req: Request, res: NextResponse) {
           }
 
           if (tld) {
-            userMessageContent += "Please try to generate unique names that may have a .com domain available. ";
-
             if (previousNames) {
               userMessageContent += `Please exclude the following names: ${previousNames.join(
                 ", "
