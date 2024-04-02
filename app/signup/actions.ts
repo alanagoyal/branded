@@ -29,7 +29,7 @@ export async function signup(
     console.log("in data user exists thing");
     authError = {
       name: "AuthApiError",
-      message: "User already exists",
+      message: "User already registered",
     };
     return { success: false, errorMessage: authError?.message };
   } else if (error) {
