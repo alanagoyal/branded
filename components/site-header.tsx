@@ -19,7 +19,7 @@ export async function SiteHeader() {
           <div className="flex items-center">
             <Link href="/">
               <Image
-                src="/wordmark_pink.png"
+                src="/wordmark_purple.png"
                 alt="namebase"
                 width={196}
                 height={64}

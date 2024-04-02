@@ -1,8 +1,8 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 import { Heart, HelpCircle, LogOut, Plus, User } from "lucide-react";
-import { useTheme } from 'next-themes';
-import { Sun, Moon } from 'lucide-react';
+import { useTheme } from "next-themes";
+import { Sun, Moon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -58,7 +58,8 @@ export default function UserNav({ user }: any) {
           <Avatar className="h-8 w-8">
             <AvatarFallback
               style={{
-                background: "linear-gradient(135deg, #ffcc70 0%, #c850c0 100%)",
+                background:
+                  "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)",
               }}
             >
               {user.email?.charAt(0).toUpperCase()}
@@ -103,8 +104,16 @@ export default function UserNav({ user }: any) {
               <span>Support</span>
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuItem className="cursor-pointer" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} aria-label="Toggle theme">
-            {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" aria-hidden="true" /> : <Moon className="mr-2 h-4 w-4" aria-hidden="true" />}
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
+            )}
             <span>Switch Theme</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
