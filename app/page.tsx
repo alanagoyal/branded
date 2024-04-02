@@ -14,18 +14,18 @@ export default async function Home() {
   const sections = [
     {
       title: "Startup Names",
-      subtitle: `"Deel", "Lattice", "Samsara"—we love 'em, but we don't know how to choose 'em. Namebase helps you go from idea to startup name in one click.`,
+      subtitle: `Naming your startup is the first big decision you have to make as a founder. With Namebase, go from idea to iconic name in one click and get back to building.`,
       image: "names.gif",
     },
     {
       title: "Domain Availability",
-      subtitle: `Tired of being stuck with a crappy, unmemorable domain name? Secure the perfect domain name for your startup in seconds with our AI-assisted domain availability lookup.`,
-      image: "domain.png",
+      subtitle: `Secure the perfect domain name for your startup in seconds with our AI-assisted domain availability lookup—purpose-built to help you secure a memorable domain.`,
+      image: "domain_availability.png",
     },
     {
       title: "Branded Content",
       subtitle: `Use Namebase to generate custom branded content—including logos and one-pagers—for your startup without the headaches.`,
-      image: "one_pager.png",
+      image: "branded_content.png",
     },
   ];
 
@@ -138,18 +138,18 @@ export default async function Home() {
             <Card
               key={index}
               className={`flex flex-col w-full md:w-1/3 p-4 shadow-lg rounded-lg ${
-                index === 1 ? "md:mx-4 my-4 md:my-0" : "my-4 md:my-0"
+                index === 1 ? "md:mx-4 my-2 md:my-0" : "my-4 md:my-0"
               }`}
             >
               <CardHeader>
                 <CardTitle>{section.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm">{section.subtitle}</p>
+                <p className="text-sm h-26 overflow-hidden">{section.subtitle}</p>
                 <img
                   src={section.image}
                   alt={section.title}
-                  className="mt-4 w-full"
+                  className="mt-4 w-full rounded-md"
                 />
               </CardContent>
             </Card>
