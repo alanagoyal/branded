@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import Image from "next/image";
