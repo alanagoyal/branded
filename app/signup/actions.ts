@@ -26,7 +26,6 @@ export async function signup(
 
   // User exists, but is fake. See https://supabase.com/docs/reference/javascript/auth-signup
   if (data.user && data.user.identities && data.user.identities.length === 0) {
-    console.log("in data user exists thing");
     authError = {
       name: "AuthApiError",
       message: "User already registered",
