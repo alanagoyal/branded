@@ -8,7 +8,7 @@ import { SignupFormData } from '@/components/signup-form';
 export async function signup(formData: SignupFormData, idString: string, origin: string) {
   const supabase = createClient()
   const { email, password } = formData;
-  const { error } = await supabase.auth.signUp({
+  const foo = await supabase.auth.signUp({
     email, 
     password, 
     options: {
@@ -16,6 +16,9 @@ export async function signup(formData: SignupFormData, idString: string, origin:
     }
   })
 
+  const { error } = foo;
+
+  console.log("full response", foo)
   console.log(error)
 
   console.log("in signup action")
