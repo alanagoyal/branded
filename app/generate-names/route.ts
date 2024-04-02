@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 import { init, initLogger, traced, wrapOpenAI } from "braintrust";
-export const maxDuration = 25; 
-export const dynamic = 'force-dynamic';
+export const maxDuration = 25;
+export const dynamic = "force-dynamic";
 const logger = initLogger({ projectName: "namebase" });
 const openai = wrapOpenAI(
   new OpenAI({
@@ -12,9 +12,11 @@ const openai = wrapOpenAI(
 );
 
 function cleanNames(names: string[]): string[] {
-  return names.map(name => {
-    const nameNoNumber = name.includes('.') ? name.split('. ')[1].trim() : name.trim();
-    const nameCleaned = nameNoNumber.split('(')[0].trim();
+  return names.map((name) => {
+    const nameNoNumber = name.includes(".")
+      ? name.split(". ")[1].trim()
+      : name.trim();
+    const nameCleaned = nameNoNumber.split("(")[0].trim();
     return nameCleaned;
   });
 }
@@ -43,14 +45,13 @@ export async function POST(req: Request, res: NextResponse) {
     let namesFound = 0;
     let attempts = 0;
     const validNames: string[] = [];
-    const previousNames: string[] = []; 
-
+    const previousNames: string[] = [];
 
     while (namesFound < 3 && attempts < 3) {
       attempts++;
       const output = await traced(
         async (span) => {
-          let userMessageContent = `Please provide me with 3 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
+          let userMessageContent = `Please provide me with 5 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
 
           if (style !== "any") {
             if (style === "one_word") {
@@ -115,15 +116,19 @@ export async function POST(req: Request, res: NextResponse) {
                   "Each name should be inspired by a literary reference or figure. For example 'Palantir' or 'Anduril' are references from Lord of the Rings. ";
               }
             }
-
-            if (previousNames) {
-              userMessageContent += `The names I have already found are ${previousNames.join(", ")}. Please ensure the new names are not in this list. `;
-            }
-
           }
 
-          userMessageContent +=
-            "Please provide 3 names with no explanation.";
+          if (tld) {
+            userMessageContent += "Please try to generate unique names that may have a .com domain available. ";
+
+            if (previousNames) {
+              userMessageContent += `Please exclude the following names: ${previousNames.join(
+                ", "
+              )}. `;
+            }
+          }
+
+          userMessageContent += "Please provide 5 names with no explanation.";
 
           const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
@@ -154,16 +159,17 @@ export async function POST(req: Request, res: NextResponse) {
                 const isAvailable = await checkDomainAvailability(
                   `${name}.com`
                 );
-
+                console.log(`checking ${name}.com`);
                 if (isAvailable) {
+                  console.log(`${name} is available`);
                   validNames.push(name);
                   namesFound++;
-                  break; 
+                  break;
                 }
               } else {
                 validNames.push(name);
                 namesFound++;
-                break; 
+                break;
               }
             } catch (error) {
               console.error(error);
@@ -184,6 +190,15 @@ export async function POST(req: Request, res: NextResponse) {
           },
         }
       );
+    }
+
+    if (validNames.length < 3) {
+      return new Response(JSON.stringify({ response: previousNames.slice(0, 3) }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     return new Response(JSON.stringify({ response: validNames }), {

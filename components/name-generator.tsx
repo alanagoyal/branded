@@ -510,8 +510,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                           <div className="space-y-0.5">
                             <FormLabel>Domain Availability</FormLabel>
                             <FormDescription>
-                              Optimize names for .com availability—this may take
-                              a bit longer and generate fewer names
+                              Optimize for names with .com availability—this may take up to 30 seconds and generate fewer results
                             </FormDescription>
                           </div>
                           <FormControl>
