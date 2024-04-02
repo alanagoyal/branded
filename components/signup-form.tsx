@@ -18,6 +18,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ToastAction } from "./ui/toast";
+import { Separator } from "./ui/separator";
 
 export interface SignupFormData {
   email: string;
@@ -61,6 +62,23 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
       password: "",
     },
   });
+
+  const signUpWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: idString
+          ? origin + `/new?ids=${idString}`
+          : origin + "/new",
+      },
+    });
+    if (error) {
+      toast({
+        title: "Sign up failed",
+        description: error.message,
+      });
+    }
+  };
 
   const onSubmit = async (data: SignupFormData) => {
     try {
@@ -149,6 +167,10 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
           </div>
         </form>
       </Form>
+      <Separator/>
+      <Button className="w-full mt-2" variant="secondary" onClick={signUpWithGoogle}>
+        Sign Up with Google
+      </Button>
     </div>
   );
 }

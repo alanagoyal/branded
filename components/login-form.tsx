@@ -17,6 +17,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "./ui/use-toast";
+import { createClient } from "@/utils/supabase/client";
 
 export interface LoginFormData {
   email: string;
@@ -39,6 +40,7 @@ const formSchema = z.object({
 });
 
 export function LoginForm({ login }: LoginFormProps) {
+  const supabase = createClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -46,6 +48,21 @@ export function LoginForm({ login }: LoginFormProps) {
       password: "",
     },
   });
+
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "/new",
+      },
+    });
+    if (error) {
+      toast({
+        title: "Login failed",
+        description: error.message,
+      });
+    }
+  };
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -104,6 +121,7 @@ export function LoginForm({ login }: LoginFormProps) {
               />
             </div>
             <Button type="submit">Sign In</Button>
+            <Button variant="secondary" onClick={signInWithGoogle}>Sign in with Google</Button>
           </div>
         </form>
       </Form>
