@@ -54,7 +54,7 @@ export default async function Home() {
             <img
               src="brainy.png"
               alt="Brainy"
-              className="object-cover w-44 h-44 rounded-md"
+              className="object-cover w-40 h-40 rounded-md"
             />
           </div>
         </div>
