@@ -20,7 +20,7 @@ export default async function Home() {
     {
       title: "Domain Availability",
       subtitle: `Secure the perfect domain name for your startup in seconds with our AI-assisted domain availability lookup—purpose-built to help you secure a memorable domain.`,
-      image: "domain_availability.png",
+      image: "analytics.png",
     },
     {
       title: "Branded Content",
