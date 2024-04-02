@@ -20,7 +20,7 @@ export default async function Home() {
     {
       title: "Domain Availability",
       subtitle: `Secure the perfect domain name for your startup in seconds with our AI-assisted domain availability lookup—purpose-built to help you secure a memorable domain.`,
-      image: "analytics.png",
+      image: "domain_avail.png",
     },
     {
       title: "Branded Content",
@@ -156,7 +156,7 @@ export default async function Home() {
           ))}
         </div>
         <div className="mt-20 flex justify-center w-full">
-          <Carousel className="w-2/3 justify-center">
+          <Carousel className="w-4/5 justify-center">
             <CarouselContent>
               {customerQuotes.map((customerQuote, index) => (
                 <CarouselItem key={index}>
