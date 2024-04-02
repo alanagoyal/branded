@@ -433,12 +433,12 @@ to public
 using ((auth.uid() = created_by));
 
 
-create policy "Insert based on user_id"
+create policy "Insert for anyone"
 on "public"."names"
 as permissive
 for insert
 to public
-with check ((auth.uid() = created_by));
+with check (true);
 
 
 create policy "Read for anyone"
@@ -506,6 +506,16 @@ using ((auth.uid() = id))
 with check ((auth.uid() = id));
 
 
+
+alter table "auth"."flow_state" add column "auth_code_issued_at" timestamp with time zone;
+
+alter table "auth"."saml_providers" add column "name_id_format" text;
+
+alter table "auth"."saml_relay_states" drop column "from_ip_address";
+
+alter table "auth"."users" add column "is_anonymous" boolean not null default false;
+
+CREATE INDEX users_is_anonymous_idx ON auth.users USING btree (is_anonymous);
 
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 

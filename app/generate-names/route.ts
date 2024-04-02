@@ -48,7 +48,7 @@ export async function POST(req: Request, res: NextResponse) {
     const validNames: string[] = [];
     const previousNames: string[] = [];
 
-    while (namesFound < 3 && attempts < 3) {
+    while (namesFound < 3 && attempts < 2) {
       attempts++;
       const output = await traced(
         async (span) => {
