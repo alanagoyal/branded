@@ -25,15 +25,14 @@ export async function signup(formData: SignupFormData, idString: string, origin:
       name: "AuthApiError",
       message: "User already exists",
     };
-    console.log(authError)
-  } else if (error)
+    return { success: false, errorMessage: authError?.message };
+
+  } else if (error) {
     authError = {
       name: error.name,
       message: error.message,
     };
 
-  if (error) {
-    return { success: false, errorMessage: authError?.message };
   } else {
     revalidatePath('/', 'layout')
     return { success: true };
