@@ -4,6 +4,7 @@ import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
 import UserNav from "./user-nav";
 import { Button } from "@/components/ui/button";
+import Wordmark from "./wordmark";
 
 export async function SiteHeader() {
   const supabase = createClient();
@@ -16,17 +17,7 @@ export async function SiteHeader() {
     <nav>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link href="/">
-              <Image
-                src="/wordmark_purple.png"
-                alt="namebase"
-                width={196}
-                height={64}
-                priority
-              />
-            </Link>
-          </div>
+          <Wordmark />
           <div className="flex items-center">
             <div className="hidden sm:flex">
               <ThemeToggle />

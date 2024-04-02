@@ -106,7 +106,7 @@ export default async function Home() {
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-6xl font-extrabold leading-tight">
           Transform your idea into a{" "}
-          <span style={{ color: "#C850C0" }}>billion-dollar brand</span>
+          <span style={{ color: "#BB58BC" }}>billion-dollar brand</span>
         </h1>
         <p className="pt-6 max-w-2xl text-xl">
           Namebase helps founders name their startup, secure the domain, and
