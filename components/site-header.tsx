@@ -1,30 +1,16 @@
-"use client";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import Image from "next/image";
-import { useTheme } from 'next-themes';
-import { useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
-import { createClient } from "@/utils/supabase/client"; 
+import { createClient } from "@/utils/supabase/server";
 import UserNav from "./user-nav";
 import { Button } from "@/components/ui/button";
 
-export function SiteHeader() {
-  const { theme } = useTheme();
-  const [user, setUser] = useState<User | null>(null);
-  const wordmarkSrc = theme === 'light' ? "/wordmark_light.png" : "/wordmark_dark.png";
+export async function SiteHeader() {
+  const supabase = createClient();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.auth.getUser();
-      if (data) {
-        setUser(data.user);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <nav>
@@ -33,7 +19,7 @@ export function SiteHeader() {
           <div className="flex items-center">
             <Link href="/">
               <Image
-                src={wordmarkSrc}
+                src="/wordmark_light.png"
                 alt="namebase"
                 width={196}
                 height={64}
