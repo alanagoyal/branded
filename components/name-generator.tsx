@@ -223,12 +223,11 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
       const data = await response.json();
 
-      if (!data.response) {
+      if (data.response.length === 0) {
         toast({
-          variant: "destructive",
-          description: "Error generating startup names",
+          title: "Uh oh! No names generated",
+          description: "Looks like we can't find any names that fit your critera. Please try again.",
         });
-        throw new Error("Failed to generate startup names");
       }
 
       const ids: string[] = [];

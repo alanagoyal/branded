@@ -154,6 +154,7 @@ export async function POST(req: Request, res: NextResponse) {
                 const isAvailable = await checkDomainAvailability(
                   `${name}.com`
                 );
+
                 if (isAvailable) {
                   validNames.push(name);
                   namesFound++;
