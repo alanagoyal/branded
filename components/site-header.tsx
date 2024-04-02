@@ -4,13 +4,14 @@ import { ThemeToggle } from "./theme-toggle";
 import Image from "next/image";
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
 import { createClient } from "@/utils/supabase/client"; // Updated import path as per the instructions
 import UserNav from "./user-nav";
 import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
   const { theme } = useTheme();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const wordmarkSrc = theme === 'light' ? "/wordmark_light.png" : "/wordmark_dark.png";
 
   useEffect(() => {
