@@ -2,19 +2,27 @@ import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import Image from "next/image";
 import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
 import { createClient } from "@/utils/supabase/server";
 import UserNav from "./user-nav";
 import { Button } from "@/components/ui/button";
 
-export async function SiteHeader() {
+export function SiteHeader() {
   const { theme } = useTheme();
+  const [user, setUser] = useState(null);
   const wordmarkSrc = theme === 'light' ? "/wordmark_light.png" : "/wordmark_dark.png";
-  
-  const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    const fetchData = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getUser();
+      if (data) {
+        setUser(data.user);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <nav>
