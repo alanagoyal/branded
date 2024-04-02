@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 import { init, initLogger, traced, wrapOpenAI } from "braintrust";
 
-export const maxDuration = 20;
+export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 const logger = initLogger({ projectName: "namebase" });
