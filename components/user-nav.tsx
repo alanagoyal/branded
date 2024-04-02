@@ -22,6 +22,11 @@ export default function UserNav({ user }: any) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [profileName, setProfileName] = useState("");
+  const [isScreenWide, setIsScreenWide] = useState(false);
+
+  useEffect(() => {
+    setIsScreenWide(window.innerWidth >= 768);
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -104,18 +109,20 @@ export default function UserNav({ user }: any) {
               <span>Support</span>
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
-            )}
-            <span>Switch Theme</span>
-          </DropdownMenuItem>
+          {!isScreenWide && (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
+              )}
+              <span>Switch Theme</span>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
