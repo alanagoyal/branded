@@ -17,6 +17,8 @@ import {
   Plus,
   User,
 } from "lucide-react";
+import { useTheme } from 'next-themes';
+import { Sun, Moon } from 'lucide-react';
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
@@ -90,6 +92,19 @@ export function CommandMenu() {
     </Link>
   );
 
+  const ThemeSwitchItem = () => {
+    const { setTheme, theme } = useTheme();
+    return (
+      <CommandItem
+        icon={theme === 'light' ? Moon : Sun}
+        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        title="Switch Theme"
+      >
+        {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+      </CommandItem>
+    );
+  };
+
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput placeholder="Type a command or search..." />
@@ -124,6 +139,7 @@ export function CommandMenu() {
               <CommandShortcut>⌘J</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
+          <ThemeSwitchItem />
           <CommandSeparator />
           <CommandItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
