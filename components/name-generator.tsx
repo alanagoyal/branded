@@ -544,7 +544,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         </Form>
         {Object.keys(namesList).length > 0 && (
           <div className="flex-col pt-4 space-y-4 sm:flex">
-            <NamesDisplay namesList={namesList} user={user} />
+            <NamesDisplay namesList={namesList} user={user} verticalLayout={false} />
             <Share idString={idsList.join("")} />
           </div>
         )}

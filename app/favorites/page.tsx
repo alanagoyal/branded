@@ -1,4 +1,5 @@
 import { Icons } from "@/components/icons";
+import { NamesDisplay } from "@/components/names-display";
 import { NamesTable } from "@/components/names-table";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
@@ -32,8 +33,8 @@ export default async function Favorites() {
   return namesList && Object.keys(namesList).length > 0 ? (
     <div className="w-full px-4 flex justify-center items-center flex-col">
       <h1 className="text-2xl font-bold mb-4">Favorites</h1>
-      <div className="min-h-screen">
-        <NamesTable namesList={namesList} user={user} />
+      <div className="min-h-screen w-full">
+        <NamesDisplay namesList={namesList} user={user} verticalLayout={true} />
       </div>
     </div>
   ) : (
