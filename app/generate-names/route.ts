@@ -13,13 +13,11 @@ const openai = wrapOpenAI(
 );
 
 function cleanNames(names: string[]): string[] {
-  return names.map((name) => {
-    const nameNoNumber = name.includes(".")
-      ? name.split(". ")[1].trim()
-      : name.trim();
-    const nameCleaned = nameNoNumber.split("(")[0].trim();
-    return nameCleaned;
-  });
+  return names
+    .map((name) =>
+      name.includes(".") ? name.split(". ")[1].trim() : name.trim()
+    )
+    .map((name) => name.split("(")[0].trim());
 }
 
 async function checkDomainAvailability(domain: string) {
@@ -43,162 +41,83 @@ export async function POST(req: Request, res: NextResponse) {
       tld,
     } = body;
 
-    let namesFound = 0;
-    let attempts = 0;
-    const validNames: string[] = [];
-    const previousNames: string[] = [];
+    let userMessageContent = `Please provide me with 10 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
 
-    while (namesFound < 3 && attempts < 2) {
-      attempts++;
-      const output = await traced(
-        async (span) => {
-          let userMessageContent = `Please provide me with 5 name ideas for my startup, based on this description: ${description}. Please ensure the name has at least ${minLength} characters and at most ${maxLength} characters. `;
+    const styleMessages: { [key: string]: string } = {
+      one_word:
+        "Each name should be a single, commonly used English noun. Examples include 'Thrive', 'Default', or 'Surge'. Avoid compound words like 'Facebook' or 'Guidewire'.",
+      portmanteau: `Each name must be a portmanteau including the word "${wordToInclude}", placed ${
+        wordPlacement || "anywhere"
+      } in the combination. For example, 'Microsoft' combines 'microcomputer' and 'software'.`,
+      alternative_spelling: `Each name should be an alternative spelling, particularly of "${
+        wordToInclude || "a common word"
+      }", like 'Flickr' for 'Flicker' or 'Lyft' for 'Lift'.`,
+      foreign_language: `Each name should be a foreign word that resonates with the startup's description, potentially related to "${wordToInclude}". For instance, 'Samsara' is a Sanskrit term for 'cycle of life'.`,
+      historical: `Names should draw from historical figures or concepts, especially those linked to "${wordToInclude}". 'Da Vinci' and 'Kepler' are prime examples, connected to art and astronomy, respectively.`,
+      literary: `Opt for literary references, ideally associated with "${wordToInclude}". 'Palantir', a seeing-stone from Lord of the Rings, serves as a fitting illustration.`,
+    };
 
-          if (style !== "any") {
-            if (style === "one_word") {
-              userMessageContent +=
-                "Each name should be a noun that is used in the everyday English Language. For example 'Thrive', 'Default', or 'Surge'. It should definitely not be a compound word like 'Facebook' or 'Guidewire'. ";
-            }
+    // Add the style-specific message if a valid style is provided
+    if (style && styleMessages[style]) {
+      userMessageContent += styleMessages[style];
+    }
 
-            if (style === "portmanteau") {
-              userMessageContent +=
-                "Each name must be a portmanteau of two words. For example 'Microsoft' is a portmanteau of 'microcomputer' and 'software'. ";
+    // Final instruction
+    userMessageContent += " Please provide 10 names without explanations.";
 
-              if (wordToInclude) {
-                userMessageContent += `Each portmanteau must include the word "${wordToInclude}", `;
-                if (wordPlacement === "start") {
-                  userMessageContent +=
-                    "which must be placed at the start of the portmanteau.";
-                }
-
-                if (wordPlacement === "end") {
-                  userMessageContent +=
-                    "which must be placed at the end of the portmanteau.";
-                }
-
-                if (wordPlacement === "any") {
-                  userMessageContent +=
-                    "which can be placed anywhere in the portmanteau.";
-                }
-              }
-            }
-
-            if (style === "alternative_spelling") {
-              if (wordToInclude) {
-                userMessageContent += `Each name should be an alternative spelling of "${wordToInclude}". For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. `;
-              } else {
-                userMessageContent +=
-                  "Each name must be an alternative spelling of a word. For example 'Flickr' instead of 'Flicker' or 'Lyft' instead of 'Lift'. ";
-              }
-            }
-            if (style === "foreign_language") {
-              if (wordToInclude) {
-                userMessageContent += `Each name must be a word in a foreign language that means something based on the description and the word or phrase "${wordToInclude}". For example 'Samsara' is a Sanskrit word that means 'cycle of life'. `;
-              } else {
-                userMessageContent +=
-                  "Each name must be a word in a foreign language that means something based on the English description. For example 'Samsara' is a Sanskrit word that means 'cycle of life'. ";
-              }
-            }
-
-            if (style === "historical") {
-              if (wordToInclude) {
-                userMessageContent += `Each name should reference a historical figure or concept related to "${wordToInclude}". For example 'Da Vinci' is related to 'art' or 'Kepler' is related to 'astronomy'. `;
-              } else {
-                userMessageContent +=
-                  "Each name should be inspired by a historical reference or figure. For example 'Da Vinci' or 'Tesla'. ";
-              }
-            }
-
-            if (style === "literary") {
-              if (wordToInclude) {
-                userMessageContent += `Each name should be a literary reference related to "${wordToInclude}". For example 'Palantir' is a 'seeing-stone' from Lord of the Rings. `;
-              } else {
-                userMessageContent +=
-                  "Each name should be inspired by a literary reference or figure. For example 'Palantir' or 'Anduril' are references from Lord of the Rings. ";
-              }
-            }
-          }
-
-          if (tld) {
-            if (previousNames) {
-              userMessageContent += `Please exclude the following names: ${previousNames.join(
-                ", "
-              )}. `;
-            }
-          }
-
-          userMessageContent += "Please provide 5 names with no explanation.";
-
-          const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            seed: 123,
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are a creative naming assistant tasked with helping a startup founder determine a name for the company.",
-              },
-              {
-                role: "user",
-                content: userMessageContent,
-              },
-            ],
-          });
-
-          const output = completion.choices[0].message.content;
-          const names = output!
-            .split("\n")
-            .filter((name) => name.trim() !== "");
-
-          for (const name of cleanNames(names)) {
-            previousNames.push(name);
-            if (namesFound >= 3) break;
-            try {
-              if (tld) {
-                const isAvailable = await checkDomainAvailability(
-                  `${name}.com`
-                );
-                if (isAvailable) {
-                  validNames.push(name);
-                  namesFound++;
-                  break;
-                }
-              } else {
-                validNames.push(name);
-                namesFound++;
-                break;
-              }
-            } catch (error) {
-              console.error(error);
-            }
-          }
-
-          span.log({ output });
-          return output;
-        },
-        {
-          name: "generate-name",
-          event: {
-            input: {
-              ...body,
-              minLength: minLength[0],
-              maxLength: maxLength[0],
+    const completion = await traced(
+      async () =>
+        openai.chat.completions.create({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a creative naming assistant tasked with generating unique startup names based on specific criteria.",
             },
-          },
-        }
+            {
+              role: "user",
+              content: userMessageContent,
+            },
+          ],
+        }),
+      { name: "generate-name", event: body }
+    );
+
+    const names = cleanNames(
+      (completion.choices[0].message.content || "")
+        .split("\n")
+        .filter((name) => name.trim() !== "")
+    );
+
+    let selectedNames = [];
+
+    if (tld) {
+      const domainChecks = names.map((name) =>
+        checkDomainAvailability(`${name}.com`)
       );
+      const results = await Promise.allSettled(domainChecks);
+
+      const availableDomains = results.map((result, index) => ({
+        name: names[index],
+        available: result.status === "fulfilled" && result.value,
+      }));
+
+      const validNames = availableDomains
+        .filter((domain) => domain.available)
+        .map((domain) => domain.name);
+
+      console.log(`validNames: ${validNames}`);
+
+      selectedNames =
+        validNames.length >= 3 ? validNames.slice(0, 3) : names.slice(0, 3);
+    } else {
+      selectedNames = names.slice(0, 3);
     }
 
-    if (validNames.length < 3) {
-      return new Response(JSON.stringify({ response: previousNames.slice(0, 3) }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
+    console.log(`selectedNames: ${selectedNames}`);
 
-    return new Response(JSON.stringify({ response: validNames }), {
+    return new Response(JSON.stringify({ response: selectedNames }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
