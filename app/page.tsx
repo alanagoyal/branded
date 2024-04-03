@@ -1,6 +1,4 @@
 import Description from "@/components/description";
-import { Icons } from "@/components/icons";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
@@ -9,9 +7,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import Link from "next/link";
+
 
 export default async function Home() {
   const sections = [

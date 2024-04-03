@@ -127,6 +127,15 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const [idsList, setIdsList] = useState<string[]>([]);
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (queryDescription) {
+      const submitForm = async () => {
+        await onSubmit(form.getValues());
+      };
+      submitForm();
+    }
+  }, [queryDescription]);
+
   async function clear() {
     form.reset();
     setNamesList({});
@@ -235,7 +244,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       if (data.response.length === 0) {
         toast({
           title: "Uh oh! No names generated",
-          description: "Looks like we can't find any names that fit your critera. Please try again.",
+          description:
+            "Looks like we can't find any names that fit your critera. Please try again.",
         });
       }
 
@@ -519,7 +529,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                           <div className="space-y-0.5">
                             <FormLabel>Domain Availability</FormLabel>
                             <FormDescription>
-                              Optimize for names with .com availability—this may take up to 30 seconds and generate fewer results
+                              Optimize for names with .com availability—this may
+                              take up to 30 seconds and generate fewer results
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -552,7 +563,11 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         </Form>
         {Object.keys(namesList).length > 0 && (
           <div className="flex-col pt-4 space-y-4 sm:flex">
-            <NamesDisplay namesList={namesList} user={user} verticalLayout={false} />
+            <NamesDisplay
+              namesList={namesList}
+              user={user}
+              verticalLayout={false}
+            />
             <Share idString={idsList.join("")} />
           </div>
         )}
