@@ -175,7 +175,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .eq("created_by", user.id)
           .gte("created_at", oneDayAgo);
 
-        if (names!.length >= 50) {
+        if (names!.length >= 36) {
           toast({
             title: "Uh oh! Out of generations",
             description:
@@ -190,7 +190,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .eq("session_id", localStorage.getItem("session_id"))
           .gte("created_at", oneDayAgo);
 
-        if (names!.length >= 6) {
+        if (names!.length >= 9) {
           toast({
             title: "Uh oh! Out of generations",
             description:

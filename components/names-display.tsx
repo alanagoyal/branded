@@ -593,7 +593,7 @@ export function NamesDisplay({
 
   const handleActionForUnauthenticatedUser = (actionType: string) => {
     toast({
-      title: "Uh oh! You need an account",
+      title: "Please create an account",
       description: `In order to ${actionType} this name, please sign up for a free account.`,
       action: (
         <ToastAction onClick={() => router.push(signUpLink)} altText="Sign up">
