@@ -9,8 +9,10 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Link from "next/link";
+import { useState } from 'react';
 
 export default async function Home() {
+  const [descriptionInput, setDescriptionInput] = useState('');
   const sections = [
     {
       title: "Startup Names",
@@ -113,18 +115,26 @@ export default async function Home() {
           brand it—all in one place.
         </p>
         <div className="flex pt-6 space-x-2">
-          <Link href="/new">
-            <Button
-              className="text-lg"
-              style={{
-                background:
-                  "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)",
-                padding: "2px 30px",
-              }}
-            >
-              Get Started
-            </Button>
-          </Link>
+          <input
+            type="text"
+            value={descriptionInput}
+            onChange={(e) => setDescriptionInput(e.target.value)}
+            className="border p-2 mr-2"
+            placeholder="Enter a name"
+          />
+          <button
+            onClick={() => {
+              window.location.href = `/new?description=${encodeURIComponent(descriptionInput)}`;
+            }}
+            className="text-lg"
+            style={{
+              background:
+                "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)",
+              padding: "2px 30px",
+            }}
+          >
+            Get Started
+          </button>
           <Link
             href="https://github.com/alanagoyal/namebase"
             target="_blank"

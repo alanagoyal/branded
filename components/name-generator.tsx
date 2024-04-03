@@ -92,6 +92,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     }
   }, [user]);
 
+  const descriptionQueryParam = router.query.description ? router.query.description.toString() : '';
+  
   let defaultValues = {};
   if (names) {
     defaultValues = {
@@ -105,7 +107,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     };
   } else {
     defaultValues = {
-      description: "",
+      description: descriptionQueryParam,
       wordToInclude: "",
       wordPlacement: "any",
       style: "any",
