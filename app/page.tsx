@@ -1,3 +1,4 @@
+"use client";
 import { Icons } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +11,10 @@ import {
 } from "@/components/ui/carousel";
 import Link from "next/link";
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
-export default async function Home() {
+export default function Home() {
+  const router = useRouter();
   const [descriptionInput, setDescriptionInput] = useState('');
   const sections = [
     {
@@ -124,7 +127,7 @@ export default async function Home() {
           />
           <button
             onClick={() => {
-              window.location.href = `/new?description=${encodeURIComponent(descriptionInput)}`;
+              router.push(`/new?description=${encodeURIComponent(descriptionInput)}`);
             }}
             className="text-lg"
             style={{
