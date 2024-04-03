@@ -12,9 +12,14 @@ export async function login(formData: LoginFormData) {
   const { error } = await supabase.auth.signInWithPassword({email, password})
 
   if (error) {
-    return { errorMessage: error.message };
+    const isAlreadyUser = await supabase.rpc('checkIfUser', { given_mail: email })
+    console.log(isAlreadyUser)
+    if (!isAlreadyUser) {
+      return { errorMessage: "Please sign up for an account" };
+    } else { 
+      return { errorMessage: error.message };
+    }
   }
-
   revalidatePath('/', 'layout')
   redirect('/new')
 }

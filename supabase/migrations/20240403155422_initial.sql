@@ -143,6 +143,14 @@ alter table "public"."profiles" validate constraint "profiles_id_fkey";
 
 set check_function_bodies = off;
 
+CREATE OR REPLACE FUNCTION public."checkIfUser"(given_mail text)
+ RETURNS boolean
+ LANGUAGE plpgsql
+AS $function$BEGIN
+  RETURN (EXISTS (SELECT 1 FROM auth.users a WHERE a.email = given_mail));
+END;$function$
+;
+
 CREATE OR REPLACE FUNCTION public.handle_new_user()
  RETURNS trigger
  LANGUAGE plpgsql
