@@ -13,9 +13,8 @@ export async function login(formData: LoginFormData) {
 
   if (error) {
     const isAlreadyUser = await supabase.rpc('checkIfUser', { given_mail: email })
-    console.log(isAlreadyUser)
-    if (!isAlreadyUser) {
-      return { errorMessage: "Please sign up for an account" };
+    if (isAlreadyUser.data === false)  {
+      return { errorMessage: "No account exists for this email address. Please sign up for an account." };
     } else { 
       return { errorMessage: error.message };
     }
