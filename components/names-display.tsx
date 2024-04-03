@@ -182,8 +182,6 @@ export function NamesDisplay({
 
           const data = await response.json();
 
-          console.log(data);
-
           if (data.availabilityResults.length === 0) {
             toast({
               title: "Uh oh! No available domain names",
