@@ -21,7 +21,14 @@ export async function SiteHeader() {
         <div className="flex justify-between items-center h-16">
           <Wordmark />
           <div className="flex items-center mx-1">
-            <div className="items-center">
+            <div className="items-center space-x-2">
+              <Link
+                href="https://github.com/alanagoyal/namebase"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Button variant="ghost">View on GitHub</Button>
+              </Link>
               {user ? (
                 <UserNav user={user} />
               ) : (
