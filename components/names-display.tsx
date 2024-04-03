@@ -36,11 +36,11 @@ import { ToastAction } from "./ui/toast";
 export function NamesDisplay({
   namesList,
   user,
-  verticalLayout = false, 
+  verticalLayout = false,
 }: {
   namesList: any;
   user: any;
-  verticalLayout: boolean; 
+  verticalLayout: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -181,6 +181,16 @@ export function NamesDisplay({
           }
 
           const data = await response.json();
+
+          console.log(data);
+
+          if (data.availabilityResults.length === 0) {
+            toast({
+              title: "Uh oh! No available domain names",
+              description:
+                "Looks like we can't find any available domain names for this name. Please try again with another name.",
+            });
+          }
 
           if (data.error) {
             toast({

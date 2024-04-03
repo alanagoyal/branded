@@ -16,23 +16,31 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  name = name.toLowerCase();
 
-  name = name.toLowerCase();  
-
-  const tlds = [".com", ".ai", ".io", ".co", ".so", ".dev", ".app", ".net", ".org"];
-  const prefixes = ["", "get", "with", "use"]; 
+  const tlds = [
+    ".com",
+    ".ai",
+    ".io",
+    ".co",
+    ".so",
+    ".dev",
+    ".app",
+    ".net",
+    ".org",
+  ];
   const domains: string[] = [];
 
-  prefixes.forEach((prefix) => {
-    tlds.forEach((tld) => {
-      const domain = `${prefix}${name}${tld}`.toLowerCase();
-      domains.push(domain);
-    });
+  tlds.forEach((tld) => {
+    const domain = `${name}${tld}`.toLowerCase();
+    domains.push(domain);
   });
 
   try {
     const fetchPromises = domains.map((domain) =>
-      fetch(`https://api.whoxy.com/?key=${process.env.WHOXY_API_KEY}&whois=${domain}`)
+      fetch(
+        `https://api.whoxy.com/?key=${process.env.WHOXY_API_KEY}&whois=${domain}`
+      )
     );
 
     const responses = await Promise.all(fetchPromises);
@@ -46,15 +54,20 @@ export async function GET(req: NextRequest) {
 
     const results = await Promise.all(dataPromises);
 
-    const availabilityResults = results.map((data, index) => ({
-      domain: domains[index],
-      available: data.domain_registered.toLowerCase() === "no",
-    })).filter(result => result.available);
+    const availabilityResults = results
+      .map((data, index) => ({
+        domain: domains[index],
+        available: data.domain_registered.toLowerCase() === "no",
+      }))
+      .filter((result) => result.available);
 
-    return new NextResponse(JSON.stringify({ availabilityResults: availabilityResults.slice(0, 3) }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new NextResponse(
+      JSON.stringify({ availabilityResults: availabilityResults.slice(0, 3) }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
     return new NextResponse(
       JSON.stringify({ error: "Failed to fetch WHOIS data" }),
