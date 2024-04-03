@@ -4,17 +4,19 @@ export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const name = req.nextUrl.searchParams.get("query")?.toLowerCase();
+  let name = req.nextUrl.searchParams.get("query");
 
   if (!name) {
     return new NextResponse(
-      JSON.stringify({ error: "Query parameter is missing" }),
+      JSON.stringify({ error: "Query parameter 'name' is missing or empty." }),
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
       }
     );
   }
+
+  name = name.toLowerCase();
 
   const tlds = [
     ".com",
@@ -26,53 +28,53 @@ export async function GET(req: NextRequest) {
     ".app",
     ".net",
     ".org",
-    ".net",
   ];
+  const domains: string[] = [];
 
-  const domains = tlds.map((tld) => `${name}${tld}`);
-
-  const availabilityResults = [];
-
-  for (const domain of domains) {
-    try {
-      const response = await fetch(
-        `https://api.whoxy.com/?key=${process.env.WHOXY_API_KEY}&whois=${domain}`
-      );
-
-      if (!response.ok) {
-        return new NextResponse(
-          JSON.stringify({ error: "Failed to fetch WHOIS data" }),
-          {
-            status: response.status,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
-
-      const data = await response.json();
-
-      if (data.domain_registered.toLowerCase() === "no") {
-        availabilityResults.push({ domain, available: true });
-      } else {
-        availabilityResults.push({ domain, available: false });
-      }
-
-      if (availabilityResults.filter(result => result.available).length === 3) {
-        break;
-      }
-    } catch (error) {
-      return new NextResponse(
-        JSON.stringify({ error: "Failed to fetch WHOIS data" }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-  }
-
-  return new NextResponse(JSON.stringify({ availabilityResults }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
+  tlds.forEach((tld) => {
+    const domain = `${name}${tld}`.toLowerCase();
+    domains.push(domain);
   });
+
+  try {
+    const fetchPromises = domains.map((domain) =>
+      fetch(
+        `https://api.whoxy.com/?key=${process.env.WHOXY_API_KEY}&whois=${domain}`
+      )
+    );
+
+    const responses = await Promise.all(fetchPromises);
+
+    const dataPromises = responses.map((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch WHOIS data");
+      }
+      return response.json();
+    });
+
+    const results = await Promise.all(dataPromises);
+
+    const availabilityResults = results
+      .map((data, index) => ({
+        domain: domains[index],
+        available: data.domain_registered.toLowerCase() === "no",
+      }))
+      .filter((result) => result.available);
+
+    return new NextResponse(
+      JSON.stringify({ availabilityResults: availabilityResults.slice(0, 3) }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    return new NextResponse(
+      JSON.stringify({ error: "Failed to fetch WHOIS data" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
 }

@@ -223,6 +223,13 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
       const data = await response.json();
 
+      if (data.fallbackMessage) {
+        toast({
+          title: "Heads up! No .com names available",
+          description: data.fallbackMessage,
+        });
+      }
+
       if (data.response.length === 0) {
         toast({
           title: "Uh oh! No names generated",
