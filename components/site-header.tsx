@@ -21,9 +21,6 @@ export async function SiteHeader() {
         <div className="flex justify-between items-center h-16">
           <Wordmark />
           <div className="flex items-center mx-1">
-            <div className="hidden sm:flex">
-              <ThemeToggle />
-            </div>
             <div className="items-center">
               {user ? (
                 <UserNav user={user} />

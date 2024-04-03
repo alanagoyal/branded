@@ -16,7 +16,7 @@ export default function Wordmark() {
         <div className="flex items-center">
             <Link href="/">
                 <img
-                    src={"/wordmark_purple.png"}
+                    src={logoSrc}
                     alt="namebase"
                     width={196}
                     height={64}
