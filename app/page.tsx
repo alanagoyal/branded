@@ -1,3 +1,4 @@
+import Description from "@/components/description";
 import { Icons } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 
 export default async function Home() {
@@ -20,7 +23,7 @@ export default async function Home() {
     {
       title: "Domain Availability",
       subtitle: `Secure the perfect domain name for your startup in seconds with our AI-assisted domain availability lookup—purpose-built to help you secure a memorable domain.`,
-      image: "domain_avail.png",
+      image: "domain_availability.png",
     },
     {
       title: "Branded Content",
@@ -69,10 +72,10 @@ export default async function Home() {
       quote: (
         <>
           &quot;When we started our company we knew we needed a simple,
-          memorable name that built trust with our customers. Before Namebase, we
-          spent hours coming up with names and looking up domain availability.
-          With Namebase we found alpharun.com with a click, and haven&apos;t looked
-          back since.
+          memorable name that built trust with our customers. Before Namebase,
+          we spent hours coming up with names and looking up domain
+          availability. With Namebase we found alpharun.com with a click, and
+          haven&apos;t looked back since.
           <br />
           <br />
           The process was seamless, and the results were beyond my expectations.
@@ -113,43 +116,27 @@ export default async function Home() {
           brand it—all in one place.
         </p>
         <div className="flex pt-6 space-x-2">
-          <Link href="/new">
-            <Button
-              className="text-lg"
-              style={{
-                background:
-                  "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)",
-                padding: "2px 30px",
-              }}
-            >
-              Get Started
-            </Button>
-          </Link>
-          <Link
-            href="https://github.com/alanagoyal/namebase"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Button variant="ghost">View on GitHub</Button>
-          </Link>
+          <Description />
         </div>
         <div className="flex flex-col md:flex-row justify-around items-stretch mt-20">
           {sections.map((section, index) => (
             <Card
               key={index}
-              className={`flex flex-col w-full md:w-1/3 p-4 shadow-lg rounded-lg ${
+              className={`flex flex-col w-full md:w-1/3 shadow-lg rounded-lg ${
                 index === 1 ? "md:mx-4 my-2 md:my-0" : "my-4 md:my-0"
               }`}
             >
               <CardHeader>
                 <CardTitle>{section.title}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm h-26 overflow-hidden">{section.subtitle}</p>
+              <CardContent className="flex flex-col justify-between h-full p-0">
+                <p className="text-sm p-4 overflow-hidden">
+                  {section.subtitle}
+                </p>
                 <img
                   src={section.image}
                   alt={section.title}
-                  className="mt-4 w-full rounded-md"
+                  className="mt-4 w-full h-auto rounded-b-md"
                 />
               </CardContent>
             </Card>

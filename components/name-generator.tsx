@@ -40,7 +40,7 @@ import {
 import { Share } from "./share";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { NamesDisplay } from "./names-display";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
@@ -80,6 +80,8 @@ const formSchema = z.object({
 export function NameGenerator({ user, names }: { user: any; names: any }) {
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryDescription = searchParams.get("description");
   const [isScreenWide, setIsScreenWide] = useState(false);
 
   useEffect(() => {
@@ -105,7 +107,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     };
   } else {
     defaultValues = {
-      description: "",
+      description: queryDescription || "",
       wordToInclude: "",
       wordPlacement: "any",
       style: "any",
