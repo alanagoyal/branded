@@ -66,8 +66,8 @@ export async function POST(req: Request, res: NextResponse) {
     userMessageContent += " Please provide 10 names without explanations.";
 
     const completion = await traced(
-      async () =>
-        openai.chat.completions.create({
+      async (span) => {
+        const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo",
           messages: [
             {
@@ -80,12 +80,16 @@ export async function POST(req: Request, res: NextResponse) {
               content: userMessageContent,
             },
           ],
-        }),
+        });
+        const output = response.choices[0].message.content;
+        span.log({input: userMessageContent, output});
+        return output;
+      },
       { name: "generate-name", event: body }
     );
 
     const names = cleanNames(
-      (completion.choices[0].message.content || "")
+      (completion || "")
         .split("\n")
         .filter((name) => name.trim() !== "")
     );
