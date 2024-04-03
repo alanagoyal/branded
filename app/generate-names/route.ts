@@ -91,6 +91,7 @@ export async function POST(req: Request, res: NextResponse) {
     );
 
     let selectedNames = [];
+    let fallbackMessage = null; 
 
     if (tld) {
       const domainChecks = names.map((name) =>
@@ -107,7 +108,9 @@ export async function POST(req: Request, res: NextResponse) {
         .filter((domain) => domain.available)
         .map((domain) => domain.name);
 
-      console.log(`validNames: ${validNames}`);
+      if (validNames.length === 0) {
+        fallbackMessage = "No .com domains were available for the names given your criteria. We found you some names that are available in other TLDs."; 
+      }
 
       selectedNames =
         validNames.length >= 3 ? validNames.slice(0, 3) : names.slice(0, 3);
@@ -115,9 +118,12 @@ export async function POST(req: Request, res: NextResponse) {
       selectedNames = names.slice(0, 3);
     }
 
-    console.log(`selectedNames: ${selectedNames}`);
+    const responsePayload = { 
+      response: selectedNames, 
+      ...(fallbackMessage ? { fallbackMessage } : {}) 
+    };
 
-    return new Response(JSON.stringify({ response: selectedNames }), {
+    return new Response(JSON.stringify(responsePayload), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

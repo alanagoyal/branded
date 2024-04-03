@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   name = name.toLowerCase();  
 
-  const tlds = [".com", ".ai", ".io", ".co", ".so", ".dev", ".app", ".net", ".org", ".net"];
+  const tlds = [".com", ".ai", ".io", ".co", ".so", ".dev", ".app", ".net", ".org"];
   const prefixes = ["", "get", "with", "use"]; 
   const domains: string[] = [];
 
