@@ -26,6 +26,7 @@ export async function SiteHeader() {
                 href="https://github.com/alanagoyal/namebase"
                 target="_blank"
                 rel="noreferrer"
+                className="hidden sm:inline-block" 
               >
                 <Button variant="ghost">View on GitHub</Button>
               </Link>
