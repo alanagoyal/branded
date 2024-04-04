@@ -89,7 +89,8 @@ export function NamesDisplay({
     async function fetchFavoritedStatus() {
       const { data: favoritedData, error } = await supabase
         .from("names")
-        .select("name, favorited");
+        .select("name, favorited")
+        .eq("created_by", user.id);
       if (error) {
         toast({
           variant: "destructive",
@@ -103,6 +104,7 @@ export function NamesDisplay({
         favoritedData.forEach((item: { name: string; favorited: boolean }) => {
           favoritedMap[item.name] = item.favorited;
         });
+        console.log(favoritedMap);
         setFavoritedNames(favoritedMap);
       }
     }
@@ -110,8 +112,10 @@ export function NamesDisplay({
   }, [namesList, user]);
 
   async function toggleFavoriteName(name: string) {
+    console.log(`name: ${name}`);
     try {
       const isFavorited = favoritedNames[name] || false;
+      console.log(`isFavorited: ${isFavorited}`);
       setFavoritedNames((prevState) => ({
         ...prevState,
         [name]: !isFavorited,
