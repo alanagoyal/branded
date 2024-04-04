@@ -149,10 +149,20 @@ export function NamesDisplay({
           [key: string]: { domain: string; purchaseLink: string }[];
         } = { ...domainResults };
 
-        const { data: domainData, error } = await supabase
+        const { data: nameData, error: nameError } = await supabase
+          .from("names")
+          .select()
+          .ilike("name", name.toLowerCase());
+
+        let nameIds: string[] = [];
+        if (nameData && nameData.length > 0) {
+          nameIds = nameData.map((item: any) => item.id);
+        }
+
+        const { data: domainData, error: domainError } = await supabase
           .from("domains")
           .select()
-          .eq("name_id", namesList[name]);
+          .in("name_id", nameIds);
 
         if (domainData && domainData.length > 0) {
           for (const result of domainData) {
@@ -166,66 +176,7 @@ export function NamesDisplay({
             }
           }
         } else {
-          const parsedName = name.split(" ")[0];
-          const sanitizedName = parsedName.replace(/[^\w\s]/gi, "");
-          const response = await fetch(
-            `/find-domain-availability?query=${sanitizedName}`
-          );
-
-          if (!response.ok) {
-            toast({
-              variant: "destructive",
-              description: "Error finding domain availability",
-            });
-            throw new Error("Error finding domain availability");
-          }
-
-          const data = await response.json();
-
-          if (data.availabilityResults.length === 0) {
-            toast({
-              title: "Uh oh! No available domain names",
-              description:
-                "Looks like we can't find any available domain names for this name. Please try again with another name.",
-            });
-          }
-
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: "Error finding domain availability",
-            });
-            throw new Error("Error finding domain availability");
-          }
-
-          for (const result of data.availabilityResults) {
-            if (result.available) {
-              const domain = result.domain;
-              const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
-              const updates = {
-                domain_name: domain,
-                purchase_link: purchaseLink,
-                created_at: new Date(),
-                name_id: namesList[name],
-                created_by: user.id,
-              };
-              let { data, error } = await supabase
-                .from("domains")
-                .insert(updates);
-              if (error) throw error;
-
-              if (!updatedResults[name]) {
-                updatedResults[name] = [{ domain, purchaseLink }];
-              } else {
-                updatedResults[name].push({ domain, purchaseLink });
-              }
-              if (Object.keys(updatedResults).length === 0) {
-                toast({
-                  description: "No available domain results for this name",
-                });
-              }
-            }
-          }
+          await domainApiCall(name, updatedResults);
         }
         setDomainResults(updatedResults);
       }
@@ -233,6 +184,67 @@ export function NamesDisplay({
       console.error(error);
     } finally {
       setProcessingDomains((prev) => prev.filter((n) => n !== name));
+    }
+  }
+
+  async function domainApiCall(name: string, updatedResults: any) {
+    const parsedName = name.split(" ")[0];
+    const sanitizedName = parsedName.replace(/[^\w\s]/gi, "");
+    const response = await fetch(
+      `/find-domain-availability?query=${sanitizedName}`
+    );
+
+    if (!response.ok) {
+      toast({
+        variant: "destructive",
+        description: "Error finding domain availability",
+      });
+      throw new Error("Error finding domain availability");
+    }
+
+    const data = await response.json();
+
+    if (data.availabilityResults.length === 0) {
+      toast({
+        title: "Uh oh! No available domain names",
+        description:
+          "Looks like we can't find any available domain names for this name. Please try again with another name.",
+      });
+    }
+
+    if (data.error) {
+      toast({
+        variant: "destructive",
+        description: "Error finding domain availability",
+      });
+      throw new Error("Error finding domain availability");
+    }
+
+    for (const result of data.availabilityResults) {
+      if (result.available) {
+        const domain = result.domain;
+        const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
+        const updates = {
+          domain_name: domain,
+          purchase_link: purchaseLink,
+          created_at: new Date(),
+          name_id: namesList[name],
+          created_by: user.id,
+        };
+        let { data, error } = await supabase.from("domains").insert(updates);
+        if (error) throw error;
+
+        if (!updatedResults[name]) {
+          updatedResults[name] = [{ domain, purchaseLink }];
+        } else {
+          updatedResults[name].push({ domain, purchaseLink });
+        }
+        if (Object.keys(updatedResults).length === 0) {
+          toast({
+            description: "No available domain results for this name",
+          });
+        }
+      }
     }
   }
 
