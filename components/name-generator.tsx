@@ -125,15 +125,14 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const [autoSubmitted, setAutoSubmitted] = useState(false);
 
   useEffect(() => {
-    // Only auto-submit if `queryDescription` is present and the form hasn't been auto-submitted yet
     if (queryDescription && !autoSubmitted) {
       const submitForm = async () => {
         await onSubmit(form.getValues());
-        setAutoSubmitted(true); // Prevent further auto-submissions
+        setAutoSubmitted(true); 
       };
       submitForm();
     }
-  }, [queryDescription, autoSubmitted]); // Now also depends on `autoSubmitted`
+  }, [queryDescription, autoSubmitted]); 
   
 
   async function clear() {
@@ -159,7 +158,6 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   }, [names, user]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("in on submit");
     setIsLoading(true);
     setNamesList({});
     setIdsList([]);

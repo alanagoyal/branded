@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { v4 as uuidv4 } from "uuid";
 
 export default function Description() {
   const [description, setDescription] = useState("");
@@ -43,8 +44,4 @@ export default function Description() {
       </div>
     </div>
   );
-}
-
-function uuidv4(): string {
-  throw new Error("Function not implemented.");
 }
