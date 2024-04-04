@@ -89,7 +89,8 @@ export function NamesDisplay({
     async function fetchFavoritedStatus() {
       const { data: favoritedData, error } = await supabase
         .from("names")
-        .select("name, favorited");
+        .select("name, favorited")
+        .eq("created_by", user.id);
       if (error) {
         toast({
           variant: "destructive",
