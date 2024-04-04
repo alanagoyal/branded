@@ -82,17 +82,12 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryDescription = searchParams.get("description");
+  const sessionId = searchParams.get("session_id");
   const [isScreenWide, setIsScreenWide] = useState(false);
 
   useEffect(() => {
     setIsScreenWide(window.innerWidth >= 768);
   }, []);
-
-  useEffect(() => {
-    if (!user && !localStorage.getItem("session_id")) {
-      localStorage.setItem("session_id", uuidv4());
-    }
-  }, [user]);
 
   let defaultValues = {};
   if (names) {
@@ -127,14 +122,18 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const [idsList, setIdsList] = useState<string[]>([]);
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
+  const [autoSubmitted, setAutoSubmitted] = useState(false);
+
   useEffect(() => {
-    if (queryDescription) {
+    if (queryDescription && !autoSubmitted) {
       const submitForm = async () => {
         await onSubmit(form.getValues());
+        setAutoSubmitted(true); 
       };
       submitForm();
     }
-  }, [queryDescription]);
+  }, [queryDescription, autoSubmitted]); 
+  
 
   async function clear() {
     form.reset();
@@ -187,7 +186,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         const { data: names, error } = await supabase
           .from("names")
           .select("*", { count: "exact" })
-          .eq("session_id", localStorage.getItem("session_id"))
+          .eq("session_id", sessionId)
           .gte("created_at", oneDayAgo);
 
         if (names!.length >= 9) {
@@ -262,7 +261,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             max_length: values.maxLength,
             created_at: new Date(),
             created_by: user?.id,
-            session_id: localStorage.getItem("session_id"),
+            session_id: sessionId,
           };
 
           let { data, error } = await supabase
