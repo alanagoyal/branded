@@ -8,11 +8,14 @@ import { v4 as uuidv4 } from "uuid";
 
 export default function Description() {
   const [description, setDescription] = useState("");
+  const [sessionId, setSessionId] = useState("");
 
   useEffect(() => {
+    const currentSessionId = localStorage.getItem("session_id") || uuidv4();
     if (!localStorage.getItem("session_id")) {
-      localStorage.setItem("session_id", uuidv4());
+      localStorage.setItem("session_id", currentSessionId);
     }
+    setSessionId(currentSessionId);
   }, []);
 
   return (
@@ -28,7 +31,7 @@ export default function Description() {
         <Link
           href={{
             pathname: "/new",
-            query: { description: description, session_id: localStorage.getItem("session_id") },
+            query: { description: description, session_id: sessionId },
           }}
         >
           <Button
