@@ -1,5 +1,7 @@
 import AuthRefresh from "@/components/auth-refresh";
 import { NameGenerator } from "@/components/name-generator";
+import NewGeneration from "@/components/new-generation";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function GenerateName({
@@ -18,7 +20,7 @@ export default async function GenerateName({
   if (searchParams && searchParams.ids) {
     const idString = searchParams.ids as string;
     const idRegex = /.{36}/g;
-    idsList = idString.match(idRegex); 
+    idsList = idString.match(idRegex);
 
     const { data, error } = await supabase
       .from("names")
@@ -31,9 +33,8 @@ export default async function GenerateName({
 
   return (
     <div className="w-full px-4">
-      <h1 className="text-2xl font-bold mb-4">Name Generator</h1>
       <AuthRefresh idsList={idsList ?? []} />
-      <NameGenerator user={user} names={names ?? null} />
+      <NewGeneration user={user} names={names} />
     </div>
   );
 }

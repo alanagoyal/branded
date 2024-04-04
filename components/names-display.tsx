@@ -605,7 +605,7 @@ export function NamesDisplay({
   };
 
   return (
-    <div>
+    <div className="min-h-screen">
       {verticalLayout ? (
         <div className="flex flex-col space-y-4">
           {Object.keys(namesList).map((name, index) => (
