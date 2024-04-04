@@ -26,7 +26,6 @@ export default function NewGeneration({
   
   async function addExistingName() {
     const updatedNamesList: { [name: string]: string } = {};
-    console.log(inputName);
 
     try {
       const updates = {
@@ -40,18 +39,18 @@ export default function NewGeneration({
         .insert(updates)
         .select();
 
-      console.log(data);
       if (data) {
         updatedNamesList[data[0].name] = data[0].id;
         setNamesList(updatedNamesList);
         setShowNamesDisplay(true); 
+        setInputName("");
       }
 
       if (error) {
         console.error(error);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 

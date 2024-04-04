@@ -107,7 +107,9 @@ export function NamesDisplay({
         setFavoritedNames(favoritedMap);
       }
     }
-    fetchFavoritedStatus();
+    if (user) {
+      fetchFavoritedStatus();
+    }
   }, [namesList, user]);
 
   async function toggleFavoriteName(name: string) {
