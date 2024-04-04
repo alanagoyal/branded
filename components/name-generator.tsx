@@ -82,17 +82,12 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryDescription = searchParams.get("description");
+  const sessionId = searchParams.get("session_id");
   const [isScreenWide, setIsScreenWide] = useState(false);
 
   useEffect(() => {
     setIsScreenWide(window.innerWidth >= 768);
   }, []);
-
-  useEffect(() => {
-    if (!user && !localStorage.getItem("session_id")) {
-      localStorage.setItem("session_id", uuidv4());
-    }
-  }, [user]);
 
   let defaultValues = {};
   if (names) {
@@ -127,14 +122,19 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const [idsList, setIdsList] = useState<string[]>([]);
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
+  const [autoSubmitted, setAutoSubmitted] = useState(false);
+
   useEffect(() => {
-    if (queryDescription) {
+    // Only auto-submit if `queryDescription` is present and the form hasn't been auto-submitted yet
+    if (queryDescription && !autoSubmitted) {
       const submitForm = async () => {
         await onSubmit(form.getValues());
+        setAutoSubmitted(true); // Prevent further auto-submissions
       };
       submitForm();
     }
-  }, [queryDescription]);
+  }, [queryDescription, autoSubmitted]); // Now also depends on `autoSubmitted`
+  
 
   async function clear() {
     form.reset();
@@ -159,6 +159,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   }, [names, user]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("in on submit");
     setIsLoading(true);
     setNamesList({});
     setIdsList([]);
@@ -187,7 +188,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         const { data: names, error } = await supabase
           .from("names")
           .select("*", { count: "exact" })
-          .eq("session_id", localStorage.getItem("session_id"))
+          .eq("session_id", sessionId)
           .gte("created_at", oneDayAgo);
 
         if (names!.length >= 9) {
@@ -262,7 +263,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             max_length: values.maxLength,
             created_at: new Date(),
             created_by: user?.id,
-            session_id: localStorage.getItem("session_id"),
+            session_id: sessionId,
           };
 
           let { data, error } = await supabase

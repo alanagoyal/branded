@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NameGenerator } from "./name-generator";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -7,6 +7,7 @@ import { Label } from "./ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { createClient } from "@/utils/supabase/client";
 import { NamesDisplay } from "./names-display";
+import { useSearchParams } from "next/navigation";
 
 export default function NewGeneration({
   user,
@@ -19,7 +20,10 @@ export default function NewGeneration({
   const [inputName, setInputName] = useState<string>("");
   const [showNamesDisplay, setShowNamesDisplay] = useState<boolean>(false);
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
 
+  
   async function addExistingName() {
     const updatedNamesList: { [name: string]: string } = {};
     console.log(inputName);
@@ -29,7 +33,7 @@ export default function NewGeneration({
         name: inputName,
         created_at: new Date(),
         created_by: user?.id,
-        session_id: localStorage.getItem("session_id"),
+        session_id: sessionId,
       };
       const { data, error } = await supabase
         .from("names")
@@ -87,3 +91,7 @@ export default function NewGeneration({
     </div>
   );
 }
+function uuidv4(): string {
+    throw new Error("Function not implemented.");
+}
+
