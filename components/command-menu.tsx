@@ -10,26 +10,21 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "./ui/command";
-import {
-  Heart,
-  HelpCircle,
-  LogOut,
-  Plus,
-  User,
-} from "lucide-react";
+import { Heart, HelpCircle, LogOut, Plus, User } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import { Sun, Moon } from "lucide-react";
 
 export function CommandMenu() {
   const router = useRouter();
-  const supabase = createClient();
   const [open, setOpen] = React.useState(false);
-
+  const { theme, setTheme } = useTheme();
 
   const navigateAndCloseDialog = (path: string) => {
     router.push(path);
-    setOpen(false); 
+    setOpen(false);
   };
 
   useEffect(() => {
@@ -61,6 +56,10 @@ export function CommandMenu() {
             e.preventDefault();
             handleSignOut();
             break;
+          case "c":
+            e.preventDefault();
+            setTheme(theme === "light" ? "dark" : "light");
+            break;
           default:
             break;
         }
@@ -68,7 +67,7 @@ export function CommandMenu() {
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [router]); 
+  }, [router, theme, setTheme]);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -124,6 +123,17 @@ export function CommandMenu() {
               <CommandShortcut>⌘J</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
+          <CommandItem
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          >
+            {theme === "dark" ? (
+              <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
+            )}
+            <span>Switch Theme</span>
+            <CommandShortcut>⌘C</CommandShortcut>
+          </CommandItem>
           <CommandSeparator />
           <CommandItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
