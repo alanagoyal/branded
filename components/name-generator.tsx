@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
 import {
@@ -120,20 +120,17 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const [isLoading, setIsLoading] = useState(false);
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [idsList, setIdsList] = useState<string[]>([]);
-  const [isOwner, setIsOwner] = useState<boolean>(false);
-
-  const [autoSubmitted, setAutoSubmitted] = useState(false);
+  const autoSubmitted = useRef(false);
 
   useEffect(() => {
-    if (queryDescription && !autoSubmitted) {
+    if (queryDescription && !autoSubmitted.current) {
+      autoSubmitted.current = true;
       const submitForm = async () => {
         await onSubmit(form.getValues());
-        setAutoSubmitted(true); 
       };
       submitForm();
     }
-  }, [queryDescription, autoSubmitted]); 
-  
+  }, [queryDescription, autoSubmitted]);
 
   async function clear() {
     form.reset();
@@ -145,9 +142,6 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       const updatedNamesList: { [name: string]: string } = {};
       for (const name of names) {
         updatedNamesList[name.name] = name.id;
-        if (user && name.created_by === user.id) {
-          setIsOwner(true);
-        }
       }
       setNamesList(updatedNamesList);
 
