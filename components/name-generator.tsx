@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,7 +82,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryDescription = searchParams.get("description");
-  const sessionId = searchParams.get("session_id");
+  const sessionId = useMemo(
+    () => searchParams.get("session_id") || uuidv4(),
+    [searchParams]
+  );
   const [isScreenWide, setIsScreenWide] = useState(false);
 
   useEffect(() => {
@@ -129,7 +132,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         await onSubmit(form.getValues());
       };
       submitForm();
-      router.push('/new')
+      router.push(`/new?session_id=${sessionId}`);
     }
   }, [queryDescription, autoSubmitted]);
 
