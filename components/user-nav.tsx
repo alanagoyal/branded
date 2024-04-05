@@ -79,48 +79,66 @@ export default function UserNav({ user }: any) {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <Link href="/new">
-            <DropdownMenuItem className="cursor-pointer">
-              <Plus className="mr-2 h-4 w-4" />
-              <span>Generate</span>
+            <DropdownMenuItem className="cursor-pointer justify-between">
+              <div className="flex items-center">
+                <Plus className="mr-2 h-4 w-4" />
+                <span>Generate</span>
+              </div>
+              <p className="text-xs text-muted-foreground">⌘G</p>
             </DropdownMenuItem>
           </Link>
           <Link href="/profile">
-            <DropdownMenuItem className="cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+            <DropdownMenuItem className="cursor-pointer justify-between">
+              <div className="flex items-center">
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </div>
+              <p className="text-xs text-muted-foreground">⌘P</p>
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
         <DropdownMenuGroup>
           <Link href="/favorites">
-            <DropdownMenuItem className="cursor-pointer">
-              <Heart className="mr-2 h-4 w-4" />
-              <span>Favorites</span>
+            <DropdownMenuItem className="cursor-pointer justify-between">
+              <div className="flex items-center">
+                <Heart className="mr-2 h-4 w-4" />
+                <span>Favorites</span>
+              </div>
+              <p className="text-xs text-muted-foreground">⌘F</p>
             </DropdownMenuItem>
           </Link>
           <Link href="/help">
-            <DropdownMenuItem className="cursor-pointer">
-              <HelpCircle className="mr-2 h-4 w-4" />
-              <span>Support</span>
+            <DropdownMenuItem className="cursor-pointer justify-between">
+              <div className="flex items-center">
+                <HelpCircle className="mr-2 h-4 w-4" />
+                <span>Support</span>
+              </div>
+              <p className="text-xs text-muted-foreground">⌘J</p>
             </DropdownMenuItem>
           </Link>
           <DropdownMenuItem
-            className="cursor-pointer"
+            className="cursor-pointer justify-between"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
             aria-label="Toggle theme"
           >
-            {theme === "dark" ? (
-              <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
-            )}
-            <span>Switch Theme</span>
+            <div className="flex items-center">
+              {theme === "dark" ? (
+                <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
+              )}
+              <span>Switch Theme</span>
+            </div>
+            <p className="text-xs text-muted-foreground">⌘C</p>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+        <DropdownMenuItem className="cursor-pointer justify-between" onClick={handleSignOut}>
+          <div className="flex items-center">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+          </div>
+          <p className="text-xs text-muted-foreground">⌘O</p>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

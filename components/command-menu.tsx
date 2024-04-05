@@ -94,7 +94,7 @@ export function CommandMenu() {
       <CommandInput placeholder="Type a command or search..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="User">
+        <CommandGroup>
           <CommandLinkItem href="/new">
             <CommandItem>
               <Plus className="mr-2 h-4 w-4" />
