@@ -121,18 +121,19 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [idsList, setIdsList] = useState<string[]>([]);
   const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [userHasInteracted, setUserHasInteracted] = useState(false);
 
   const [autoSubmitted, setAutoSubmitted] = useState(false);
 
   useEffect(() => {
-    if (queryDescription && !autoSubmitted) {
+    if (queryDescription && !autoSubmitted && !userHasInteracted) {
       const submitForm = async () => {
         await onSubmit(form.getValues());
         setAutoSubmitted(true); 
       };
       submitForm();
     }
-  }, [queryDescription, autoSubmitted]); 
+  }, [queryDescription, autoSubmitted, userHasInteracted]); 
   
 
   async function clear() {
@@ -294,7 +295,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   return (
     <>
       <div className="min-h-screen flex flex-col">
-        <Form {...form}>
+        <Form {...form} onChange={() => setUserHasInteracted(true)}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-1 gap-4">
               <div className="flex h-full flex-col space-y-4">
@@ -308,6 +309,12 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         <Textarea
                           placeholder="What will you build?"
                           {...field}
+                          onChange={(e) => {
+                            setUserHasInteracted(true);
+                            if (field.onChange) {
+                              field.onChange(e);
+                            }
+                          }}
                         />
                       </FormControl>
                       <FormDescription>
@@ -327,7 +334,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                     <FormItem>
                       <FormLabel>Style</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          setUserHasInteracted(true);
+                          field.onChange(value);
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>
@@ -378,7 +388,16 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                         <FormItem>
                           <FormLabel>Optional Word</FormLabel>
                           <FormControl>
-                            <Input {...field} autoComplete="off" />
+                            <Input 
+                              {...field} 
+                              autoComplete="off"
+                              onChange={(e) => {
+                                setUserHasInteracted(true);
+                                if (field.onChange) {
+                                  field.onChange(e);
+                                }
+                              }}
+                            />
                           </FormControl>
                           <FormDescription>
                             {form.watch("style") === "portmanteau"
@@ -408,7 +427,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                       <FormItem>
                         <FormLabel>Placement</FormLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            setUserHasInteracted(true);
+                            field.onChange(value);
+                          }}
                           defaultValue={field.value}
                         >
                           <FormControl>
@@ -463,6 +485,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                                   form.getValues().maxLength
                                 );
                                 const newValue = Math.max(minValue, 4);
+                                setUserHasInteracted(true);
                                 field.onChange(newValue);
                               }}
                               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
@@ -506,6 +529,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                                   form.getValues().minLength
                                 );
                                 const newValue = Math.min(maxValue, 14);
+                                setUserHasInteracted(true);
                                 field.onChange(newValue);
                               }}
                               className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
@@ -535,7 +559,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
                           <FormControl>
                             <Switch
                               checked={field.value}
-                              onCheckedChange={field.onChange}
+                              onCheckedChange={(value) => {
+                                setUserHasInteracted(true);
+                                field.onChange(value);
+                              }}
                             />
                           </FormControl>
                         </FormItem>
