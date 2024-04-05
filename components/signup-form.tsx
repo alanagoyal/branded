@@ -67,7 +67,7 @@ export function SignupForm({ signup, idString }: SignupFormProps) {
       const response = await signup(data, idString, origin);
       if (response && !response.success) {
         if (response.errorMessage === "User already registered") {
-          console.log(response.errorMessage);
+          console.error(response.errorMessage);
           toast({
             title: "Account already exists",
             description: "Please sign in or sign up with another email",
