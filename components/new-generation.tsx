@@ -55,7 +55,7 @@ export default function NewGeneration({
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Name Generator</h1>
         {showNamesDisplay ? (

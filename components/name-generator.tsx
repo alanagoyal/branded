@@ -293,7 +293,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col">
+      <div className="flex flex-col">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-1 gap-4">
