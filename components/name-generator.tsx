@@ -136,19 +136,6 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     }
   }, [queryDescription, autoSubmitted]);
 
-  /*   const autoSubmitted = useRef(false);
-
-  useEffect(() => {
-    if (queryDescription && !autoSubmitted.current) {
-      autoSubmitted.current = true;
-      const submitForm = async () => {
-        await onSubmit(form.getValues());
-      };
-      submitForm();
-      router.push('/new')
-    }
-  }, [queryDescription, autoSubmitted]); */
-
   async function clear() {
     form.reset();
     setNamesList({});
