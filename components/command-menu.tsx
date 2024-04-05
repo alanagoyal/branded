@@ -56,7 +56,7 @@ export function CommandMenu() {
             e.preventDefault();
             handleSignOut();
             break;
-          case "c":
+          case "b":
             e.preventDefault();
             setTheme(theme === "light" ? "dark" : "light");
             break;
@@ -132,7 +132,7 @@ export function CommandMenu() {
               <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
             )}
             <span>Switch Theme</span>
-            <CommandShortcut>⌘C</CommandShortcut>
+            <CommandShortcut>⌘B</CommandShortcut>
           </CommandItem>
           <CommandSeparator />
           <CommandItem onClick={handleSignOut}>

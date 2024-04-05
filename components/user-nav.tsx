@@ -129,7 +129,7 @@ export default function UserNav({ user }: any) {
               )}
               <span>Switch Theme</span>
             </div>
-            <p className="text-xs text-muted-foreground">⌘C</p>
+            <p className="text-xs text-muted-foreground">⌘B</p>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
