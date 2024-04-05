@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NameGenerator } from "./name-generator";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -21,8 +21,10 @@ export default function NewGeneration({
   const [showNamesDisplay, setShowNamesDisplay] = useState<boolean>(false);
   const supabase = createClient();
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id");
-
+  const sessionId = useMemo(
+    () => searchParams.get("session_id") || uuidv4(),
+    [searchParams]
+  );
   
   async function addExistingName() {
     const updatedNamesList: { [name: string]: string } = {};
