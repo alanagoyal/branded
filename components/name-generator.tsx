@@ -295,7 +295,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   return (
     <>
       <div className="min-h-screen flex flex-col">
-        <Form {...form} onChange={() => setUserHasInteracted(true)}>
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-1 gap-4">
               <div className="flex h-full flex-col space-y-4">
