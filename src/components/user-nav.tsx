@@ -1,5 +1,5 @@
 import React from 'react';
-import { CommandShortcut } from './command-menu.tsx';
+import CommandShortcut from './CommandShortcut';
 
 const UserNav: React.FC = () => {
   return (
