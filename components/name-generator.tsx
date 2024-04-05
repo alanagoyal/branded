@@ -129,6 +129,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         await onSubmit(form.getValues());
       };
       submitForm();
+      router.push('/new')
     }
   }, [queryDescription, autoSubmitted]);
 
