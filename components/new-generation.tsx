@@ -1,13 +1,13 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import {  useMemo, useState } from "react";
 import { NameGenerator } from "./name-generator";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { createClient } from "@/utils/supabase/client";
 import { NamesDisplay } from "./names-display";
 import { useSearchParams } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";
 
 export default function NewGeneration({
   user,
@@ -92,7 +92,3 @@ export default function NewGeneration({
     </div>
   );
 }
-function uuidv4(): string {
-    throw new Error("Function not implemented.");
-}
-
