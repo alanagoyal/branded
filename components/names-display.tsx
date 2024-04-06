@@ -46,6 +46,7 @@ export function NamesDisplay({
   const supabase = createClient();
   const [processingDomains, setProcessingDomains] = useState<string[]>([]);
   const [processingNpm, setProcessingNpm] = useState<string[]>([]);
+  const [processingTrademark, setProcessingTrademark] = useState<string[]>([]);
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
   }>({});
@@ -54,6 +55,9 @@ export function NamesDisplay({
   }>({});
   const [npmResults, setNpmResults] = useState<{
     [key: string]: { npmName: string; purchaseLink: string }[];
+  }>({});
+  const [trademarkResults, setTrademarkResults] = useState<{
+    [key: string]: { keyword: string; description: string; link: string }[];
   }>({});
   const [processingLogo, setProcessingLogo] = useState<string[]>([]);
   const [logoResults, setLogoResults] = useState<{
@@ -248,6 +252,108 @@ export function NamesDisplay({
           });
         }
       }
+    }
+  }
+
+  async function checkTrademarks(name: string) {
+    console.log("checkTrademarks", name);
+    try {
+      setProcessingTrademark((prev) => [...prev, name]);
+      const showingAvailability = trademarkResults[name];
+      if (showingAvailability) {
+        setTrademarkResults((prev) => {
+          const updatedResults = { ...prev };
+          delete updatedResults[name];
+          return updatedResults;
+        });
+      } else {
+        const trademarkStatus: {
+          keyword: string;
+          description: string;
+          link: string;
+        }[] = [];
+        const { data: trademarkData, error: trademarkError } = await supabase
+          .from("trademarks")
+          .select()
+          .eq("name_id", namesList[name]);
+
+        if (trademarkData && trademarkData.length > 0) {
+          trademarkData.forEach((result) => {
+            trademarkStatus.push({
+              keyword: result.keyword,
+              description: result.description,
+              link: result.link,
+            });
+          });
+        } else {
+          const response = await fetch(
+            `/find-trademarks?searchTerm=${encodeURIComponent(name)}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Error finding trademarks");
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error("Error finding trademarks");
+          }
+
+          if (data.count === 0) {
+            toast({
+              title: "We didn't find any trademarks for this name.",
+              description:
+                "Please double check this with the United States Patent & Trademark Office to be sure.",
+              action: (
+                <ToastAction
+                  onClick={() =>
+                    window.open("https://tmsearch.uspto.gov/search/", "_blank")
+                  }
+                  altText="Visit Website"
+                >
+                  Visit Website
+                </ToastAction>
+              ),
+            });
+          } else if (data.items.length > 0) {
+            for (const item of data.items) {
+              if (item.status_label === "Live/Registered") {
+                const { keyword, description, serial_number: serial } = item;
+                const link = `https://tsdr.uspto.gov/#caseNumber=${serial}&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch`;
+
+                const updates = {
+                  keyword,
+                  description,
+                  link,
+                  created_at: new Date(),
+                  name_id: namesList[name],
+                  created_by: user.id,
+                };
+
+                const { error } = await supabase
+                  .from("trademarks")
+                  .insert(updates);
+                if (error) throw error;
+
+                trademarkStatus.push({ keyword, description, link });
+              }
+            }
+          }
+        }
+        console.log("trademarkStatus", trademarkStatus);
+        setTrademarkResults((prev) => ({ ...prev, [name]: trademarkStatus }));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setProcessingTrademark((prev) => prev.filter((n) => n !== name));
     }
   }
 
@@ -670,6 +776,48 @@ export function NamesDisplay({
                     ))}
                   <Button
                     variant="ghost"
+                    disabled={processingTrademark.includes(name)}
+                    onClick={() =>
+                      user
+                        ? checkTrademarks(name)
+                        : handleActionForUnauthenticatedUser(
+                            "check trademarks for"
+                          )
+                    }
+                  >
+                    {processingTrademark.includes(name) ? (
+                      <Icons.spinner />
+                    ) : trademarkResults[name] &&
+                      trademarkResults[name].length === 0 ? (
+                      <>
+                        <Icons.checkmark />
+                        <span className="ml-2">No trademarks found</span>
+                      </>
+                    ) : (
+                      <>
+                        <Icons.trademark />
+                        <span className="ml-2">Check trademarks</span>
+                      </>
+                    )}
+                  </Button>
+                  {trademarkResults[name] &&
+                    Object.keys(trademarkResults).length > 0 &&
+                    trademarkResults[name].map((result, idx) => (
+                      <div
+                        key={idx}
+                        className="flex flex-col items-center justify-center w-full"
+                      >
+                        <Link
+                          href={result.link}
+                          target="_blank"
+                          className="text-sm cursor-pointer"
+                        >
+                          {result.keyword}
+                        </Link>
+                      </div>
+                    ))}
+                  <Button
+                    variant="ghost"
                     disabled={processingLogo.includes(name)}
                     onClick={() =>
                       user
@@ -747,7 +895,7 @@ export function NamesDisplay({
                     </Button>
                   )}
                 </div>
-              </CardContent>{" "}
+              </CardContent>
             </Card>
           ))}
         </div>
@@ -800,6 +948,50 @@ export function NamesDisplay({
                             </Link>
                           </div>
                         ))}
+                      <Button
+                        variant="ghost"
+                        disabled={processingTrademark.includes(name)}
+                        onClick={() =>
+                          user
+                            ? checkTrademarks(name)
+                            : handleActionForUnauthenticatedUser(
+                                "check trademarks for"
+                              )
+                        }
+                      >
+                        {processingTrademark.includes(name) ? (
+                          <Icons.spinner />
+                        ) : trademarkResults[name] &&
+                          trademarkResults[name].length === 0 ? (
+                          <>
+                            <Icons.checkmark />
+                            <span className="ml-2">No trademarks found</span>
+                          </>
+                        ) : (
+                          <>
+                            <Icons.trademark />
+                            <span className="ml-2">Check trademarks</span>
+                          </>
+                        )}
+                      </Button>
+                      {trademarkResults[name] && (
+                        <div className="flex flex-col items-center justify-center w-full">
+                          {trademarkResults[name].map((result, idx) => (
+                            <div
+                              key={idx}
+                              className="flex flex-col items-center justify-center w-full"
+                            >
+                              <Link
+                                href={result.link}
+                                target="_blank"
+                                className="text-sm cursor-pointer"
+                              >
+                                {result.keyword}
+                              </Link>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <Button
                         variant="ghost"
                         disabled={processingLogo.includes(name)}
