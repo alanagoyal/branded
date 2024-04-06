@@ -7,7 +7,8 @@ import { TiBusinessCard } from "react-icons/ti";
 import { IoCopyOutline } from "react-icons/io5";
 import { GrDocumentPdf } from "react-icons/gr";
 import { MdOutlineMarkEmailRead } from "react-icons/md";
-
+import { RiTrademarkFill } from "react-icons/ri";
+import { IoIosCheckmarkCircle } from "react-icons/io";
 
 
 type IconProps = React.HTMLAttributes<SVGElement>;
@@ -30,8 +31,10 @@ export const Icons = {
   generate: BsStars,
   domain: BsGlobe2,
   npmPackage: IoTerminalOutline,
+  trademark: RiTrademarkFill,
   unfavorite: FaHeart,
   favorite: FaRegHeart,
+  checkmark: IoIosCheckmarkCircle,
   copy: IoCopyOutline,
   check: (props: IconProps) => (
     <svg fill="none" viewBox="0 0 24 24" {...props}>
