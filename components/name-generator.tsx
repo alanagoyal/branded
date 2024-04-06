@@ -563,7 +563,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             <NamesDisplay
               namesList={namesList}
               user={user}
-              verticalLayout={false}
+              verticalLayout={!isScreenWide}
             />
             <Share idString={idsList.join("")} />
           </div>
