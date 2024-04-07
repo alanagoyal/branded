@@ -1,5 +1,6 @@
 import { Icons } from "@/components/icons";
 import { NamesDisplay } from "@/components/names-display";
+import { NamesDisplayCleaner } from "@/components/names-display-cleaner";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";

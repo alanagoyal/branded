@@ -256,7 +256,6 @@ export function NamesDisplay({
   }
 
   async function checkTrademarks(name: string) {
-    console.log("checkTrademarks", name);
     try {
       setProcessingTrademark((prev) => [...prev, name]);
       const showingAvailability = trademarkResults[name];
@@ -306,7 +305,7 @@ export function NamesDisplay({
             throw new Error("Error finding trademarks");
           }
 
-          if (data.count === 0) {
+          /*   if (data.count === 0) {
             toast({
               title: "We didn't find any trademarks for this name.",
               description:
@@ -322,7 +321,7 @@ export function NamesDisplay({
                 </ToastAction>
               ),
             });
-          } else if (data.items.length > 0) {
+          } else */ if (data.items.length > 0) {
             for (const item of data.items) {
               if (item.status_label === "Live/Registered") {
                 const { keyword, description, serial_number: serial } = item;
@@ -792,6 +791,12 @@ export function NamesDisplay({
                       <>
                         <Icons.checkmark />
                         <span className="ml-2">No trademarks found</span>
+                      </>
+                    ) : trademarkResults[name] &&
+                      trademarkResults[name].length > 0 ? (
+                      <>
+                        <Icons.alert />
+                        <span className="ml-2">Trademark detected</span>
                       </>
                     ) : (
                       <>

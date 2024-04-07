@@ -9,6 +9,7 @@ import { GrDocumentPdf } from "react-icons/gr";
 import { MdOutlineMarkEmailRead } from "react-icons/md";
 import { RiTrademarkFill } from "react-icons/ri";
 import { IoIosCheckmarkCircle } from "react-icons/io";
+import { IoIosAlert } from "react-icons/io";
 
 
 type IconProps = React.HTMLAttributes<SVGElement>;
@@ -35,6 +36,7 @@ export const Icons = {
   unfavorite: FaHeart,
   favorite: FaRegHeart,
   checkmark: IoIosCheckmarkCircle,
+  alert: IoIosAlert,
   copy: IoCopyOutline,
   check: (props: IconProps) => (
     <svg fill="none" viewBox="0 0 24 24" {...props}>

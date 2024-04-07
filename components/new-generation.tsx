@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/client";
 import { NamesDisplay } from "./names-display";
 import { useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
+import { NamesDisplayCleaner } from "./names-display-cleaner";
 
 export default function NewGeneration({
   user,
