@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -16,11 +16,13 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
+import { AppContext } from './AppContext';
 
 export function CommandMenu() {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
+  const { toggleUserNavVisibility } = useContext(AppContext);
 
   const navigateAndCloseDialog = (path: string) => {
     router.push(path);
@@ -28,7 +30,12 @@ export function CommandMenu() {
   };
 
   useEffect(() => {
-    const down = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        toggleUserNavVisibility();
+      }
+
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((open) => !open);
@@ -60,15 +67,12 @@ export function CommandMenu() {
             e.preventDefault();
             setTheme(theme === "light" ? "dark" : "light");
             break;
-          default:
-            break;
         }
       }
     };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, [router, theme, setTheme]);
-
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [toggleUserNavVisibility, router, theme, setTheme]);
   const handleSignOut = async () => {
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();
