@@ -33,6 +33,62 @@ import {
 import { useRouter } from "next/navigation";
 import { ToastAction } from "./ui/toast";
 
+// Define a reusable component for rendering buttons
+const ActionButton = ({
+  name,
+  processing,
+  action,
+  icon,
+  text,
+  onClick,
+  status,
+}: {
+  name: string;
+  processing: string[];
+  action: React.ReactNode;
+  icon: React.ReactNode;
+  text: string;
+  onClick: () => void;
+  status?: 'default' | 'noTrademarks' | 'trademarksFound';
+}) => {
+  let content = <>{icon}<span className="ml-2">{text}</span></>;
+
+  if (processing.includes(name)) {
+    content = <>{action}<span className="ml-2">{text}</span></>;
+  } else if (status === 'noTrademarks') {
+    content = <><Icons.checkmark /><span className="ml-2">No trademarks found</span></>;
+  } else if (status === 'trademarksFound') {
+    content = <><Icons.alert /><span className="ml-2">Trademark detected</span></>;
+  }
+
+  return (
+    <Button variant="ghost" disabled={processing.includes(name)} onClick={onClick}>
+      {content}
+    </Button>
+  );
+};
+
+// Define a reusable component for rendering results
+const ResultLinks = ({
+  results,
+  name,
+}: {
+  results: { [key: string]: any[] };
+  name: string;
+}) => (
+  <>
+    {results[name] &&
+      Object.keys(results).length > 0 &&
+      results[name].map((result, idx) => (
+        <div key={idx} className="flex items-center justify-center w-full">
+          <Link href={result.purchaseLink || result.link} target="_blank" className="text-sm cursor-pointer">
+            {result.domain || result.keyword}
+          </Link>
+        </div>
+      ))}
+  </>
+);
+
 export function NamesDisplay({
   namesList,
   user,
@@ -46,6 +102,7 @@ export function NamesDisplay({
   const supabase = createClient();
   const [processingDomains, setProcessingDomains] = useState<string[]>([]);
   const [processingNpm, setProcessingNpm] = useState<string[]>([]);
+  const [processingTrademark, setProcessingTrademark] = useState<string[]>([]);
   const [favoritedNames, setFavoritedNames] = useState<{
     [key: string]: boolean;
   }>({});
@@ -54,6 +111,9 @@ export function NamesDisplay({
   }>({});
   const [npmResults, setNpmResults] = useState<{
     [key: string]: { npmName: string; purchaseLink: string }[];
+  }>({});
+  const [trademarkResults, setTrademarkResults] = useState<{
+    [key: string]: { keyword: string; description: string; link: string }[];
   }>({});
   const [processingLogo, setProcessingLogo] = useState<string[]>([]);
   const [logoResults, setLogoResults] = useState<{
@@ -248,6 +308,90 @@ export function NamesDisplay({
           });
         }
       }
+    }
+  }
+
+  async function checkTrademarks(name: string) {
+    try {
+      setProcessingTrademark((prev) => [...prev, name]);
+      const showingAvailability = trademarkResults[name];
+      if (showingAvailability) {
+        setTrademarkResults((prev) => {
+          const updatedResults = { ...prev };
+          delete updatedResults[name];
+          return updatedResults;
+        });
+      } else {
+        const trademarkStatus: {
+          keyword: string;
+          description: string;
+          link: string;
+        }[] = [];
+        const { data: trademarkData, error: trademarkError } = await supabase
+          .from("trademarks")
+          .select()
+          .eq("name_id", namesList[name]);
+
+        if (trademarkData && trademarkData.length > 0) {
+          trademarkData.forEach((result) => {
+            trademarkStatus.push({
+              keyword: result.keyword,
+              description: result.description,
+              link: result.link,
+            });
+          });
+        } else {
+          const response = await fetch(
+            `/find-trademarks?searchTerm=${encodeURIComponent(name)}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Error finding trademarks");
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error("Error finding trademarks");
+          }
+
+          if (data.items.length > 0) {
+            for (const item of data.items.slice(0, 5)) { 
+              if (item.status_label === "Live/Registered") {
+                const { keyword, description, serial_number: serial } = item;
+                const link = `https://tsdr.uspto.gov/#caseNumber=${serial}&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch`;
+
+                const updates = {
+                  keyword,
+                  description,
+                  link,
+                  created_at: new Date(),
+                  name_id: namesList[name],
+                  created_by: user.id,
+                };
+
+                const { error } = await supabase
+                  .from("trademarks")
+                  .insert(updates);
+                if (error) throw error;
+
+                trademarkStatus.push({ keyword, description, link });
+              }
+            }
+          }
+        }
+        setTrademarkResults((prev) => ({ ...prev, [name]: trademarkStatus }));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setProcessingTrademark((prev) => prev.filter((n) => n !== name));
     }
   }
 
@@ -589,23 +733,6 @@ export function NamesDisplay({
     }
   }
 
-  const copyToClipboard = (url: string) => {
-    navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        toast({
-          description: "Copied to clipboard",
-        });
-      })
-      .catch((error) => {
-        console.error("Error copying to clipboard: ", error);
-        toast({
-          variant: "destructive",
-          description: "Failed to copy to clipboard",
-        });
-      });
-  };
-
   const handleActionForUnauthenticatedUser = (actionType: string) => {
     toast({
       title: "Please create an account",
@@ -630,64 +757,47 @@ export function NamesDisplay({
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col space-y-2">
-                  <Button
-                    variant="ghost"
-                    disabled={processingDomains.includes(name)}
+                  <ActionButton
+                    name={name}
+                    processing={processingDomains}
+                    action={<Icons.spinner />}
+                    icon={<Icons.domain />}
+                    text="Find available domain names"
                     onClick={() =>
-                      user
-                        ? findDomainNames(name)
-                        : handleActionForUnauthenticatedUser(
-                            "find available domain names for"
-                          )
+                      user ? findDomainNames(name) : handleActionForUnauthenticatedUser("find available domain names for")
                     }
-                  >
-                    {processingDomains.includes(name) ? (
-                      <Icons.spinner />
-                    ) : (
-                      <>
-                        <Icons.domain />
-                        <span className="ml-2">
-                          Find available domain names
-                        </span>
-                      </>
-                    )}
-                  </Button>
-                  {domainResults[name] &&
-                    Object.keys(domainResults).length > 0 &&
-                    domainResults[name].map((result, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-center w-full"
-                      >
-                        <Link
-                          href={result.purchaseLink}
-                          target="_blank"
-                          className="text-sm cursor-pointer"
-                        >
-                          {result.domain}
-                        </Link>
-                      </div>
-                    ))}
-                  <Button
-                    variant="ghost"
-                    disabled={processingLogo.includes(name)}
+                  />
+                  <ResultLinks results={domainResults} name={name} />
+                  <ActionButton
+                    name={name}
+                    processing={processingTrademark}
+                    action={<Icons.spinner />}
+                    icon={<Icons.trademark />}
+                    text="Check trademarks"
                     onClick={() =>
-                      user
-                        ? generateLogo(name)
-                        : handleActionForUnauthenticatedUser(
-                            "generate a logo for"
-                          )
+                      user ? checkTrademarks(name) : handleActionForUnauthenticatedUser("check trademarks for")
                     }
-                  >
-                    {processingLogo.includes(name) ? (
-                      <Icons.spinner />
-                    ) : (
-                      <>
-                        <Icons.generate />
-                        <span className="ml-2">Generate a logo</span>
-                      </>
-                    )}
-                  </Button>
+                    status={
+                      processingTrademark.includes(name)
+                        ? 'default'
+                        : trademarkResults[name] && trademarkResults[name].length === 0
+                        ? 'noTrademarks'
+                        : trademarkResults[name] && trademarkResults[name].length > 0
+                        ? 'trademarksFound'
+                        : 'default'
+                    }
+                  />
+                  <ResultLinks results={trademarkResults} name={name} />
+                  <ActionButton
+                    name={name}
+                    processing={processingLogo}
+                    action={<Icons.spinner />}
+                    icon={<Icons.generate />}
+                    text="Generate a logo"
+                    onClick={() =>
+                      user ? generateLogo(name) : handleActionForUnauthenticatedUser("generate a logo for")
+                    }
+                  />
                   {logoResults[name] && (
                     <div className="flex items-center justify-center w-full">
                       <Link
@@ -704,26 +814,16 @@ export function NamesDisplay({
                       </Link>
                     </div>
                   )}
-                  <Button
-                    variant="ghost"
-                    disabled={processingOnePager.includes(name)}
+                  <ActionButton
+                    name={name}
+                    processing={processingOnePager}
+                    action={<Icons.spinner />}
+                    icon={<Icons.onePager />}
+                    text="Generate a one-pager"
                     onClick={() =>
-                      user
-                        ? createOnePager(name)
-                        : handleActionForUnauthenticatedUser(
-                            "generate a one-pager for"
-                          )
+                      user ? createOnePager(name) : handleActionForUnauthenticatedUser("generate a one-pager for")
                     }
-                  >
-                    {processingOnePager.includes(name) ? (
-                      <Icons.spinner />
-                    ) : (
-                      <>
-                        <Icons.onePager />
-                        <span className="ml-2">Generate a one-pager</span>
-                      </>
-                    )}
-                  </Button>
+                  />
                   {isOwner && (
                     <Button
                       onClick={() =>
@@ -747,7 +847,7 @@ export function NamesDisplay({
                     </Button>
                   )}
                 </div>
-              </CardContent>{" "}
+              </CardContent>
             </Card>
           ))}
         </div>
@@ -762,64 +862,47 @@ export function NamesDisplay({
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col space-y-2">
-                      <Button
-                        variant="ghost"
-                        disabled={processingDomains.includes(name)}
+                      <ActionButton
+                        name={name}
+                        processing={processingDomains}
+                        action={<Icons.spinner />}
+                        icon={<Icons.domain />}
+                        text="Find available domain names"
                         onClick={() =>
-                          user
-                            ? findDomainNames(name)
-                            : handleActionForUnauthenticatedUser(
-                                "find available domain names for"
-                              )
+                          user ? findDomainNames(name) : handleActionForUnauthenticatedUser("find available domain names for")
                         }
-                      >
-                        {processingDomains.includes(name) ? (
-                          <Icons.spinner />
-                        ) : (
-                          <>
-                            <Icons.domain />
-                            <span className="ml-2">
-                              Find available domain names
-                            </span>
-                          </>
-                        )}
-                      </Button>
-                      {domainResults[name] &&
-                        Object.keys(domainResults).length > 0 &&
-                        domainResults[name].map((result, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center justify-center w-full"
-                          >
-                            <Link
-                              href={result.purchaseLink}
-                              target="_blank"
-                              className="text-sm cursor-pointer"
-                            >
-                              {result.domain}
-                            </Link>
-                          </div>
-                        ))}
-                      <Button
-                        variant="ghost"
-                        disabled={processingLogo.includes(name)}
+                      />
+                      <ResultLinks results={domainResults} name={name} />
+                      <ActionButton
+                        name={name}
+                        processing={processingTrademark}
+                        action={<Icons.spinner />}
+                        icon={<Icons.trademark />}
+                        text="Check trademarks"
                         onClick={() =>
-                          user
-                            ? generateLogo(name)
-                            : handleActionForUnauthenticatedUser(
-                                "generate a logo for"
-                              )
+                          user ? checkTrademarks(name) : handleActionForUnauthenticatedUser("check trademarks for")
                         }
-                      >
-                        {processingLogo.includes(name) ? (
-                          <Icons.spinner />
-                        ) : (
-                          <>
-                            <Icons.generate />
-                            <span className="ml-2">Generate a logo</span>
-                          </>
-                        )}
-                      </Button>
+                        status={
+                          processingTrademark.includes(name)
+                            ? 'default'
+                            : trademarkResults[name] && trademarkResults[name].length === 0
+                            ? 'noTrademarks'
+                            : trademarkResults[name] && trademarkResults[name].length > 0
+                            ? 'trademarksFound'
+                            : 'default'
+                        }
+                      />
+                      <ResultLinks results={trademarkResults} name={name} />
+                      <ActionButton
+                        name={name}
+                        processing={processingLogo}
+                        action={<Icons.spinner />}
+                        icon={<Icons.generate />}
+                        text="Generate a logo"
+                        onClick={() =>
+                          user ? generateLogo(name) : handleActionForUnauthenticatedUser("generate a logo for")
+                        }
+                      />
                       {logoResults[name] && (
                         <div className="flex items-center justify-center w-full">
                           <Link
@@ -836,26 +919,16 @@ export function NamesDisplay({
                           </Link>
                         </div>
                       )}
-                      <Button
-                        variant="ghost"
-                        disabled={processingOnePager.includes(name)}
+                      <ActionButton
+                        name={name}
+                        processing={processingOnePager}
+                        action={<Icons.spinner />}
+                        icon={<Icons.onePager />}
+                        text="Generate a one-pager"
                         onClick={() =>
-                          user
-                            ? createOnePager(name)
-                            : handleActionForUnauthenticatedUser(
-                                "generate a one-pager for"
-                              )
+                          user ? createOnePager(name) : handleActionForUnauthenticatedUser("generate a one-pager for")
                         }
-                      >
-                        {processingOnePager.includes(name) ? (
-                          <Icons.spinner />
-                        ) : (
-                          <>
-                            <Icons.onePager />
-                            <span className="ml-2">Generate a one-pager</span>
-                          </>
-                        )}
-                      </Button>
+                      />
                       {isOwner && (
                         <Button
                           onClick={() =>

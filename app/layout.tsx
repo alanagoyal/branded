@@ -56,6 +56,7 @@ export default async function RootLayout({
           content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712009452/i1600x839-BQQvTJy8t3Pk_grpcmh.png"
         />
         <meta property="og:url" content="https://namebase.ai"></meta>
+        <meta name='impact-site-verification' content='69669d07-f4c4-4ab2-9530-33933551cc53'></meta>
       </head>
       <body
         className={cn(
