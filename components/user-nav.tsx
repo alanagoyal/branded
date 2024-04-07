@@ -22,6 +22,18 @@ export default function UserNav({ user }: any) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [profileName, setProfileName] = useState("");
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "u" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -52,7 +64,7 @@ export default function UserNav({ user }: any) {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
@@ -133,7 +145,10 @@ export default function UserNav({ user }: any) {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer justify-between" onClick={handleSignOut}>
+        <DropdownMenuItem
+          className="cursor-pointer justify-between"
+          onClick={handleSignOut}
+        >
           <div className="flex items-center">
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
