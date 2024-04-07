@@ -13,7 +13,7 @@ export default async function Home() {
   const sections = [
     {
       title: "Startup Names",
-      subtitle: `Naming your startup is the first big decision you have to make as a founder. With Namebase, go from idea to iconic name in one click and get back to building.`,
+      subtitle: `Naming your startup is the first big decision you have to make as a founder. With Branded, go from idea to iconic name in one click and get back to building.`,
       image: "names.gif",
     },
     {
@@ -23,7 +23,7 @@ export default async function Home() {
     },
     {
       title: "Branded Content",
-      subtitle: `Use Namebase to generate custom branded content—including logos and one-pagers—for your startup without the headaches.`,
+      subtitle: `Use Branded to generate custom branded content—including logos and one-pagers—for your startup without the headaches.`,
       image: "branded_content.png",
     },
   ];
@@ -68,9 +68,9 @@ export default async function Home() {
       quote: (
         <>
           &quot;When we started our company we knew we needed a simple,
-          memorable name that built trust with our customers. Before Namebase,
+          memorable name that built trust with our customers. Before Branded,
           we spent hours coming up with names and looking up domain
-          availability. With Namebase we found alpharun.com with a click, and
+          availability. With Branded we found alpharun.com with a click, and
           haven&apos;t looked back since.
           <br />
           <br />
@@ -88,7 +88,7 @@ export default async function Home() {
       quote: (
         <>
           &quot;I love how Alana builds tools that not only her portfolio
-          companies but anyone can use. Namebase is a great example of a simple
+          companies but anyone can use. Branded is a great example of a simple
           idea to help come up with one of the most critical parts of your
           company: its name.
           <br />
@@ -108,7 +108,7 @@ export default async function Home() {
           <span style={{ color: "#BB58BC" }}>billion-dollar brand</span>
         </h1>
         <p className="pt-6 max-w-2xl text-xl">
-          Namebase helps founders name their startup, secure the domain, and
+          Branded helps founders name their startup, secure the domain, and
           brand it—all in one place.
         </p>
         <div className="flex pt-6 space-x-2">
