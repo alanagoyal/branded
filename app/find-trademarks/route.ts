@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
   try {
     const response = await fetch(url, options);
     const result = await response.json();
-    console.log(result);
     return new NextResponse(JSON.stringify(result), {
       status: 200, 
       headers: {
