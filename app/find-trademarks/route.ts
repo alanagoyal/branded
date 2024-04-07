@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 const rapidApiKey = process.env.RAPID_API_KEY!;
 export async function GET(req: NextRequest) {
   const searchTerm = req.nextUrl.searchParams.get("searchTerm")!;
-
-  console.log(searchTerm);
   const url = `https://uspto-trademark.p.rapidapi.com/v1/trademarkSearch/${searchTerm}/active`;
   const options = {
     method: "GET",
