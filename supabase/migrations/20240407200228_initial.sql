@@ -78,7 +78,9 @@ create table "public"."trademarks" (
     "created_at" timestamp with time zone not null default now(),
     "name_id" uuid,
     "created_by" uuid,
-    "link" text
+    "link" text,
+    "keyword" text,
+    "description" text
 );
 
 
