@@ -44,7 +44,7 @@ export default async function RootLayout({
         ></meta>
         <meta
           property="twitter:image"
-          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712534409/i1600x839-LrUriw9kEaKB_rjuhbv.png"
+          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712592656/i1600x839-UT2wedEVYwW9_g7tm7m.png"
         ></meta>
         <meta property="og:title" content="Branded"></meta>
         <meta
@@ -53,7 +53,7 @@ export default async function RootLayout({
         ></meta>
         <meta
           property="og:image"
-          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712534409/i1600x839-LrUriw9kEaKB_rjuhbv.png"
+          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712592656/i1600x839-UT2wedEVYwW9_g7tm7m.png"
         />
         <meta property="og:url" content="https://branded.ai"></meta>
         <meta name='impact-site-verification' content='69669d07-f4c4-4ab2-9530-33933551cc53'></meta>
