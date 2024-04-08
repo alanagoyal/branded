@@ -1,5 +1,5 @@
 "use client";
-import {  useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { NameGenerator } from "./name-generator";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -57,9 +57,9 @@ export default function NewGeneration({
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Name Generator</h1>
+    <div className="min-h-screen px-4 sm:px-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold sm:text-left mb-4 sm:mb-0">Name Generator</h1>
         {showNamesDisplay ? (
           <Button variant="ghost" onClick={() => setShowNamesDisplay(false)}>
             Back
