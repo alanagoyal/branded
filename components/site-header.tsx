@@ -1,12 +1,8 @@
 import Link from "next/link";
-import { ThemeToggle } from "./theme-toggle";
-import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
 import UserNav from "./user-nav";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import Wordmark from "./wordmark";
-import { Icons } from "./icons";
-import { cn } from "@/lib/utils";
 
 export async function SiteHeader() {
   const supabase = createClient();

@@ -18,8 +18,8 @@ export default function Wordmark() {
                 <img
                     src={logoSrc}
                     alt="branded"
-                    width={196}
-                    height={64}
+                    width={150} 
+                    height={50} 
                 />
             </Link>
         </div>
