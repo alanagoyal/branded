@@ -19,7 +19,7 @@ export async function SiteHeader() {
           <div className="flex items-center mx-1">
             <div className="items-center space-x-2">
               <Link
-                href="https://github.com/alanagoyal/namebase"
+                href="https://github.com/alanagoyal/branded"
                 target="_blank"
                 rel="noreferrer"
                 className="hidden sm:inline-block" 

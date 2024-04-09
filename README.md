@@ -2,10 +2,10 @@
 Branded.ai helps founders generate unique name ideas, available domain names, creative logos, and even sales collateral for their startups.
 
 ## Getting Started
-`git clone https://github.com/alanagoyal/namebase`
+`git clone https://github.com/alanagoyal/branded`
 
 ### Supabase
-This project uses [Supabase](https://supabase.com) as a backend. To set up the database, create a [new project](https://database.new), enter your project details, and wait for the database to launch. Navigate to the SQL editor in the dashboard, paste the SQL from the [migration file](https://github.com/alanagoyal/namebase/blob/main/supabase/migrations/20240325200017_initial.sql) into the SQL editor and press run. You can also use the Supabase CLI to do this locally.
+This project uses [Supabase](https://supabase.com) as a backend. To set up the database, create a [new project](https://database.new), enter your project details, and wait for the database to launch. Navigate to the SQL editor in the dashboard, paste the SQL from the [migration file](https://github.com/alanagoyal/branded/blob/main/supabase/migrations/20240325200017_initial.sql) into the SQL editor and press run. You can also use the Supabase CLI to do this locally.
 
 Grab the project URL and anon key from the API settings and put them in a new `.env.local` file in the root directory as shown:
 ```
