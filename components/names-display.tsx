@@ -33,7 +33,6 @@ import {
 import { useRouter } from "next/navigation";
 import { ToastAction } from "./ui/toast";
 
-// Define a reusable component for rendering buttons
 const ActionButton = ({
   name,
   processing,
@@ -49,26 +48,84 @@ const ActionButton = ({
   icon: React.ReactNode;
   text: string;
   onClick: () => void;
-  status?: 'default' | 'noTrademarks' | 'trademarksFound';
+  status?:
+    | "default"
+    | "noTrademarks"
+    | "trademarksFound"
+    | "noNpmPackages"
+    | "npmPackagesFound"
+    | "noDomains"
+    | "domainsFound";
 }) => {
-  let content = <>{icon}<span className="ml-2">{text}</span></>;
+  let content = (
+    <>
+      {icon}
+      <span className="ml-2">{text}</span>
+    </>
+  );
 
   if (processing.includes(name)) {
-    content = <>{action}<span className="ml-2">{text}</span></>;
-  } else if (status === 'noTrademarks') {
-    content = <><Icons.checkmark /><span className="ml-2">No trademarks found</span></>;
-  } else if (status === 'trademarksFound') {
-    content = <><Icons.alert /><span className="ml-2">Trademark detected</span></>;
+    content = (
+      <>
+        {action}
+        <span className="ml-2">{text}</span>
+      </>
+    );
+  } else if (status === "noTrademarks") {
+    content = (
+      <>
+        <Icons.checkmark />
+        <span className="ml-2">No trademarks found</span>
+      </>
+    );
+  } else if (status === "trademarksFound") {
+    content = (
+      <>
+        <Icons.alert />
+        <span className="ml-2">Trademark detected</span>
+      </>
+    );
+  } else if (status === "noNpmPackages") {
+    content = (
+      <>
+        <Icons.cross />
+        <span className="ml-2">No npm package names available</span>
+      </>
+    );
+  } else if (status === "npmPackagesFound") {
+    content = (
+      <>
+        <Icons.checkmark />
+        <span className="ml-2">Npm package name is available</span>
+      </>
+    );
+  } else if (status === "noDomains") {
+    content = (
+      <>
+        <Icons.cross />
+        <span className="ml-2">No domain names available</span>
+      </>
+    );
+  } else if (status === "domainsFound") {
+    content = (
+      <>
+        <Icons.checkmark />
+        <span className="ml-2">Domain names available</span>
+      </>
+    );
   }
 
   return (
-    <Button variant="ghost" disabled={processing.includes(name)} onClick={onClick}>
+    <Button
+      variant="ghost"
+      disabled={processing.includes(name)}
+      onClick={onClick}
+    >
       {content}
     </Button>
   );
 };
 
-// Define a reusable component for rendering results
 const ResultLinks = ({
   results,
   name,
@@ -81,8 +138,12 @@ const ResultLinks = ({
       Object.keys(results).length > 0 &&
       results[name].map((result, idx) => (
         <div key={idx} className="flex items-center justify-center w-full">
-          <Link href={result.purchaseLink || result.link} target="_blank" className="text-sm cursor-pointer">
-            {result.domain || result.keyword}
+          <Link
+            href={result.purchaseLink || result.link}
+            target="_blank"
+            className="text-sm cursor-pointer"
+          >
+            {result.domain || result.keyword || result.npmName}
           </Link>
         </div>
       ))}
@@ -362,7 +423,7 @@ export function NamesDisplay({
           }
 
           if (data.items.length > 0) {
-            for (const item of data.items.slice(0, 5)) { 
+            for (const item of data.items.slice(0, 5)) {
               if (item.status_label === "Live/Registered") {
                 const { keyword, description, serial_number: serial } = item;
                 const link = `https://tsdr.uspto.gov/#caseNumber=${serial}&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch`;
@@ -423,22 +484,14 @@ export function NamesDisplay({
             npmAvailability.push({ npmName: npmCommand, purchaseLink });
           }
         } else {
-          const response = await fetch("/find-npm-names", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: name,
-            }),
-          });
+          const response = await fetch(`/find-npm-availability?query=${name}`);
 
           if (!response.ok) {
             toast({
               variant: "destructive",
-              description: "Error finding npm package names",
+              description: "Error finding npm package availability",
             });
-            throw new Error("Error finding npm package names");
+            throw new Error("Error finding npm package availability");
           }
 
           const data = await response.json();
@@ -446,67 +499,26 @@ export function NamesDisplay({
           if (data.error) {
             toast({
               variant: "destructive",
-              description: "Error finding npm package names",
+              description: "Error finding npm package availability",
             });
-            throw new Error("Error finding npm package names");
+            throw new Error("Error finding npm package availability");
           }
 
-          let npmNames = data.response.split("\n").map((line: any) => {
-            return line.replace(/^\d+\.\s*/, "").trim();
-          });
-
-          npmNames = [
-            name,
-            ...npmNames.filter(
-              (n: string) => n.toLowerCase() !== name.toLowerCase()
-            ),
-          ];
-
-          for (const npmName of npmNames) {
-            const response = await fetch(
-              `/find-npm-availability?query=${npmName}`
-            );
-
-            if (!response.ok) {
-              toast({
-                variant: "destructive",
-                description: "Error finding npm package availability",
-              });
-              throw new Error("Error finding npm package availability");
-            }
-
-            const data = await response.json();
-
-            if (data.error) {
-              toast({
-                variant: "destructive",
-                description: "Error finding npm package availability",
-              });
-              throw new Error("Error finding npm package availability");
-            }
-
-            if (data.available) {
-              const npmCommand = `npm i ${npmName.toLowerCase()}`;
-              const purchaseLink = `https://www.npmjs.com/package/${npmName}`;
-              const updates = {
-                npm_name: npmCommand,
-                purchase_link: purchaseLink,
-                created_at: new Date(),
-                name_id: namesList[name],
-                created_by: user.id,
-              };
-              let { data, error } = await supabase
-                .from("npm_names")
-                .insert(updates);
-              if (error) throw error;
-              npmAvailability.push({ npmName: npmCommand, purchaseLink });
-
-              if (npmAvailability.length === 0) {
-                toast({
-                  description: "No available npm package results for this name",
-                });
-              }
-            }
+          if (data.available) {
+            const npmCommand = `npm i ${name.toLowerCase()}`;
+            const purchaseLink = `https://www.npmjs.com/`;
+            const updates = {
+              npm_name: npmCommand,
+              purchase_link: purchaseLink,
+              created_at: new Date(),
+              name_id: namesList[name],
+              created_by: user.id,
+            };
+            let { data, error } = await supabase
+              .from("npm_names")
+              .insert(updates);
+            if (error) throw error;
+            npmAvailability.push({ npmName: npmCommand, purchaseLink });
           }
         }
         setNpmResults((prev) => ({
@@ -764,10 +776,48 @@ export function NamesDisplay({
                     icon={<Icons.domain />}
                     text="Find available domain names"
                     onClick={() =>
-                      user ? findDomainNames(name) : handleActionForUnauthenticatedUser("find available domain names for")
+                      user
+                        ? findDomainNames(name)
+                        : handleActionForUnauthenticatedUser(
+                            "find available domain names for"
+                          )
+                    }
+                    status={
+                      processingDomains.includes(name)
+                        ? "default"
+                        : domainResults[name] &&
+                          domainResults[name].length === 0
+                        ? "noDomains"
+                        : domainResults[name] && domainResults[name].length > 0
+                        ? "domainsFound"
+                        : "default"
                     }
                   />
                   <ResultLinks results={domainResults} name={name} />
+                  <ActionButton
+                    name={name}
+                    processing={processingNpm}
+                    action={<Icons.spinner />}
+                    icon={<Icons.npmPackage />}
+                    text="Find npm package names"
+                    onClick={() =>
+                      user
+                        ? findNpmNames(name)
+                        : handleActionForUnauthenticatedUser(
+                            "check npm package names for"
+                          )
+                    }
+                    status={
+                      processingNpm.includes(name)
+                        ? "default"
+                        : npmResults[name] && npmResults[name].length === 0
+                        ? "noNpmPackages"
+                        : npmResults[name] && npmResults[name].length > 0
+                        ? "npmPackagesFound"
+                        : "default"
+                    }
+                  />
+                  <ResultLinks results={npmResults} name={name} />
                   <ActionButton
                     name={name}
                     processing={processingTrademark}
@@ -775,16 +825,22 @@ export function NamesDisplay({
                     icon={<Icons.trademark />}
                     text="Check trademarks"
                     onClick={() =>
-                      user ? checkTrademarks(name) : handleActionForUnauthenticatedUser("check trademarks for")
+                      user
+                        ? checkTrademarks(name)
+                        : handleActionForUnauthenticatedUser(
+                            "check trademarks for"
+                          )
                     }
                     status={
                       processingTrademark.includes(name)
-                        ? 'default'
-                        : trademarkResults[name] && trademarkResults[name].length === 0
-                        ? 'noTrademarks'
-                        : trademarkResults[name] && trademarkResults[name].length > 0
-                        ? 'trademarksFound'
-                        : 'default'
+                        ? "default"
+                        : trademarkResults[name] &&
+                          trademarkResults[name].length === 0
+                        ? "noTrademarks"
+                        : trademarkResults[name] &&
+                          trademarkResults[name].length > 0
+                        ? "trademarksFound"
+                        : "default"
                     }
                   />
                   <ResultLinks results={trademarkResults} name={name} />
@@ -795,7 +851,11 @@ export function NamesDisplay({
                     icon={<Icons.generate />}
                     text="Generate a logo"
                     onClick={() =>
-                      user ? generateLogo(name) : handleActionForUnauthenticatedUser("generate a logo for")
+                      user
+                        ? generateLogo(name)
+                        : handleActionForUnauthenticatedUser(
+                            "generate a logo for"
+                          )
                     }
                   />
                   {logoResults[name] && (
@@ -821,7 +881,11 @@ export function NamesDisplay({
                     icon={<Icons.onePager />}
                     text="Generate a one-pager"
                     onClick={() =>
-                      user ? createOnePager(name) : handleActionForUnauthenticatedUser("generate a one-pager for")
+                      user
+                        ? createOnePager(name)
+                        : handleActionForUnauthenticatedUser(
+                            "generate a one-pager for"
+                          )
                     }
                   />
                   {isOwner && (
@@ -869,10 +933,49 @@ export function NamesDisplay({
                         icon={<Icons.domain />}
                         text="Find available domain names"
                         onClick={() =>
-                          user ? findDomainNames(name) : handleActionForUnauthenticatedUser("find available domain names for")
+                          user
+                            ? findDomainNames(name)
+                            : handleActionForUnauthenticatedUser(
+                                "find available domain names for"
+                              )
+                        }
+                        status={
+                          processingDomains.includes(name)
+                            ? "default"
+                            : domainResults[name] &&
+                              domainResults[name].length === 0
+                            ? "noDomains"
+                            : domainResults[name] &&
+                              domainResults[name].length > 0
+                            ? "domainsFound"
+                            : "default"
                         }
                       />
                       <ResultLinks results={domainResults} name={name} />
+                      <ActionButton
+                        name={name}
+                        processing={processingNpm}
+                        action={<Icons.spinner />}
+                        icon={<Icons.npmPackage />}
+                        text="Find npm package names"
+                        onClick={() =>
+                          user
+                            ? findNpmNames(name)
+                            : handleActionForUnauthenticatedUser(
+                                "check npm package names for"
+                              )
+                        }
+                        status={
+                          processingNpm.includes(name)
+                            ? "default"
+                            : npmResults[name] && npmResults[name].length === 0
+                            ? "noNpmPackages"
+                            : npmResults[name] && npmResults[name].length > 0
+                            ? "npmPackagesFound"
+                            : "default"
+                        }
+                      />
+                      <ResultLinks results={npmResults} name={name} />
                       <ActionButton
                         name={name}
                         processing={processingTrademark}
@@ -880,16 +983,22 @@ export function NamesDisplay({
                         icon={<Icons.trademark />}
                         text="Check trademarks"
                         onClick={() =>
-                          user ? checkTrademarks(name) : handleActionForUnauthenticatedUser("check trademarks for")
+                          user
+                            ? checkTrademarks(name)
+                            : handleActionForUnauthenticatedUser(
+                                "check trademarks for"
+                              )
                         }
                         status={
                           processingTrademark.includes(name)
-                            ? 'default'
-                            : trademarkResults[name] && trademarkResults[name].length === 0
-                            ? 'noTrademarks'
-                            : trademarkResults[name] && trademarkResults[name].length > 0
-                            ? 'trademarksFound'
-                            : 'default'
+                            ? "default"
+                            : trademarkResults[name] &&
+                              trademarkResults[name].length === 0
+                            ? "noTrademarks"
+                            : trademarkResults[name] &&
+                              trademarkResults[name].length > 0
+                            ? "trademarksFound"
+                            : "default"
                         }
                       />
                       <ResultLinks results={trademarkResults} name={name} />
@@ -900,7 +1009,11 @@ export function NamesDisplay({
                         icon={<Icons.generate />}
                         text="Generate a logo"
                         onClick={() =>
-                          user ? generateLogo(name) : handleActionForUnauthenticatedUser("generate a logo for")
+                          user
+                            ? generateLogo(name)
+                            : handleActionForUnauthenticatedUser(
+                                "generate a logo for"
+                              )
                         }
                       />
                       {logoResults[name] && (
@@ -926,7 +1039,11 @@ export function NamesDisplay({
                         icon={<Icons.onePager />}
                         text="Generate a one-pager"
                         onClick={() =>
-                          user ? createOnePager(name) : handleActionForUnauthenticatedUser("generate a one-pager for")
+                          user
+                            ? createOnePager(name)
+                            : handleActionForUnauthenticatedUser(
+                                "generate a one-pager for"
+                              )
                         }
                       />
                       {isOwner && (
