@@ -1,5 +1,5 @@
-# Namebase
-Namebase helps founders generate unique name ideas, available domain names, creative logos, and even sales collateral for their startups.
+# Branded.ai
+Branded.ai helps founders generate unique name ideas, available domain names, creative logos, and even sales collateral for their startups.
 
 ## Getting Started
 `git clone https://github.com/alanagoyal/namebase`

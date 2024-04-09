@@ -126,7 +126,7 @@ export function Chat({
           </div>
           {!isChatting && (
             <p className="mt-3 text-xs text-muted-foreground -mb-3">
-              Try to ask: How do I generate logos for my names? Do I need an account to use Namebase?
+              Try to ask: How do I generate logos for my names? Do I need an account to use Branded?
             </p>
           )}
         </CardContent>

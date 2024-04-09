@@ -17,9 +17,9 @@ export default function Wordmark() {
             <Link href="/">
                 <img
                     src={logoSrc}
-                    alt="namebase"
-                    width={196}
-                    height={64}
+                    alt="branded"
+                    width={150} 
+                    height={50} 
                 />
             </Link>
         </div>

@@ -19,7 +19,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Namebase",
+  title: "Branded",
   description: "AI-generated names for your next project",
 };
 
@@ -44,18 +44,18 @@ export default async function RootLayout({
         ></meta>
         <meta
           property="twitter:image"
-          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712009452/i1600x839-BQQvTJy8t3Pk_grpcmh.png"
+          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712592656/i1600x839-UT2wedEVYwW9_g7tm7m.png"
         ></meta>
-        <meta property="og:title" content="Namebase"></meta>
+        <meta property="og:title" content="Branded"></meta>
         <meta
           property="og:description"
           content="Name your startup, secure the domain, and brand it—all in one place"
         ></meta>
         <meta
           property="og:image"
-          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712009452/i1600x839-BQQvTJy8t3Pk_grpcmh.png"
+          content="https://res.cloudinary.com/djp21wtxm/image/upload/v1712592656/i1600x839-UT2wedEVYwW9_g7tm7m.png"
         />
-        <meta property="og:url" content="https://namebase.ai"></meta>
+        <meta property="og:url" content="https://branded.ai"></meta>
         <meta name='impact-site-verification' content='69669d07-f4c4-4ab2-9530-33933551cc53'></meta>
       </head>
       <body
