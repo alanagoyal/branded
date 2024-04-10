@@ -74,14 +74,14 @@ const ActionButton = ({
     content = (
       <>
         <Icons.cross />
-        <span className="ml-2">No npm package names available</span>
+        <span className="ml-2">No node package names available</span>
       </>
     );
   } else if (status === "npmPackagesFound") {
     content = (
       <>
         <Icons.checkmark />
-        <span className="ml-2">Npm package name is available</span>
+        <span className="ml-2">Node package name is available</span>
       </>
     );
   } else if (status === "noDomains") {
@@ -254,9 +254,10 @@ export function NamesDisplay({
           return updatedResults;
         });
       } else {
-        const updatedResults: {
-          [key: string]: { domain: string; purchaseLink: string }[];
-        } = { ...domainResults };
+        const domainStatus: {
+          domain: string;
+          purchaseLink: string;
+        }[] = [];
 
         const { data: nameData, error: nameError } = await supabase
           .from("names")
@@ -274,83 +275,65 @@ export function NamesDisplay({
           .in("name_id", nameIds);
 
         if (domainData && domainData.length > 0) {
-          for (const result of domainData) {
-            const domain = result.domain_name;
-            const purchaseLink = result.purchase_link;
+          domainData.forEach((result) => {
+            domainStatus.push({
+              domain: result.domain_name,
+              purchaseLink: result.purchase_link,
+            });
+          });
+        } else {
+          const parsedName = name.split(" ")[0];
+          const sanitizedName = parsedName.replace(/[^\w\s]/gi, "");
+          const response = await fetch(
+            `/find-domain-availability?query=${sanitizedName}`
+          );
 
-            if (!updatedResults[name]) {
-              updatedResults[name] = [{ domain, purchaseLink }];
-            } else {
-              updatedResults[name].push({ domain, purchaseLink });
+          if (!response.ok) {
+            toast({
+              variant: "destructive",
+              description: "Error finding domain availability",
+            });
+            throw new Error("Error finding domain availability");
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            toast({
+              variant: "destructive",
+              description: "Error finding domain availability",
+            });
+            throw new Error("Error finding domain availability");
+          }
+
+          for (const result of data.availabilityResults) {
+            if (result.available) {
+              const domain = result.domain;
+              const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
+              const updates = {
+                domain_name: domain,
+                purchase_link: purchaseLink,
+                created_at: new Date(),
+                name_id: namesList[name],
+                created_by: user.id,
+              };
+              let { data, error } = await supabase
+                .from("domains")
+                .insert(updates);
+              if (error) throw error;
+              domainStatus.push({ domain, purchaseLink });
             }
           }
-        } else {
-          await domainApiCall(name, updatedResults);
         }
-        setDomainResults(updatedResults);
+        setDomainResults((prev) => ({
+          ...prev,
+          [name]: domainStatus,
+        }));
       }
     } catch (error) {
       console.error(error);
     } finally {
       setProcessingDomains((prev) => prev.filter((n) => n !== name));
-    }
-  }
-
-  async function domainApiCall(name: string, updatedResults: any) {
-    const parsedName = name.split(" ")[0];
-    const sanitizedName = parsedName.replace(/[^\w\s]/gi, "");
-    const response = await fetch(
-      `/find-domain-availability?query=${sanitizedName}`
-    );
-
-    console.log(response)
-
-    if (!response.ok) {
-      toast({
-        variant: "destructive",
-        description: "Error finding domain availability",
-      });
-      throw new Error("Error finding domain availability");
-    }
-
-    const data = await response.json();
-
-    if (data.availabilityResults.length === 0) {
-      toast({
-        title: "Uh oh! No available domain names",
-        description:
-          "Looks like we can't find any available domain names for this name. Please try again with another name.",
-      });
-    } 
-
-    if (data.error) {
-      toast({
-        variant: "destructive",
-        description: "Error finding domain availability",
-      });
-      throw new Error("Error finding domain availability");
-    }
-
-    for (const result of data.availabilityResults) {
-      if (result.available) {
-        const domain = result.domain;
-        const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
-        const updates = {
-          domain_name: domain,
-          purchase_link: purchaseLink,
-          created_at: new Date(),
-          name_id: namesList[name],
-          created_by: user.id,
-        };
-        let { data, error } = await supabase.from("domains").insert(updates);
-        if (error) throw error;
-
-        if (!updatedResults[name]) {
-          updatedResults[name] = [{ domain, purchaseLink }];
-        } else {
-          updatedResults[name].push({ domain, purchaseLink });
-        }
-      }
     }
   }
 
