@@ -74,7 +74,7 @@ const ActionButton = ({
     content = (
       <>
         <Icons.cross />
-        <span className="ml-2">No node package names available</span>
+        <span className="ml-2">Node package name is not available</span>
       </>
     );
   } else if (status === "npmPackagesFound") {
@@ -449,7 +449,7 @@ export function NamesDisplay({
             npmAvailability.push({ npmName: npmCommand, purchaseLink });
           }
         } else {
-          const response = await fetch(`/find-npm-availability?query=${name}`);
+          const response = await fetch(`/find-npm-availability?query=${name.toLowerCase()}`);
 
           if (!response.ok) {
             toast({
