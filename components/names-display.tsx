@@ -2,26 +2,11 @@
 import { createClient } from "@/utils/supabase/client";
 import { Icons } from "./icons";
 import { Button } from "./ui/button";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
 import { useEffect, useState } from "react";
 import { toast } from "./ui/use-toast";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   Carousel,
@@ -318,6 +303,8 @@ export function NamesDisplay({
       `/find-domain-availability?query=${sanitizedName}`
     );
 
+    console.log(response)
+
     if (!response.ok) {
       toast({
         variant: "destructive",
@@ -334,7 +321,7 @@ export function NamesDisplay({
         description:
           "Looks like we can't find any available domain names for this name. Please try again with another name.",
       });
-    }
+    } 
 
     if (data.error) {
       toast({
@@ -362,11 +349,6 @@ export function NamesDisplay({
           updatedResults[name] = [{ domain, purchaseLink }];
         } else {
           updatedResults[name].push({ domain, purchaseLink });
-        }
-        if (Object.keys(updatedResults).length === 0) {
-          toast({
-            description: "No available domain results for this name",
-          });
         }
       }
     }
@@ -489,9 +471,9 @@ export function NamesDisplay({
           if (!response.ok) {
             toast({
               variant: "destructive",
-              description: "Error finding npm package availability",
+              description: "Error finding node package name availability",
             });
-            throw new Error("Error finding npm package availability");
+            throw new Error("Error finding node package name availability");
           }
 
           const data = await response.json();
@@ -499,9 +481,9 @@ export function NamesDisplay({
           if (data.error) {
             toast({
               variant: "destructive",
-              description: "Error finding npm package availability",
+              description: "Error finding node package name availability",
             });
-            throw new Error("Error finding npm package availability");
+            throw new Error("Error finding node package name availability");
           }
 
           if (data.available) {
@@ -758,6 +740,141 @@ export function NamesDisplay({
     return;
   };
 
+  const renderNameContent = (name: string) => (
+    <div className="flex flex-col space-y-2">
+      <ActionButton
+        name={name}
+        processing={processingDomains}
+        action={<Icons.spinner />}
+        icon={<Icons.domain />}
+        text="Find available domain names"
+        onClick={() =>
+          user
+            ? findDomainNames(name)
+            : handleActionForUnauthenticatedUser(
+                "find available domain names for"
+              )
+        }
+        status={
+          processingDomains.includes(name)
+            ? "default"
+            : domainResults[name] && domainResults[name].length === 0
+            ? "noDomains"
+            : domainResults[name] && domainResults[name].length > 0
+            ? "domainsFound"
+            : "default"
+        }
+      />
+      <ResultLinks results={domainResults} name={name} />
+      <ActionButton
+        name={name}
+        processing={processingNpm}
+        action={<Icons.spinner />}
+        icon={<Icons.npmPackage />}
+        text="Find node package names"
+        onClick={() =>
+          user
+            ? findNpmNames(name)
+            : handleActionForUnauthenticatedUser("check node package names for")
+        }
+        status={
+          processingNpm.includes(name)
+            ? "default"
+            : npmResults[name] && npmResults[name].length === 0
+            ? "noNpmPackages"
+            : npmResults[name] && npmResults[name].length > 0
+            ? "npmPackagesFound"
+            : "default"
+        }
+      />
+      <ResultLinks results={npmResults} name={name} />
+      <ActionButton
+        name={name}
+        processing={processingTrademark}
+        action={<Icons.spinner />}
+        icon={<Icons.trademark />}
+        text="Check trademarks"
+        onClick={() =>
+          user
+            ? checkTrademarks(name)
+            : handleActionForUnauthenticatedUser("check trademarks for")
+        }
+        status={
+          processingTrademark.includes(name)
+            ? "default"
+            : trademarkResults[name] && trademarkResults[name].length === 0
+            ? "noTrademarks"
+            : trademarkResults[name] && trademarkResults[name].length > 0
+            ? "trademarksFound"
+            : "default"
+        }
+      />
+      <ResultLinks results={trademarkResults} name={name} />
+      <ActionButton
+        name={name}
+        processing={processingLogo}
+        action={<Icons.spinner />}
+        icon={<Icons.generate />}
+        text="Generate a logo"
+        onClick={() =>
+          user
+            ? generateLogo(name)
+            : handleActionForUnauthenticatedUser("generate a logo for")
+        }
+      />
+      {logoResults[name] && (
+        <div className="flex items-center justify-center w-full">
+          <Link
+            href={logoResults[name]}
+            target="_blank"
+            className="cursor-pointer"
+          >
+            <Image
+              src={logoResults[name]}
+              alt={name}
+              width={200}
+              height={200}
+            />
+          </Link>
+        </div>
+      )}
+      <ActionButton
+        name={name}
+        processing={processingOnePager}
+        action={<Icons.spinner />}
+        icon={<Icons.onePager />}
+        text="Generate a one-pager"
+        onClick={() =>
+          user
+            ? createOnePager(name)
+            : handleActionForUnauthenticatedUser("generate a one-pager for")
+        }
+      />
+      {isOwner && (
+        <Button
+          onClick={() =>
+            user
+              ? toggleFavoriteName(name)
+              : handleActionForUnauthenticatedUser("favorite")
+          }
+          variant="ghost"
+        >
+          {favoritedNames[name] ? (
+            <>
+              <Icons.unfavorite />
+              <span className="ml-2">Remove from favorites</span>
+            </>
+          ) : (
+            <>
+              <Icons.favorite />
+              <span className="ml-2">Add to favorites</span>
+            </>
+          )}
+        </Button>
+      )}
+    </div>
+  );
+
   return (
     <div>
       {verticalLayout ? (
@@ -767,151 +884,7 @@ export function NamesDisplay({
               <CardHeader>
                 <CardTitle className="text-center">{name}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-col space-y-2">
-                  <ActionButton
-                    name={name}
-                    processing={processingDomains}
-                    action={<Icons.spinner />}
-                    icon={<Icons.domain />}
-                    text="Find available domain names"
-                    onClick={() =>
-                      user
-                        ? findDomainNames(name)
-                        : handleActionForUnauthenticatedUser(
-                            "find available domain names for"
-                          )
-                    }
-                    status={
-                      processingDomains.includes(name)
-                        ? "default"
-                        : domainResults[name] &&
-                          domainResults[name].length === 0
-                        ? "noDomains"
-                        : domainResults[name] && domainResults[name].length > 0
-                        ? "domainsFound"
-                        : "default"
-                    }
-                  />
-                  <ResultLinks results={domainResults} name={name} />
-                  <ActionButton
-                    name={name}
-                    processing={processingNpm}
-                    action={<Icons.spinner />}
-                    icon={<Icons.npmPackage />}
-                    text="Find npm package names"
-                    onClick={() =>
-                      user
-                        ? findNpmNames(name)
-                        : handleActionForUnauthenticatedUser(
-                            "check npm package names for"
-                          )
-                    }
-                    status={
-                      processingNpm.includes(name)
-                        ? "default"
-                        : npmResults[name] && npmResults[name].length === 0
-                        ? "noNpmPackages"
-                        : npmResults[name] && npmResults[name].length > 0
-                        ? "npmPackagesFound"
-                        : "default"
-                    }
-                  />
-                  <ResultLinks results={npmResults} name={name} />
-                  <ActionButton
-                    name={name}
-                    processing={processingTrademark}
-                    action={<Icons.spinner />}
-                    icon={<Icons.trademark />}
-                    text="Check trademarks"
-                    onClick={() =>
-                      user
-                        ? checkTrademarks(name)
-                        : handleActionForUnauthenticatedUser(
-                            "check trademarks for"
-                          )
-                    }
-                    status={
-                      processingTrademark.includes(name)
-                        ? "default"
-                        : trademarkResults[name] &&
-                          trademarkResults[name].length === 0
-                        ? "noTrademarks"
-                        : trademarkResults[name] &&
-                          trademarkResults[name].length > 0
-                        ? "trademarksFound"
-                        : "default"
-                    }
-                  />
-                  <ResultLinks results={trademarkResults} name={name} />
-                  <ActionButton
-                    name={name}
-                    processing={processingLogo}
-                    action={<Icons.spinner />}
-                    icon={<Icons.generate />}
-                    text="Generate a logo"
-                    onClick={() =>
-                      user
-                        ? generateLogo(name)
-                        : handleActionForUnauthenticatedUser(
-                            "generate a logo for"
-                          )
-                    }
-                  />
-                  {logoResults[name] && (
-                    <div className="flex items-center justify-center w-full">
-                      <Link
-                        href={logoResults[name]}
-                        target="_blank"
-                        className="cursor-pointer"
-                      >
-                        <Image
-                          src={logoResults[name]}
-                          alt={name}
-                          width={200}
-                          height={200}
-                        />
-                      </Link>
-                    </div>
-                  )}
-                  <ActionButton
-                    name={name}
-                    processing={processingOnePager}
-                    action={<Icons.spinner />}
-                    icon={<Icons.onePager />}
-                    text="Generate a one-pager"
-                    onClick={() =>
-                      user
-                        ? createOnePager(name)
-                        : handleActionForUnauthenticatedUser(
-                            "generate a one-pager for"
-                          )
-                    }
-                  />
-                  {isOwner && (
-                    <Button
-                      onClick={() =>
-                        user
-                          ? toggleFavoriteName(name)
-                          : handleActionForUnauthenticatedUser("favorite")
-                      }
-                      variant="ghost"
-                    >
-                      {favoritedNames[name] ? (
-                        <>
-                          <Icons.unfavorite />
-                          <span className="ml-2">Remove from favorites</span>
-                        </>
-                      ) : (
-                        <>
-                          <Icons.favorite />
-                          <span className="ml-2">Add to favorites</span>
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
+              <CardContent>{renderNameContent(name)}</CardContent>
             </Card>
           ))}
         </div>
@@ -924,154 +897,7 @@ export function NamesDisplay({
                   <CardHeader>
                     <CardTitle className="text-center">{name}</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col space-y-2">
-                      <ActionButton
-                        name={name}
-                        processing={processingDomains}
-                        action={<Icons.spinner />}
-                        icon={<Icons.domain />}
-                        text="Find available domain names"
-                        onClick={() =>
-                          user
-                            ? findDomainNames(name)
-                            : handleActionForUnauthenticatedUser(
-                                "find available domain names for"
-                              )
-                        }
-                        status={
-                          processingDomains.includes(name)
-                            ? "default"
-                            : domainResults[name] &&
-                              domainResults[name].length === 0
-                            ? "noDomains"
-                            : domainResults[name] &&
-                              domainResults[name].length > 0
-                            ? "domainsFound"
-                            : "default"
-                        }
-                      />
-                      <ResultLinks results={domainResults} name={name} />
-                      <ActionButton
-                        name={name}
-                        processing={processingNpm}
-                        action={<Icons.spinner />}
-                        icon={<Icons.npmPackage />}
-                        text="Find npm package names"
-                        onClick={() =>
-                          user
-                            ? findNpmNames(name)
-                            : handleActionForUnauthenticatedUser(
-                                "check npm package names for"
-                              )
-                        }
-                        status={
-                          processingNpm.includes(name)
-                            ? "default"
-                            : npmResults[name] && npmResults[name].length === 0
-                            ? "noNpmPackages"
-                            : npmResults[name] && npmResults[name].length > 0
-                            ? "npmPackagesFound"
-                            : "default"
-                        }
-                      />
-                      <ResultLinks results={npmResults} name={name} />
-                      <ActionButton
-                        name={name}
-                        processing={processingTrademark}
-                        action={<Icons.spinner />}
-                        icon={<Icons.trademark />}
-                        text="Check trademarks"
-                        onClick={() =>
-                          user
-                            ? checkTrademarks(name)
-                            : handleActionForUnauthenticatedUser(
-                                "check trademarks for"
-                              )
-                        }
-                        status={
-                          processingTrademark.includes(name)
-                            ? "default"
-                            : trademarkResults[name] &&
-                              trademarkResults[name].length === 0
-                            ? "noTrademarks"
-                            : trademarkResults[name] &&
-                              trademarkResults[name].length > 0
-                            ? "trademarksFound"
-                            : "default"
-                        }
-                      />
-                      <ResultLinks results={trademarkResults} name={name} />
-                      <ActionButton
-                        name={name}
-                        processing={processingLogo}
-                        action={<Icons.spinner />}
-                        icon={<Icons.generate />}
-                        text="Generate a logo"
-                        onClick={() =>
-                          user
-                            ? generateLogo(name)
-                            : handleActionForUnauthenticatedUser(
-                                "generate a logo for"
-                              )
-                        }
-                      />
-                      {logoResults[name] && (
-                        <div className="flex items-center justify-center w-full">
-                          <Link
-                            href={logoResults[name]}
-                            target="_blank"
-                            className="cursor-pointer"
-                          >
-                            <Image
-                              src={logoResults[name]}
-                              alt={name}
-                              width={200}
-                              height={200}
-                            />
-                          </Link>
-                        </div>
-                      )}
-                      <ActionButton
-                        name={name}
-                        processing={processingOnePager}
-                        action={<Icons.spinner />}
-                        icon={<Icons.onePager />}
-                        text="Generate a one-pager"
-                        onClick={() =>
-                          user
-                            ? createOnePager(name)
-                            : handleActionForUnauthenticatedUser(
-                                "generate a one-pager for"
-                              )
-                        }
-                      />
-                      {isOwner && (
-                        <Button
-                          onClick={() =>
-                            user
-                              ? toggleFavoriteName(name)
-                              : handleActionForUnauthenticatedUser("favorite")
-                          }
-                          variant="ghost"
-                        >
-                          {favoritedNames[name] ? (
-                            <>
-                              <Icons.unfavorite />
-                              <span className="ml-2">
-                                Remove from favorites
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <Icons.favorite />
-                              <span className="ml-2">Add to favorites</span>
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
+                  <CardContent>{renderNameContent(name)}</CardContent>
                 </Card>
               </CarouselItem>
             ))}
