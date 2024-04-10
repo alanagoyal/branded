@@ -23,11 +23,8 @@ export async function GET(req: NextRequest) {
     ".ai",
     ".io",
     ".co",
-    ".so",
     ".dev",
     ".app",
-    ".net",
-    ".org",
   ];
   const domains: string[] = [];
 
