@@ -67,21 +67,21 @@ const ActionButton = ({
     content = (
       <>
         <Icons.alert />
-        <span className="ml-2">Trademark detected</span>
+        <span className="ml-2">Trademark(s) detected</span>
       </>
     );
   } else if (status === "noNpmPackages") {
     content = (
       <>
         <Icons.cross />
-        <span className="ml-2">Node package name is not available</span>
+        <span className="ml-2">Package name is not available</span>
       </>
     );
   } else if (status === "npmPackagesFound") {
     content = (
       <>
         <Icons.checkmark />
-        <span className="ml-2">Node package name is available</span>
+        <span className="ml-2">Package name is available</span>
       </>
     );
   } else if (status === "noDomains") {
@@ -454,9 +454,9 @@ export function NamesDisplay({
           if (!response.ok) {
             toast({
               variant: "destructive",
-              description: "Error finding node package name availability",
+              description: "Error finding npm availability",
             });
-            throw new Error("Error finding node package name availability");
+            throw new Error("Error finding npm availability");
           }
 
           const data = await response.json();
@@ -464,9 +464,9 @@ export function NamesDisplay({
           if (data.error) {
             toast({
               variant: "destructive",
-              description: "Error finding node package name availability",
+              description: "Error finding npm availability",
             });
-            throw new Error("Error finding node package name availability");
+            throw new Error("Error finding npm availability");
           }
 
           if (data.available) {
@@ -730,12 +730,12 @@ export function NamesDisplay({
         processing={processingDomains}
         action={<Icons.spinner />}
         icon={<Icons.domain />}
-        text="Find available domain names"
+        text="Check domain availability"
         onClick={() =>
           user
             ? findDomainNames(name)
             : handleActionForUnauthenticatedUser(
-                "find available domain names for"
+                "check domain availability for"
               )
         }
         status={
@@ -754,11 +754,11 @@ export function NamesDisplay({
         processing={processingNpm}
         action={<Icons.spinner />}
         icon={<Icons.npmPackage />}
-        text="Find node package names"
+        text="Check npm availability"
         onClick={() =>
           user
             ? findNpmNames(name)
-            : handleActionForUnauthenticatedUser("check node package names for")
+            : handleActionForUnauthenticatedUser("check npm availability for")
         }
         status={
           processingNpm.includes(name)
@@ -776,7 +776,7 @@ export function NamesDisplay({
         processing={processingTrademark}
         action={<Icons.spinner />}
         icon={<Icons.trademark />}
-        text="Check trademarks"
+        text="Check for trademarks"
         onClick={() =>
           user
             ? checkTrademarks(name)
