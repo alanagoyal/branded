@@ -471,7 +471,7 @@ export function NamesDisplay({
 
           if (data.available) {
             const npmCommand = `npm i ${name.toLowerCase()}`;
-            const purchaseLink = `https://www.npmjs.com/`;
+            const purchaseLink = `https://docs.npmjs.com/creating-a-package-json-file`;
             const updates = {
               npm_name: npmCommand,
               purchase_link: purchaseLink,
