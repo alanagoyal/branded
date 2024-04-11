@@ -4,7 +4,8 @@ export async function GET(req: NextRequest) {
   const packageName = req.nextUrl.searchParams.get("query");
 
   try {
-    const response = await fetch(`https://registry.npmjs.org/${packageName}`);
+    const encodedNamespace = encodeURIComponent(packageName!).replace('%2F', '%2f');
+    const response = await fetch(`https://registry.npmjs.org/${encodedNamespace}`);
 
     if (response.ok) {
       return new NextResponse(JSON.stringify({ available: false }), {
