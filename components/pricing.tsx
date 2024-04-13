@@ -95,7 +95,7 @@ function PlanDetails({ title, price, description, features, buttonColor }: PlanD
         <Button className={`mt-4 ${buttonColor} min-w-[200px]`}>Get started with {title}</Button>
       </div>
       <div className="mt-6">
-        <h3 className="font-semibold">What's included:</h3>
+        <h3 className="font-semibold">What&apos;s included:</h3>
         <ul className="mt-2 space-y-2">
           {features.map((feature, index) => (
             <li key={index} className="flex items-center space-x-1">
