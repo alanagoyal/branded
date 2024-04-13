@@ -1,3 +1,4 @@
+import CompanyLogos from "@/components/company-logos";
 import Description from "@/components/description";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -7,7 +8,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-
 
 export default async function Home() {
   const sections = [
@@ -68,10 +68,10 @@ export default async function Home() {
       quote: (
         <>
           &quot;When we started our company we knew we needed a simple,
-          memorable name that built trust with our customers. Before Branded,
-          we spent hours coming up with names and looking up domain
-          availability. With Branded we found alpharun.com with a click, and
-          haven&apos;t looked back since.
+          memorable name that built trust with our customers. Before Branded, we
+          spent hours coming up with names and looking up domain availability.
+          With Branded we found alpharun.com with a click, and haven&apos;t
+          looked back since.
           <br />
           <br />
           The process was seamless, and the results were beyond my expectations.
@@ -82,9 +82,9 @@ export default async function Home() {
     {
       avatar: "jordan.jpeg",
       name: "Jordan Singer",
-      companyUrl: "https://diagram.com",
-      companyName: "Diagram",
-      role: "Founder",
+      companyUrl: "https://figma.com",
+      companyName: "Figma",
+      role: "Product Designer",
       quote: (
         <>
           &quot;I love how Alana builds tools that not only her portfolio
@@ -114,7 +114,7 @@ export default async function Home() {
         <div className="flex pt-6 space-x-2">
           <Description />
         </div>
-        <div className="flex flex-col md:flex-row justify-around items-stretch mt-20">
+        <div className="flex flex-col md:flex-row justify-around items-stretch my-20">
           {sections.map((section, index) => (
             <Card
               key={index}
@@ -138,7 +138,10 @@ export default async function Home() {
             </Card>
           ))}
         </div>
-        <div className="mt-20 flex justify-center w-full">
+        <div className="my-20">
+          <CompanyLogos />
+        </div>
+        <div className="my-20 flex justify-center w-full">
           <Carousel className="w-4/5 justify-center">
             <CarouselContent>
               {customerQuotes.map((customerQuote, index) => (
