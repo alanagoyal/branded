@@ -10,7 +10,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "./ui/command";
-import { Heart, HelpCircle, LogOut, Plus, User } from "lucide-react";
+import { CreditCard, Heart, HelpCircle, LogOut, Plus, User } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
@@ -51,6 +51,10 @@ export function CommandMenu() {
           case "j":
             e.preventDefault();
             navigateAndCloseDialog("/help");
+            break;
+          case "i":
+            e.preventDefault();
+            navigateAndCloseDialog("/pricing");
             break;
           case "o":
             e.preventDefault();
@@ -121,6 +125,13 @@ export function CommandMenu() {
               <HelpCircle className="mr-2 h-4 w-4" />
               <span>Support</span>
               <CommandShortcut>⌘J</CommandShortcut>
+            </CommandItem>
+          </CommandLinkItem>
+          <CommandLinkItem href="/pricing">
+            <CommandItem>
+              <CreditCard className="mr-2 h-4 w-4" />
+              <span>Pricing</span>
+              <CommandShortcut>⌘I</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
           <CommandItem

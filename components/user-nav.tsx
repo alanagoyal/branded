@@ -1,6 +1,13 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { Heart, HelpCircle, LogOut, Plus, User } from "lucide-react";
+import {
+  CreditCard,
+  Heart,
+  HelpCircle,
+  LogOut,
+  Plus,
+  User,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import Link from "next/link";
@@ -126,6 +133,15 @@ export default function UserNav({ user }: any) {
                 <span>Support</span>
               </div>
               <p className="text-xs text-muted-foreground">⌘J</p>
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/pricing">
+            <DropdownMenuItem className="cursor-pointer justify-between">
+              <div className="flex items-center">
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Pricing</span>
+              </div>
+              <p className="text-xs text-muted-foreground">⌘I</p>
             </DropdownMenuItem>
           </Link>
           <DropdownMenuItem
