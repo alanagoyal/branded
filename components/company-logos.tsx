@@ -1,7 +1,6 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 export default function CompanyLogos() {
   const { theme } = useTheme();
@@ -36,7 +35,7 @@ export default function CompanyLogos() {
             rel="noopener noreferrer"
             className="flex flex-col items-center"
           >
-            <div className="w-[150px] h-[20px] flex items-center justify-center">
+            <div className="w-[150px] h-[20px] m-2 flex items-center justify-center">
               <img
                 src={company.logo}
                 alt={`${company.name} Logo`}
