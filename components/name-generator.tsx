@@ -164,13 +164,18 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       new Date().getTime() - 24 * 60 * 60 * 1000
     ).toISOString();
 
+    const oneMonthAgo = new Date(
+      new Date().setMonth(new Date().getMonth() - 1)
+    ).toISOString();
+
+
     try {
       if (user) {
         const { data: names, error } = await supabase
           .from("names")
           .select("*", { count: "exact" })
           .eq("created_by", user.id)
-          .gte("created_at", oneDayAgo);
+          .gte("created_at", oneMonthAgo);
 
         if (names!.length >= 24) {
           toast({
@@ -185,7 +190,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .from("names")
           .select("*", { count: "exact" })
           .eq("session_id", sessionId)
-          .gte("created_at", oneDayAgo);
+          .gte("created_at", oneMonthAgo);
 
         if (names!.length >= 9) {
           toast({
