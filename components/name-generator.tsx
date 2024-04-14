@@ -181,7 +181,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           toast({
             title: "Uh oh! Out of generations",
             description:
-              "You've reached your daily limit for name generations.",
+              "You've reached the monthly limit for name generations.",
           });
           return;
         }
@@ -196,7 +196,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           toast({
             title: "Uh oh! Out of generations",
             description:
-              "You've reached your daily limit for name generations. Sign up for an account to continue.",
+              "You've reached the monthly limit for name generations. Sign up for an account to continue.",
             action: (
               <ToastAction
                 onClick={() => router.push("/signup")}
