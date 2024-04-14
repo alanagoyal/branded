@@ -168,7 +168,6 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       new Date().setMonth(new Date().getMonth() - 1)
     ).toISOString();
 
-
     try {
       if (user) {
         const { data: names, error } = await supabase
