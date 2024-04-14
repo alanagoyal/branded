@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Icons } from "./icons";
+import Link from "next/link";
 
 const freePlanDetails = {
   title: "Free",
   price: "$0",
   description: "Free forever",
+  link: "https://buy.stripe.com/cN200gaSn0pR9dm6oo",  
   features: [
     "10 name generations",
     "5 domain lookups",
@@ -22,6 +24,7 @@ const proPlanDetails = {
   price: "$4.99",
   description: "/ month",
   badge: "Popular",
+  link: "https://buy.stripe.com/3cscN2aSn2xZ89i001",
   features: [
     "100 name generations",
     "50 domain lookups",
@@ -37,6 +40,7 @@ const businessPlanDetails = {
   title: "Business",
   price: "$19.99",
   description: "/ month",
+  link: "https://buy.stripe.com/bIY5kA7GbfkLcpy6oq",
   features: [
     "500 name generations",
     "250 domain lookups",
@@ -83,16 +87,19 @@ interface PlanDetailsProps {
   features: string[];
   buttonColor?: string;
   badge?: string;
+  link: string; // Added link property to interface
 }
 
-function PlanDetails({ title, price, description, features, buttonColor }: PlanDetailsProps) {
+function PlanDetails({ title, price, description, features, buttonColor, link }: PlanDetailsProps) {
   return (
     <>
       <div className="text-center">
         <h2 className="text-xl font-semibold">{title}</h2>
         <p className="text-4xl font-bold">{price}</p>
         <p className="text-gray-500">{description}</p>
+        <Link href={link}>
         <Button className={`mt-4 ${buttonColor} min-w-[200px]`}>Get started with {title}</Button>
+        </Link>
       </div>
       <div className="mt-6">
         <h3 className="font-semibold">What&apos;s included:</h3>
