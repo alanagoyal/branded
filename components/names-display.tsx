@@ -309,7 +309,8 @@ export function NamesDisplay({
           for (const result of data.availabilityResults) {
             if (result.available) {
               const domain = result.domain;
-              const purchaseLink = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${domain}`;
+              const purchaseLink = `https://namecheap.pxf.io/c/5390613/386170/5618?u=https%3A%2F%2Fwww.namecheap.com%2Fdomains%2Fregistration%2Fresults.aspx%3Fdomain%3D${domain}
+              `;
               const updates = {
                 domain_name: domain,
                 purchase_link: purchaseLink,

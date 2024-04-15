@@ -44,20 +44,23 @@ export async function GET(req: NextRequest) {
 
     const dataPromises = responses.map((response) => {
       if (!response.ok) {
+        console.error("Response not OK", response);
         throw new Error("Failed to fetch WHOIS data");
       }
-      return response.json();
+      return response.json().then(data => {
+        return data;
+      });
     });
-
+    
     const results = await Promise.all(dataPromises);
-
+    
     const availabilityResults = results
       .map((data, index) => ({
         domain: domains[index],
-        available: data.domain_registered.toLowerCase() === "no",
+        available: data.domain_registered && data.domain_registered.toLowerCase() === "no",
       }))
       .filter((result) => result.available);
-
+        
     return new NextResponse(
       JSON.stringify({ availabilityResults: availabilityResults.slice(0, 3) }),
       {
@@ -65,6 +68,7 @@ export async function GET(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
       }
     );
+    
   } catch (error) {
     return new NextResponse(
       JSON.stringify({ error: "Failed to fetch WHOIS data" }),
