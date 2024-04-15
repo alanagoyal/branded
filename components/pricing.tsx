@@ -24,7 +24,7 @@ const proPlanDetails = {
   price: "$4.99",
   description: "/ month",
   badge: "Popular",
-  link: "https://buy.stripe.com/3cscN2aSn2xZ89i001",
+  link: "https://buy.stripe.com/test_4gw5kv7bo4h44Pm144",
   features: [
     "100 name generations",
     "50 domain lookups",

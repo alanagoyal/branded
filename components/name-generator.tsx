@@ -29,20 +29,11 @@ import {
 } from "./ui/select";
 import { Slider } from "./ui/slider";
 import { Icons } from "./icons";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
 import { Share } from "./share";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { NamesDisplay } from "./names-display";
-import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
 
 const formSchema = z.object({

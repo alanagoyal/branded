@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { NameGenerator } from "./name-generator";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { ToastAction } from "./ui/toast";
 import { toast } from "./ui/use-toast";
+import VerifySubscription from "./verify-subscription";
 
 export default function NewGeneration({
   user,
@@ -28,10 +29,9 @@ export default function NewGeneration({
     [searchParams]
   );
   const router = useRouter();
-  
+
   async function addExistingName() {
     const updatedNamesList: { [name: string]: string } = {};
-
 
     const oneDayAgo = new Date(
       new Date().getTime() - 24 * 60 * 60 * 1000
@@ -40,7 +40,6 @@ export default function NewGeneration({
     const oneMonthAgo = new Date(
       new Date().setMonth(new Date().getMonth() - 1)
     ).toISOString();
-
 
     try {
       if (user) {
@@ -111,6 +110,7 @@ export default function NewGeneration({
 
   return (
     <div className="min-h-screen px-4 sm:px-8">
+      <VerifySubscription user={user}/>
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
         <h1 className="text-xl sm:text-2xl font-bold sm:text-left mb-4 sm:mb-0">Name Generator</h1>
         {showNamesDisplay ? (
