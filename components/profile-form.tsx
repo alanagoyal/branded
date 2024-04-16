@@ -15,6 +15,17 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import {
+  BusinessPlanEntitlements,
+  FreePlanEntitlements,
+  ProPlanEntitlements,
+  TestBusinessPlanEntitlements,
+  TestFreePlanEntitlements,
+  TestProPlanEntitlements,
+} from "@/lib/plans";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const profileFormSchema = z.object({
   email: z.string().email(),
@@ -38,6 +49,23 @@ export default function ProfileForm({
       name: userData.name || "",
     },
   });
+  const [planName, setPlanName] = useState("");
+
+  useEffect(() => {
+    async function fetchUserPlan() {
+      let plan = "";
+      if (userData.plan_id === FreePlanEntitlements.id || userData.plan_id === TestFreePlanEntitlements.id) {
+        plan = "Free";
+      } else if (userData.plan_id === ProPlanEntitlements.id || userData.plan_id === TestProPlanEntitlements.id) {
+        plan = "Pro";
+      } else if (userData.plan_id === BusinessPlanEntitlements.id || userData.plan_id === TestBusinessPlanEntitlements.id) {
+        plan = "Business";
+      }
+      setPlanName(plan); 
+    }
+  
+    fetchUserPlan();
+  }, [userData.plan_id]); 
 
   async function onSubmit(data: ProfileFormValues) {
     try {
@@ -64,9 +92,9 @@ export default function ProfileForm({
     }
   }
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col ">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           <FormField
             control={form.control}
             name="email"
@@ -99,12 +127,20 @@ export default function ProfileForm({
               </FormItem>
             )}
           />
-
           <div className="py-1 flex justify-center w-full">
-            <Button className="w-full" type="submit">Update</Button>
+            <Button className="w-full" type="submit">
+              Update
+            </Button>
           </div>
         </form>
       </Form>
+      <div className="pt-2 text-sm text-gray-500">
+        You are currently on the {planName} plan. To change your plan, please
+        visit the{" "}
+        <a href="/pricing" className="underline">
+          pricing page.
+        </a>
+      </div>
     </div>
   );
 }
