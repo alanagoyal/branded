@@ -24,7 +24,6 @@ import {
   TestBusinessPlanEntitlements,
   TestFreePlanEntitlements,
   TestProPlanEntitlements,
-  UnauthenticatedEntitlements,
 } from "@/lib/plans";
 
 const ActionButton = ({
@@ -242,7 +241,7 @@ export function NamesDisplay({
           setUserPlan(BusinessPlanEntitlements);
           break;
         default:
-          setUserPlan(UnauthenticatedEntitlements);
+          setUserPlan(FreePlanEntitlements);
       }
     }
 
