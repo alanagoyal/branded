@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Icons } from "./icons";
 import Link from "next/link";
+import { TestBusinessPlanEntitlements, TestFreePlanEntitlements, TestProPlanEntitlements } from "@/lib/plans";
 
 const freePlanDetails = {
   title: "Free",
   price: "$0",
   description: "Free forever",
-  link: "https://buy.stripe.com/cN200gaSn0pR9dm6oo",  
+  link: TestFreePlanEntitlements.link,  
   features: [
     "10 name generations",
     "5 domain lookups",
@@ -24,7 +25,7 @@ const proPlanDetails = {
   price: "$4.99",
   description: "/ month",
   badge: "Popular",
-  link: "https://buy.stripe.com/test_4gw5kv7bo4h44Pm144",
+  link: TestProPlanEntitlements.link,
   features: [
     "100 name generations",
     "50 domain lookups",
@@ -40,7 +41,7 @@ const businessPlanDetails = {
   title: "Business",
   price: "$19.99",
   description: "/ month",
-  link: "https://buy.stripe.com/bIY5kA7GbfkLcpy6oq",
+  link: TestBusinessPlanEntitlements.link,
   features: [
     "500 name generations",
     "250 domain lookups",

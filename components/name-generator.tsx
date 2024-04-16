@@ -35,6 +35,14 @@ import { ToastAction } from "./ui/toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { NamesDisplay } from "./names-display";
 import { Switch } from "./ui/switch";
+import {
+  BusinessPlanEntitlements,
+  FreePlanEntitlements,
+  ProPlanEntitlements,
+  TestBusinessPlanEntitlements,
+  TestProPlanEntitlements,
+  UnauthenticatedEntitlements,
+} from "@/lib/plans";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -151,23 +159,42 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     setNamesList({});
     setIdsList([]);
 
-    const oneDayAgo = new Date(
-      new Date().getTime() - 24 * 60 * 60 * 1000
-    ).toISOString();
-
     const oneMonthAgo = new Date(
       new Date().setMonth(new Date().getMonth() - 1)
     ).toISOString();
 
     try {
+      let namesLimit = UnauthenticatedEntitlements.nameGenerations;
+
       if (user) {
+        namesLimit = FreePlanEntitlements.nameGenerations;
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("plan_id")
+          .eq("id", user.id)
+          .single();
+
+        if (profile && profile.plan_id) {
+          if (
+            profile.plan_id === TestProPlanEntitlements.id ||
+            profile.plan_id === ProPlanEntitlements.id
+          ) {
+            namesLimit = ProPlanEntitlements.nameGenerations;
+          } else if (
+            profile.plan_id === TestBusinessPlanEntitlements.id ||
+            profile.plan_id === BusinessPlanEntitlements.id
+          ) {
+            namesLimit = BusinessPlanEntitlements.nameGenerations;
+          }
+        }
+
         const { data: names, error } = await supabase
           .from("names")
           .select("*", { count: "exact" })
           .eq("created_by", user.id)
           .gte("created_at", oneMonthAgo);
 
-        if (names!.length >= 24) {
+        if (names!.length >= namesLimit) {
           toast({
             title: "Uh oh! Out of generations",
             description:
@@ -182,7 +209,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .eq("session_id", sessionId)
           .gte("created_at", oneMonthAgo);
 
-        if (names!.length >= 9) {
+        if (names!.length >= namesLimit) {
           toast({
             title: "Uh oh! Out of generations",
             description:
