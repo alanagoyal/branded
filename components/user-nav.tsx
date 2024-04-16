@@ -115,8 +115,6 @@ export default function UserNav({ user }: any) {
               <p className="text-xs text-muted-foreground">⌘P</p>
             </DropdownMenuItem>
           </Link>
-        </DropdownMenuGroup>
-        <DropdownMenuGroup>
           <Link href="/favorites">
             <DropdownMenuItem className="cursor-pointer justify-between">
               <div className="flex items-center">
