@@ -135,11 +135,8 @@ export default function ProfileForm({
         </form>
       </Form>
       <div className="pt-2 text-sm text-gray-500">
-        You are currently on the {planName} plan. To change your plan, please
-        visit the{" "}
-        <a href="/pricing" className="underline">
-          pricing page.
-        </a>
+        You are currently on the <strong>{planName} Plan</strong>. To change your plan, please
+        visit the <a href="/pricing" className="underline">pricing page.</a>
       </div>
     </div>
   );
