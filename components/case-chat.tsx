@@ -9,8 +9,14 @@ import { generateTicketData } from "@/lib/ticket";
 
 import { useChatForm } from "./chat-form-context";
 import { Button } from "./ui/button";
+import {
+  BusinessPlanEntitlements,
+  ProPlanEntitlements,
+  TestBusinessPlanEntitlements,
+  TestProPlanEntitlements,
+} from "@/lib/plans";
 
-export function CaseChat({ user }: { user: any }) {
+export function CaseChat({ user, userData }: { user: any; userData: any }) {
   const { setIsCreatingCase } = useChatForm();
   const [messages, setMessages] = useState<ChatViewMessage[]>([]);
   const [ticketData, setTicketData] = useState<TicketGeneratedData | undefined>(
@@ -99,6 +105,18 @@ export function CaseChat({ user }: { user: any }) {
           {ticketData && <CaseForm {...ticketData} />}
         </div>
       </ChatProvider>
+      {(userData.plan_id === ProPlanEntitlements.id ||
+        userData.plan_id === TestProPlanEntitlements.id ||
+        userData.plan_id === BusinessPlanEntitlements.id ||
+        userData.plan_id === TestBusinessPlanEntitlements.id) && (
+        <div className="pt-2 text-sm text-gray-500">
+          For more assistance, please reach out to{" "}
+          <a href="mailto:hi@basecase.vc" className="underline">
+            support
+          </a>
+          .
+        </div>
+      )}
     </div>
   );
 }
