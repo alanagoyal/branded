@@ -90,6 +90,8 @@ CREATE UNIQUE INDEX domain_names_pkey ON public.names USING btree (id);
 
 CREATE UNIQUE INDEX domains_pkey ON public.domains USING btree (id);
 
+CREATE INDEX idx_created_by ON public.names USING btree (created_by);
+
 CREATE UNIQUE INDEX logos_pkey ON public.logos USING btree (id);
 
 CREATE UNIQUE INDEX npm_names_pkey ON public.npm_names USING btree (id);
