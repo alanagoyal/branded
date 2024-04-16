@@ -1,23 +1,22 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export default function VerifySubscription({ user }: { user: any }) {
   const supabase = createClient();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const checkoutId = useMemo(
     () => searchParams.get("checkout_id"),
     [searchParams]
   );
 
-  const [invoice, setInvoice] = useState(null);
-  const [subscriptionId, setSubscriptionId] = useState("");
-  const [planId, setPlanId] = useState("");
-
   useEffect(() => {
-    fetchInvoice();
+    if(checkoutId) {
+      fetchInvoice();
+    }
   }, [checkoutId]);
 
   async function fetchInvoice() {
@@ -28,10 +27,6 @@ export default function VerifySubscription({ user }: { user: any }) {
       const data = await response.json();
 
       if (response.ok) {
-        setInvoice(data.invoice);
-        setSubscriptionId(data.subscriptionId);
-        setPlanId(data.planId);
-
         if (user) {
           const { error } = await supabase
             .from("profiles")
@@ -48,6 +43,8 @@ export default function VerifySubscription({ user }: { user: any }) {
       }
     } catch (error) {
       console.error("Error fetching invoice:", error);
+    } finally {
+      router.push("/new")
     }
   }
 
