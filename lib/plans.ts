@@ -10,7 +10,7 @@ export const UnauthenticatedEntitlements = {
 
 export const FreePlanEntitlements = {
   id: "prod_PvLmfOlOtEttwO",
-  link: "https://buy.stripe.com/test_fZe3cn7boaFs6Xu5kn",
+  link: "https://buy.stripe.com/cN200gaSn0pR9dm6oo",
   nameGenerations: 10,
   domainLookups: 5,
   npmNameLookups: 5,

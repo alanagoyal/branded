@@ -52,20 +52,29 @@ export default function ProfileForm({
   const [planName, setPlanName] = useState("");
 
   useEffect(() => {
-    async function fetchUserPlan() {
+    function fetchUserPlan() {
       let plan = "";
-      if (userData.plan_id === FreePlanEntitlements.id || userData.plan_id === TestFreePlanEntitlements.id) {
+      if (
+        userData.plan_id === FreePlanEntitlements.id ||
+        userData.plan_id === TestFreePlanEntitlements.id
+      ) {
         plan = "Free";
-      } else if (userData.plan_id === ProPlanEntitlements.id || userData.plan_id === TestProPlanEntitlements.id) {
+      } else if (
+        userData.plan_id === ProPlanEntitlements.id ||
+        userData.plan_id === TestProPlanEntitlements.id
+      ) {
         plan = "Pro";
-      } else if (userData.plan_id === BusinessPlanEntitlements.id || userData.plan_id === TestBusinessPlanEntitlements.id) {
+      } else if (
+        userData.plan_id === BusinessPlanEntitlements.id ||
+        userData.plan_id === TestBusinessPlanEntitlements.id
+      ) {
         plan = "Business";
       }
-      setPlanName(plan); 
+      setPlanName(plan);
     }
-  
+
     fetchUserPlan();
-  }, [userData.plan_id]); 
+  }, [userData.plan_id]);
 
   async function onSubmit(data: ProfileFormValues) {
     try {
@@ -135,8 +144,11 @@ export default function ProfileForm({
         </form>
       </Form>
       <div className="pt-2 text-sm text-gray-500">
-        You are currently on the <strong>{planName} Plan</strong>. To change your plan, please
-        visit the <a href="/pricing" className="underline">pricing page.</a>
+        You are currently on the <strong>{planName} Plan</strong>. To change
+        your plan, please visit the{" "}
+        <a href="/pricing" className="underline">
+          pricing page.
+        </a>
       </div>
     </div>
   );
