@@ -230,12 +230,15 @@ export function NamesDisplay({
 
       switch (profile?.plan_id) {
         case TestFreePlanEntitlements.id:
+        case FreePlanEntitlements.id:
           setUserPlan(FreePlanEntitlements);
           break;
         case TestProPlanEntitlements.id:
+        case ProPlanEntitlements.id:
           setUserPlan(ProPlanEntitlements);
           break;
         case TestBusinessPlanEntitlements.id:
+        case BusinessPlanEntitlements.id:
           setUserPlan(BusinessPlanEntitlements);
           break;
         default:
@@ -321,7 +324,15 @@ export function NamesDisplay({
   }
 
   async function findDomainNames(name: string) {
-    if (!await checkLimit(user.id, "domains", userPlan, "domain lookups", "domainLookups")) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "domains",
+        userPlan,
+        "domain lookups",
+        "domainLookups"
+      ))
+    ) {
       return;
     }
     try {
@@ -420,7 +431,15 @@ export function NamesDisplay({
   }
 
   async function checkTrademarks(name: string) {
-    if (!await checkLimit(user.id, "trademarks", userPlan, "trademark checks", "trademarkChecks")) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "trademarks",
+        userPlan,
+        "trademark checks",
+        "trademarkChecks"
+      ))
+    ) {
       return;
     }
     try {
@@ -507,7 +526,15 @@ export function NamesDisplay({
   }
 
   async function findNpmNames(name: string) {
-    if (!await checkLimit(user.id, "npm_names", userPlan, "npm lookups", "npmNameLookups")) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "npm_names",
+        userPlan,
+        "npm lookups",
+        "npmNameLookups"
+      ))
+    ) {
       return;
     }
     try {
@@ -589,7 +616,15 @@ export function NamesDisplay({
   }
 
   async function generateLogo(name: string) {
-    if (!await checkLimit(user.id, "logos", userPlan, "logo generations", "logoGenerations")) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "logos",
+        userPlan,
+        "logo generations",
+        "logoGenerations"
+      ))
+    ) {
       return;
     }
     try {
@@ -669,7 +704,15 @@ export function NamesDisplay({
   }
 
   async function createOnePager(name: string) {
-    if (!await checkLimit(user.id, "one_pagers", userPlan, "one pager generations", "onePagerGenerations")) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "one_pagers",
+        userPlan,
+        "one pager generations",
+        "onePagerGenerations"
+      ))
+    ) {
       return;
     }
     try {
