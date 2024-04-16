@@ -53,7 +53,7 @@ export default function ProfileForm({
 
   useEffect(() => {
     function fetchUserPlan() {
-      let plan = "";
+      let plan = "Free";
       if (
         userData.plan_id === FreePlanEntitlements.id ||
         userData.plan_id === TestFreePlanEntitlements.id
