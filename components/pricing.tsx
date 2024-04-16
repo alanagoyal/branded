@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Icons } from "./icons";
 import Link from "next/link";
-import { TestBusinessPlanEntitlements, TestFreePlanEntitlements, TestProPlanEntitlements } from "@/lib/plans";
+import { BusinessPlanEntitlements, FreePlanEntitlements, ProPlanEntitlements, TestBusinessPlanEntitlements, TestFreePlanEntitlements, TestProPlanEntitlements } from "@/lib/plans";
 
 const freePlanDetails = {
   title: "Free",
@@ -10,12 +10,12 @@ const freePlanDetails = {
   description: "Free forever",
   link: TestFreePlanEntitlements.link,  
   features: [
-    "10 name generations",
-    "5 domain lookups",
-    "5 npm name lookups",
-    "3 one-pager generations",
-    "1 trademark checks",
-    "1 logo generation",
+    `${FreePlanEntitlements.nameGenerations} name generations`,
+    `${FreePlanEntitlements.domainLookups} domain lookups`,
+    `${FreePlanEntitlements.npmNameLookups} npm name lookups`,
+    `${FreePlanEntitlements.onePagerGenerations} one-pager generations`,
+    `${FreePlanEntitlements.trademarkChecks} trademark checks`,
+    `${FreePlanEntitlements.logoGenerations} logo generations`,
     "AI-assisted support",
   ],
 };
@@ -27,12 +27,12 @@ const proPlanDetails = {
   badge: "Popular",
   link: TestProPlanEntitlements.link,
   features: [
-    "100 name generations",
-    "50 domain lookups",
-    "50 npm name lookups",
-    "25 one-pager generations",
-    "5 trademark checks",
-    "5 logo generations",
+    `${ProPlanEntitlements.nameGenerations} name generations`,
+    `${ProPlanEntitlements.domainLookups} domain lookups`,
+    `${ProPlanEntitlements.npmNameLookups} npm name lookups`,
+    `${ProPlanEntitlements.onePagerGenerations} one-pager generations`,
+    `${ProPlanEntitlements.trademarkChecks} trademark checks`,
+    `${ProPlanEntitlements.logoGenerations} logo generations`,
     "Basic email support",
   ],
 };
@@ -43,12 +43,12 @@ const businessPlanDetails = {
   description: "/ month",
   link: TestBusinessPlanEntitlements.link,
   features: [
-    "500 name generations",
-    "250 domain lookups",
-    "250 npm name lookups",
-    "100 one-pager generations",
-    "25 trademark checks",
-    "25 logo generations",
+    `${BusinessPlanEntitlements.nameGenerations} name generations`,
+    `${BusinessPlanEntitlements.domainLookups} domain lookups`,
+    `${BusinessPlanEntitlements.npmNameLookups} npm name lookups`,
+    `${BusinessPlanEntitlements.onePagerGenerations} one-pager generations`,
+    `${BusinessPlanEntitlements.trademarkChecks} trademark checks`,
+    `${BusinessPlanEntitlements.logoGenerations} logo generations`,
     "Advanced email & phone support",
   ],
 };
@@ -88,7 +88,7 @@ interface PlanDetailsProps {
   features: string[];
   buttonColor?: string;
   badge?: string;
-  link: string; // Added link property to interface
+  link: string;
 }
 
 function PlanDetails({ title, price, description, features, buttonColor, link }: PlanDetailsProps) {
