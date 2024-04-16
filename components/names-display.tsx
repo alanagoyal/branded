@@ -205,7 +205,7 @@ export function NamesDisplay({
     if (count && count >= planLimits[actionId]) {
       toast({
         title: "Uh oh! Out of generations",
-        description: `You've reached the monthly limit for ${actionType} this month. Upgrade your account to generate more names and enjoy more features.`,
+        description: `You've reached the monthly limit for ${actionType} this month. Upgrade your account to enjoy more features.`,
         action: (
           <ToastAction
             onClick={() => router.push("/pricing")}
