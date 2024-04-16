@@ -8,14 +8,14 @@ const freePlanDetails = {
   title: "Free",
   price: "$0",
   description: "Free forever",
-  link: TestFreePlanEntitlements.link,  
+  link: FreePlanEntitlements.link,  
   features: [
     `${FreePlanEntitlements.nameGenerations} name generations`,
     `${FreePlanEntitlements.domainLookups} domain lookups`,
     `${FreePlanEntitlements.npmNameLookups} npm name lookups`,
     `${FreePlanEntitlements.onePagerGenerations} one-pager generations`,
     `${FreePlanEntitlements.trademarkChecks} trademark checks`,
-    `${FreePlanEntitlements.logoGenerations} logo generations`,
+    `${FreePlanEntitlements.logoGenerations} logo generation`,
     "AI-assisted support",
   ],
 };
@@ -25,7 +25,7 @@ const proPlanDetails = {
   price: "$4.99",
   description: "/ month",
   badge: "Popular",
-  link: TestProPlanEntitlements.link,
+  link: ProPlanEntitlements.link,
   features: [
     `${ProPlanEntitlements.nameGenerations} name generations`,
     `${ProPlanEntitlements.domainLookups} domain lookups`,
@@ -41,7 +41,7 @@ const businessPlanDetails = {
   title: "Business",
   price: "$19.99",
   description: "/ month",
-  link: TestBusinessPlanEntitlements.link,
+  link: BusinessPlanEntitlements.link,
   features: [
     `${BusinessPlanEntitlements.nameGenerations} name generations`,
     `${BusinessPlanEntitlements.domainLookups} domain lookups`,
