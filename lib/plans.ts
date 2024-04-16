@@ -39,8 +39,8 @@ export const BusinessPlanEntitlements = {
   domainLookups: 250,
   npmNameLookups: 250,
   onePagerGenerations: 100,
-  trademarkChecks: 25,
-  logoGenerations: 25,
+  trademarkChecks: 50,
+  logoGenerations: 50,
   support: "Advanced email & phone",
 };
 

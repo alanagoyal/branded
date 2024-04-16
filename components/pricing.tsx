@@ -14,7 +14,7 @@ const freePlanDetails = {
     `${FreePlanEntitlements.domainLookups} domain lookups`,
     `${FreePlanEntitlements.npmNameLookups} npm name lookups`,
     `${FreePlanEntitlements.onePagerGenerations} one-pager generations`,
-    `${FreePlanEntitlements.trademarkChecks} trademark checks`,
+    `${FreePlanEntitlements.trademarkChecks} trademark check`,
     `${FreePlanEntitlements.logoGenerations} logo generation`,
     "AI-assisted support",
   ],
