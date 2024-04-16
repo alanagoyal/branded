@@ -15,7 +15,6 @@ export default function VerifySubscription({ user }: { user: any }) {
 
   useEffect(() => {
     if(checkoutId) {
-      console.log(checkoutId);
       fetchInvoice();
     }
   }, [checkoutId]);
@@ -26,7 +25,6 @@ export default function VerifySubscription({ user }: { user: any }) {
         `/verify-subscription?checkout_id=${checkoutId}`
       );
       const data = await response.json();
-      console.log(data);
 
       if (response.ok) {
         if (user) {
