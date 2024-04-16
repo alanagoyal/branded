@@ -3,6 +3,7 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function GET(req: NextRequest) {
+    console.log("in verify subscription");
   const checkoutId = req.nextUrl.searchParams.get("checkout_id");
   try {
     if (checkoutId) {
@@ -18,6 +19,8 @@ export async function GET(req: NextRequest) {
             planId = subscriptionData.items.data[0].plan.product; 
           }
         }
+
+        console.log(invoice);
 
         return new NextResponse(JSON.stringify({ invoice, subscriptionId, planId }), {
           status: 200,
