@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
       if (typeof session.invoice === "string") {
         const invoice = await stripe.invoices.retrieve(session.invoice);
         const subscriptionId = invoice.subscription;
+        const customerId = invoice.customer;
         let planId = null;
 
         if (typeof subscriptionId === "string") {
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        return new NextResponse(JSON.stringify({ invoice, subscriptionId, planId }), {
+        return new NextResponse(JSON.stringify({ invoice, subscriptionId, planId, customerId }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
         });
