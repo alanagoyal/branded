@@ -48,20 +48,49 @@ export default function ProfileForm({
     },
   });
   const [planName, setPlanName] = useState("");
+  const [customerId, setCustomerId] = useState("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState("");
 
   useEffect(() => {
-    function fetchUserPlan() {
-      const planMapping = {
-        [FreePlanEntitlements.id]: "Free",
-        [ProPlanEntitlements.id]: "Pro",
-        [BusinessPlanEntitlements.id]: "Business",
-      };
-
-      const plan = planMapping[userData.plan_id] || "Free";
-      setPlanName(plan);
-    }
     fetchUserPlan();
-  }, [userData.plan_id]);
+    fetchCustomerId();
+  }, []);
+
+  function fetchUserPlan() {
+    const planMapping = {
+      [FreePlanEntitlements.id]: "Free",
+      [ProPlanEntitlements.id]: "Pro",
+      [BusinessPlanEntitlements.id]: "Business",
+    };
+
+    const plan = planMapping[userData.plan_id];
+    setPlanName(plan || "Free");
+  }
+
+  async function fetchCustomerId() {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && profile.customer_id) {
+        setCustomerId(profile.customer_id);
+        fetchBillingSession(profile.customer_id);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function fetchBillingSession(customerId: string) {
+    const response = await fetch(`/portal-session?customer_id=${customerId}`);
+    const data = await response.json();
+    if (response.ok) {
+      setBillingPortalUrl(data.session.url);
+    }
+  }
 
   async function onSubmit(data: ProfileFormValues) {
     try {
@@ -133,7 +162,10 @@ export default function ProfileForm({
       <div className="pt-2 text-sm text-gray-500">
         You are currently on the <strong>{planName} Plan</strong>. To change
         your plan, please visit the{" "}
-        <a href={PortalLink} className="underline">
+        <a
+          href={customerId ? billingPortalUrl : "/pricing"}
+          className="underline"
+        >
           billing portal.
         </a>
       </div>
