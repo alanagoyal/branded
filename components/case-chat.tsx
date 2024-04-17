@@ -12,8 +12,6 @@ import { Button } from "./ui/button";
 import {
   BusinessPlanEntitlements,
   ProPlanEntitlements,
-  TestBusinessPlanEntitlements,
-  TestProPlanEntitlements,
 } from "@/lib/plans";
 
 export function CaseChat({ user, userData }: { user: any; userData: any }) {
@@ -106,9 +104,7 @@ export function CaseChat({ user, userData }: { user: any; userData: any }) {
         </div>
       </ChatProvider>
       {(userData.plan_id === ProPlanEntitlements.id ||
-        userData.plan_id === TestProPlanEntitlements.id ||
         userData.plan_id === BusinessPlanEntitlements.id ||
-        userData.plan_id === TestBusinessPlanEntitlements.id) && (
         <div className="pt-2 text-sm text-gray-500">
           For more assistance, please reach out to{" "}
           <a href="mailto:hi@basecase.vc" className="underline">

@@ -20,9 +20,6 @@ import {
   BusinessPlanEntitlements,
   FreePlanEntitlements,
   ProPlanEntitlements,
-  TestBusinessPlanEntitlements,
-  TestFreePlanEntitlements,
-  TestProPlanEntitlements,
 } from "@/lib/plans";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -53,26 +50,15 @@ export default function ProfileForm({
 
   useEffect(() => {
     function fetchUserPlan() {
-      let plan = "Free";
-      if (
-        userData.plan_id === FreePlanEntitlements.id ||
-        userData.plan_id === TestFreePlanEntitlements.id
-      ) {
-        plan = "Free";
-      } else if (
-        userData.plan_id === ProPlanEntitlements.id ||
-        userData.plan_id === TestProPlanEntitlements.id
-      ) {
-        plan = "Pro";
-      } else if (
-        userData.plan_id === BusinessPlanEntitlements.id ||
-        userData.plan_id === TestBusinessPlanEntitlements.id
-      ) {
-        plan = "Business";
-      }
+      const planMapping = {
+        [FreePlanEntitlements.id]: "Free",
+        [ProPlanEntitlements.id]: "Pro",
+        [BusinessPlanEntitlements.id]: "Business",
+      };
+
+      const plan = planMapping[userData.plan_id] || "Free";
       setPlanName(plan);
     }
-
     fetchUserPlan();
   }, [userData.plan_id]);
 

@@ -39,8 +39,6 @@ import {
   BusinessPlanEntitlements,
   FreePlanEntitlements,
   ProPlanEntitlements,
-  TestBusinessPlanEntitlements,
-  TestProPlanEntitlements,
   UnauthenticatedEntitlements,
 } from "@/lib/plans";
 
@@ -176,12 +174,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
         if (profile && profile.plan_id) {
           if (
-            profile.plan_id === TestProPlanEntitlements.id ||
             profile.plan_id === ProPlanEntitlements.id
           ) {
             namesLimit = ProPlanEntitlements.nameGenerations;
           } else if (
-            profile.plan_id === TestBusinessPlanEntitlements.id ||
             profile.plan_id === BusinessPlanEntitlements.id
           ) {
             namesLimit = BusinessPlanEntitlements.nameGenerations;

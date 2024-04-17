@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Icons } from "./icons";
 import Link from "next/link";
-import { BusinessPlanEntitlements, FreePlanEntitlements, ProPlanEntitlements, TestBusinessPlanEntitlements, TestFreePlanEntitlements, TestProPlanEntitlements } from "@/lib/plans";
+import { BusinessPlanEntitlements, FreePlanEntitlements, ProPlanEntitlements } from "@/lib/plans";
 
 const freePlanDetails = {
   title: "Free",

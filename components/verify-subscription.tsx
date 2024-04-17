@@ -14,7 +14,7 @@ export default function VerifySubscription({ user }: { user: any }) {
   );
 
   useEffect(() => {
-    if(checkoutId) {
+    if (checkoutId) {
       fetchInvoice();
     }
   }, [checkoutId]);
@@ -44,7 +44,7 @@ export default function VerifySubscription({ user }: { user: any }) {
     } catch (error) {
       console.error("Error fetching invoice:", error);
     } finally {
-      router.push("/new")
+      router.push("/new");
     }
   }
 

@@ -21,9 +21,6 @@ import {
   BusinessPlanEntitlements,
   FreePlanEntitlements,
   ProPlanEntitlements,
-  TestBusinessPlanEntitlements,
-  TestFreePlanEntitlements,
-  TestProPlanEntitlements,
 } from "@/lib/plans";
 
 const ActionButton = ({
@@ -228,15 +225,12 @@ export function NamesDisplay({
         .single();
 
       switch (profile?.plan_id) {
-        case TestFreePlanEntitlements.id:
         case FreePlanEntitlements.id:
           setUserPlan(FreePlanEntitlements);
           break;
-        case TestProPlanEntitlements.id:
         case ProPlanEntitlements.id:
           setUserPlan(ProPlanEntitlements);
           break;
-        case TestBusinessPlanEntitlements.id:
         case BusinessPlanEntitlements.id:
           setUserPlan(BusinessPlanEntitlements);
           break;
