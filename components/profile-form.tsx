@@ -19,6 +19,7 @@ import { Label } from "./ui/label";
 import {
   BusinessPlanEntitlements,
   FreePlanEntitlements,
+  PortalLink,
   ProPlanEntitlements,
 } from "@/lib/plans";
 import { useEffect, useState } from "react";
@@ -132,8 +133,8 @@ export default function ProfileForm({
       <div className="pt-2 text-sm text-gray-500">
         You are currently on the <strong>{planName} Plan</strong>. To change
         your plan, please visit the{" "}
-        <a href="/pricing" className="underline">
-          pricing page.
+        <a href={PortalLink} className="underline">
+          billing portal.
         </a>
       </div>
     </div>
