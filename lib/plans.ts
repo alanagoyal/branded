@@ -84,8 +84,9 @@ const TestEntitlements = {
 
 const TestCustomerPortal = "https://billing.stripe.com/p/login/test_28odSDbJHg6MfDy144";
 const CustomerPortal = "https://billing.stripe.com/p/login/bIY9BZ71t1uu7cscMM";
-
 export const PortalLink = isProduction ? CustomerPortal : TestCustomerPortal;
+
+export const baseUrl = isProduction ? 'https://namebase-git-pricing-basecasevc.vercel.app' : 'http://127.0.0.1:3000';
 
 export const FreePlanEntitlements = isProduction ? ProductionEntitlements.FreePlan : TestEntitlements.FreePlan;
 export const ProPlanEntitlements = isProduction ? ProductionEntitlements.ProPlan : TestEntitlements.ProPlan;
