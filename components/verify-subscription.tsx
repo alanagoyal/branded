@@ -12,12 +12,19 @@ export default function VerifySubscription({ user }: { user: any }) {
     () => searchParams.get("checkout_id"),
     [searchParams]
   );
+  const customerId = useMemo(
+    () => searchParams.get("customer_id"),
+    [searchParams]
+  );
 
   useEffect(() => {
     if (checkoutId) {
       fetchInvoice();
     }
-  }, [checkoutId]);
+    if (customerId) {
+      fetchCustomer();
+    }
+  }, [checkoutId, customerId]);
 
   async function fetchInvoice() {
     try {
@@ -27,22 +34,44 @@ export default function VerifySubscription({ user }: { user: any }) {
       const data = await response.json();
 
       if (response.ok) {
-        if (user) {
-          const { error } = await supabase
-            .from("profiles")
-            .update({
-              subscription_id: data.subscriptionId,
-              plan_id: data.planId,
-            })
-            .eq("id", user.id);
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            plan_id: data.planId,
+            customer_id: data.customerId,
+          })
+          .eq("id", user.id);
 
-          if (error) throw error;
-        }
+        if (error) throw error;
       } else {
         throw new Error("Failed to fetch invoice data");
       }
     } catch (error) {
       console.error("Error fetching invoice:", error);
+    } finally {
+      router.push("/new");
+    }
+  }
+
+  async function fetchCustomer() {
+    try {
+      const response = await fetch(
+        `/update-subscription?customer_id=${customerId}`
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            plan_id: data,
+          })
+          .eq("id", user.id);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error fetching customer:", error);
     } finally {
       router.push("/new");
     }
