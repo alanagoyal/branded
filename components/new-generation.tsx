@@ -39,8 +39,10 @@ export default function NewGeneration({
   const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
 
   useEffect(() => {
-    fetchCustomerId();
-  }, []);
+    if (user) {
+      fetchCustomerId();
+    }
+  }, [user]);
 
   async function fetchCustomerId() {
     try {

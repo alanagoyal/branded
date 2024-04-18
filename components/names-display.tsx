@@ -179,8 +179,10 @@ export function NamesDisplay({
   const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
 
   useEffect(() => {
-    fetchCustomerId();
-  }, []);
+    if (user) {
+      fetchCustomerId();
+    }
+  }, [user]);
 
   async function fetchCustomerId() {
     try {
@@ -232,7 +234,6 @@ export function NamesDisplay({
       console.error(error);
       return false;
     }
-
     if (count && count >= planLimits[actionId]) {
       toast({
         title: "Uh oh! Out of generations",
@@ -296,6 +297,8 @@ export function NamesDisplay({
           console.error("Error fetching user plan:", error);
           setUserPlan(FreePlanEntitlements);
         }
+      } else {
+        setUserPlan(FreePlanEntitlements);
       }
     }
 

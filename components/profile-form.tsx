@@ -56,13 +56,17 @@ export default function ProfileForm({
     fetchCustomerId();
   }, []);
 
-  async function fetchUserPlan() {
-    const response = await fetch(`/fetch-plan?plan_id=${userData.plan_id}`);
-    const data = await response.json();
-    if (response.ok) {
-      setPlanName(data.planName);
-    }
+async function fetchUserPlan() {
+  if (!userData.plan_id) {
+    setPlanName("Free");
+    return;
   }
+  const response = await fetch(`/fetch-plan?plan_id=${userData.plan_id}`);
+  const data = await response.json();
+  if (response.ok) {
+    setPlanName(data.planName);
+  }
+}
 
   async function fetchCustomerId() {
     try {

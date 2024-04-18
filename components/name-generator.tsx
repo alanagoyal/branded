@@ -125,8 +125,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
 
   useEffect(() => {
-    fetchCustomerId();
-  }, []);
+    if (user) {
+      fetchCustomerId();
+    }
+  }, [user]);
 
   async function fetchCustomerId() {
     try {
