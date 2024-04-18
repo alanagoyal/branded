@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,22 +10,60 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "./ui/command";
-import { CreditCard, Heart, HelpCircle, LogOut, Plus, User } from "lucide-react";
+import {
+  CreditCard,
+  Heart,
+  HelpCircle,
+  LogOut,
+  Plus,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 
-export function CommandMenu() {
+export function CommandMenu({ user }: { user: any }) {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const [isCustomer, setIsCustomer] = useState(false);
+  const [billingPortalUrl, setBillingPortalUrl] = useState("");
 
   const navigateAndCloseDialog = (path: string) => {
     router.push(path);
     setOpen(false);
   };
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const supabase = createClient();
+      let { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+      } else if (data && data.customer_id) {
+        setIsCustomer(true);
+        fetchBillingSession(data.customer_id);
+      }
+    };
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  async function fetchBillingSession(customerId: string) {
+    const response = await fetch(`/portal-session?customer_id=${customerId}`);
+    const data = await response.json();
+    if (response.ok) {
+      setBillingPortalUrl(data.session.url);
+    }
+  }
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -54,7 +92,11 @@ export function CommandMenu() {
             break;
           case "i":
             e.preventDefault();
-            navigateAndCloseDialog("/pricing");
+            if (isCustomer) {
+              navigateAndCloseDialog(billingPortalUrl);
+            } else {
+              navigateAndCloseDialog("/pricing");
+            }
             break;
           case "o":
             e.preventDefault();
@@ -71,7 +113,7 @@ export function CommandMenu() {
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [router, theme, setTheme]);
+  }, [router, theme, setTheme, isCustomer, billingPortalUrl]);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -126,13 +168,23 @@ export function CommandMenu() {
               <CommandShortcut>⌘J</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
-          <CommandLinkItem href="/pricing">
-            <CommandItem>
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>Pricing</span>
-              <CommandShortcut>⌘I</CommandShortcut>
-            </CommandItem>
-          </CommandLinkItem>
+          {isCustomer ? (
+            <CommandLinkItem href={billingPortalUrl}>
+              <CommandItem>
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Billing</span>
+                <CommandShortcut>⌘I</CommandShortcut>
+              </CommandItem>
+            </CommandLinkItem>
+          ) : (
+            <CommandLinkItem href="/pricing">
+              <CommandItem>
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Pricing</span>
+                <CommandShortcut>⌘I</CommandShortcut>
+              </CommandItem>
+            </CommandLinkItem>
+          )}
           <CommandItem
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           >
