@@ -40,6 +40,43 @@ export default function AccountForm({
     },
   });
   const [planName, setPlanName] = useState("");
+  const [customerId, setCustomerId] = useState<string>("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (user) {
+      fetchCustomerId();
+    }
+  }, [user]);
+
+  async function fetchCustomerId() {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && profile.customer_id) {
+        setCustomerId(profile.customer_id);
+        fetchBillingSession(profile.customer_id);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function fetchBillingSession(customerId: string) {
+    try {
+      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setBillingPortalUrl(data.session.url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch billing session:", error);
+    }
+  }
 
   useEffect(() => {
     fetchUserPlan();
@@ -89,11 +126,22 @@ export default function AccountForm({
     <div className="flex flex-col ">
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold mb-4">Account</h1>
-        {planName && (
-          <div className="bg-[#C850C0] px-3 py-1 rounded-full text-sm text-white h-6 flex items-center justify-center">
-            {planName}
-          </div>
-        )}
+        {planName &&
+          (customerId ? (
+            <a
+              href={billingPortalUrl}
+              className="bg-[#C850C0] px-3 py-1 rounded-full text-sm text-white h-6 flex items-center justify-center"
+            >
+              {planName}
+            </a>
+          ) : (
+            <a
+              href="/pricing"
+              className="bg-[#C850C0] px-3 py-1 rounded-full text-sm text-white h-6 flex items-center justify-center"
+            >
+              {planName}
+            </a>
+          ))}
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
