@@ -15,6 +15,15 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import {
+  BusinessPlanEntitlements,
+  FreePlanEntitlements,
+  PortalLink,
+  ProPlanEntitlements,
+} from "@/lib/plans";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const profileFormSchema = z.object({
   email: z.string().email(),
@@ -38,6 +47,54 @@ export default function ProfileForm({
       name: userData.name || "",
     },
   });
+  const [planName, setPlanName] = useState("");
+  const [customerId, setCustomerId] = useState("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState("");
+
+  useEffect(() => {
+    fetchUserPlan();
+    fetchCustomerId();
+  }, []);
+
+  function fetchUserPlan() {
+    const planMapping = {
+      [FreePlanEntitlements.id]: "Free",
+      [ProPlanEntitlements.id]: "Pro",
+      [BusinessPlanEntitlements.id]: "Business",
+    };
+
+    const plan = planMapping[userData.plan_id];
+    setPlanName(plan || "Free");
+  }
+
+  async function fetchCustomerId() {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && profile.customer_id) {
+        setCustomerId(profile.customer_id);
+        fetchBillingSession(profile.customer_id);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function fetchBillingSession(customerId: string) {
+    try {
+      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setBillingPortalUrl(data.session.url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch billing session:", error);
+    }
+  }
 
   async function onSubmit(data: ProfileFormValues) {
     try {
@@ -64,9 +121,9 @@ export default function ProfileForm({
     }
   }
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col ">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           <FormField
             control={form.control}
             name="email"
@@ -99,12 +156,31 @@ export default function ProfileForm({
               </FormItem>
             )}
           />
-
           <div className="py-1 flex justify-center w-full">
-            <Button className="w-full" type="submit">Update</Button>
+            <Button className="w-full" type="submit">
+              Update
+            </Button>
           </div>
         </form>
       </Form>
+      <div className="pt-2 text-sm text-gray-500">
+        You are currently on the <strong>{planName} Plan</strong>.{" "}
+        {customerId ? (
+          <>
+            To change your plan, please{" "}
+            <a href={billingPortalUrl} className="underline">
+              visit the billing portal
+            </a>.
+          </>
+        ) : (
+          <>
+            To upgrade, please{" "}
+            <a href="/pricing" className="underline">
+              visit the pricing page
+            </a>.
+          </>
+        )}
+      </div>
     </div>
   );
 }

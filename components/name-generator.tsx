@@ -29,21 +29,18 @@ import {
 } from "./ui/select";
 import { Slider } from "./ui/slider";
 import { Icons } from "./icons";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
 import { Share } from "./share";
 import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { NamesDisplay } from "./names-display";
-import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
+import {
+  BusinessPlanEntitlements,
+  FreePlanEntitlements,
+  ProPlanEntitlements,
+  UnauthenticatedEntitlements,
+} from "@/lib/plans";
 
 const formSchema = z.object({
   description: z.string().max(280).min(4),
@@ -160,27 +157,52 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     setNamesList({});
     setIdsList([]);
 
-    const oneDayAgo = new Date(
-      new Date().getTime() - 24 * 60 * 60 * 1000
-    ).toISOString();
-
     const oneMonthAgo = new Date(
       new Date().setMonth(new Date().getMonth() - 1)
     ).toISOString();
 
     try {
+      let namesLimit = UnauthenticatedEntitlements.nameGenerations;
+
       if (user) {
+        namesLimit = FreePlanEntitlements.nameGenerations;
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("plan_id")
+          .eq("id", user.id)
+          .single();
+
+        if (profile && profile.plan_id) {
+          if (
+            profile.plan_id === ProPlanEntitlements.id
+          ) {
+            namesLimit = ProPlanEntitlements.nameGenerations;
+          } else if (
+            profile.plan_id === BusinessPlanEntitlements.id
+          ) {
+            namesLimit = BusinessPlanEntitlements.nameGenerations;
+          }
+        }
+
         const { data: names, error } = await supabase
           .from("names")
           .select("*", { count: "exact" })
           .eq("created_by", user.id)
           .gte("created_at", oneMonthAgo);
 
-        if (names!.length >= 24) {
+        if (names!.length >= namesLimit) {
           toast({
             title: "Uh oh! Out of generations",
             description:
-              "You've reached the monthly limit for name generations.",
+              "You've reached the monthly limit for name generations. Upgrade your account to generate more names and enjoy more features.",
+            action: (
+              <ToastAction
+                onClick={() => router.push("/pricing")}
+                altText="Upgrade"
+              >
+                Upgrade
+              </ToastAction>
+            ),
           });
           return;
         }
@@ -191,7 +213,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .eq("session_id", sessionId)
           .gte("created_at", oneMonthAgo);
 
-        if (names!.length >= 9) {
+        if (names!.length >= namesLimit) {
           toast({
             title: "Uh oh! Out of generations",
             description:

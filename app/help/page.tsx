@@ -6,10 +6,17 @@ export default async function HelpPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const { data: userData, error } = await supabase
+  .from("profiles")
+  .select()
+  .eq("id", user?.id)
+  .single();
+
   return (
     <div className="w-full px-4 flex justify-center items-center flex-col">
       <div className="w-full min-h-screen">
-        <CaseChat user={user} />{" "}
+        <CaseChat user={user} userData={userData} />
       </div>
     </div>
   );

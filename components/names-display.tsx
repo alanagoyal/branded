@@ -17,6 +17,11 @@ import {
 } from "./ui/carousel";
 import { useRouter } from "next/navigation";
 import { ToastAction } from "./ui/toast";
+import {
+  BusinessPlanEntitlements,
+  FreePlanEntitlements,
+  ProPlanEntitlements,
+} from "@/lib/plans";
 
 const ActionButton = ({
   name,
@@ -169,6 +174,75 @@ export function NamesDisplay({
   const [onePager, setOnePager] = useState<{ [key: string]: string }>({});
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const idString = Object.values(namesList).join(",");
+  const [userPlan, setUserPlan] = useState({});
+
+  const getOneMonthAgoDate = () =>
+    new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString();
+
+  async function checkLimit(
+    userId: string,
+    tableName: string,
+    planLimits: any,
+    actionType: string,
+    actionId: string
+  ) {
+    const oneMonthAgo = getOneMonthAgoDate();
+    const { count, error } = await supabase
+      .from(tableName)
+      .select("*", { count: "exact" })
+      .eq("created_by", userId)
+      .gte("created_at", oneMonthAgo);
+
+    if (error) {
+      console.error(error);
+      return false;
+    }
+
+    if (count && count >= planLimits[actionId]) {
+      toast({
+        title: "Uh oh! Out of generations",
+        description: `You've reached the monthly limit for ${actionType} this month. Upgrade your account to enjoy more features.`,
+        action: (
+          <ToastAction
+            onClick={() => router.push("/pricing")}
+            altText="Upgrade"
+          >
+            Upgrade
+          </ToastAction>
+        ),
+      });
+      return false;
+    }
+    return true;
+  }
+
+  useEffect(() => {
+    async function fetchUserPlan() {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("plan_id")
+        .eq("id", user.id)
+        .single();
+
+      switch (profile?.plan_id) {
+        case FreePlanEntitlements.id:
+          setUserPlan(FreePlanEntitlements);
+          break;
+        case ProPlanEntitlements.id:
+          setUserPlan(ProPlanEntitlements);
+          break;
+        case BusinessPlanEntitlements.id:
+          setUserPlan(BusinessPlanEntitlements);
+          break;
+        default:
+          setUserPlan(FreePlanEntitlements);
+      }
+    }
+
+    if (user) {
+      fetchUserPlan();
+    }
+  }, [user]);
 
   const signUpLink = idString
     ? `/signup?ids=${idString.replace(/,/g, "")}`
@@ -243,6 +317,17 @@ export function NamesDisplay({
   }
 
   async function findDomainNames(name: string) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "domains",
+        userPlan,
+        "domain lookups",
+        "domainLookups"
+      ))
+    ) {
+      return;
+    }
     try {
       setProcessingDomains((prev) => [...prev, name]);
       const showingAvailability = domainResults[name];
@@ -339,6 +424,17 @@ export function NamesDisplay({
   }
 
   async function checkTrademarks(name: string) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "trademarks",
+        userPlan,
+        "trademark checks",
+        "trademarkChecks"
+      ))
+    ) {
+      return;
+    }
     try {
       setProcessingTrademark((prev) => [...prev, name]);
       const showingAvailability = trademarkResults[name];
@@ -423,6 +519,17 @@ export function NamesDisplay({
   }
 
   async function findNpmNames(name: string) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "npm_names",
+        userPlan,
+        "npm lookups",
+        "npmNameLookups"
+      ))
+    ) {
+      return;
+    }
     try {
       setProcessingNpm((prev) => [...prev, name]);
       const showingAvailability = npmResults[name];
@@ -450,7 +557,9 @@ export function NamesDisplay({
             npmAvailability.push({ npmName: npmCommand, purchaseLink });
           }
         } else {
-          const response = await fetch(`/find-npm-availability?query=${name.toLowerCase()}`);
+          const response = await fetch(
+            `/find-npm-availability?query=${name.toLowerCase()}`
+          );
 
           if (!response.ok) {
             toast({
@@ -500,6 +609,17 @@ export function NamesDisplay({
   }
 
   async function generateLogo(name: string) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "logos",
+        userPlan,
+        "logo generations",
+        "logoGenerations"
+      ))
+    ) {
+      return;
+    }
     try {
       setProcessingLogo((prev) => [...prev, name]);
       const showingAvailability = logoResults[name];
@@ -577,6 +697,17 @@ export function NamesDisplay({
   }
 
   async function createOnePager(name: string) {
+    if (
+      !(await checkLimit(
+        user.id,
+        "one_pagers",
+        userPlan,
+        "one pager generations",
+        "onePagerGenerations"
+      ))
+    ) {
+      return;
+    }
     try {
       setProcessingOnePager((prev) => [...prev, name]);
       const showingAvailability = onePager[name];

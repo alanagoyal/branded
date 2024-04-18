@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { NameGenerator } from "./name-generator";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -10,6 +10,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { ToastAction } from "./ui/toast";
 import { toast } from "./ui/use-toast";
+import VerifySubscription from "./verify-subscription";
+import {
+  BusinessPlanEntitlements,
+  FreePlanEntitlements,
+  ProPlanEntitlements,
+  UnauthenticatedEntitlements,
+} from "@/lib/plans";
 
 export default function NewGeneration({
   user,
@@ -28,33 +35,56 @@ export default function NewGeneration({
     [searchParams]
   );
   const router = useRouter();
-  
+
   async function addExistingName() {
     const updatedNamesList: { [name: string]: string } = {};
-
-
-    const oneDayAgo = new Date(
-      new Date().getTime() - 24 * 60 * 60 * 1000
-    ).toISOString();
 
     const oneMonthAgo = new Date(
       new Date().setMonth(new Date().getMonth() - 1)
     ).toISOString();
 
-
     try {
+      let namesLimit = UnauthenticatedEntitlements.nameGenerations;
+
       if (user) {
+        namesLimit = FreePlanEntitlements.nameGenerations;
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("plan_id")
+          .eq("id", user.id)
+          .single();
+
+        if (profile && profile.plan_id) {
+          if (
+            profile.plan_id === ProPlanEntitlements.id
+          ) {
+            namesLimit = ProPlanEntitlements.nameGenerations;
+          } else if (
+            profile.plan_id === BusinessPlanEntitlements.id
+          ) {
+            namesLimit = BusinessPlanEntitlements.nameGenerations;
+          }
+        }
+
         const { data: names, error } = await supabase
           .from("names")
           .select("*", { count: "exact" })
           .eq("created_by", user.id)
           .gte("created_at", oneMonthAgo);
 
-        if (names!.length >= 24) {
+        if (names!.length >= namesLimit) {
           toast({
             title: "Uh oh! Out of generations",
             description:
-            "You've reached the monthly limit for name generations.",
+              "You've reached the monthly limit for name generations. Upgrade your account to generate more names and enjoy more features.",
+            action: (
+              <ToastAction
+                onClick={() => router.push("/pricing")}
+                altText="Upgrade"
+              >
+                Upgrade
+              </ToastAction>
+            ),
           });
           return;
         }
@@ -65,7 +95,7 @@ export default function NewGeneration({
           .eq("session_id", sessionId)
           .gte("created_at", oneMonthAgo);
 
-        if (names!.length >= 9) {
+        if (names!.length >= namesLimit) {
           toast({
             title: "Uh oh! Out of generations",
             description:
@@ -82,7 +112,7 @@ export default function NewGeneration({
           return;
         }
       }
-      
+
       const updates = {
         name: inputName,
         created_at: new Date(),
@@ -97,7 +127,7 @@ export default function NewGeneration({
       if (data) {
         updatedNamesList[data[0].name] = data[0].id;
         setNamesList(updatedNamesList);
-        setShowNamesDisplay(true); 
+        setShowNamesDisplay(true);
         setInputName("");
       }
 
@@ -111,8 +141,11 @@ export default function NewGeneration({
 
   return (
     <div className="min-h-screen px-4 sm:px-8">
+      <VerifySubscription user={user} />
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h1 className="text-xl sm:text-2xl font-bold sm:text-left mb-4 sm:mb-0">Name Generator</h1>
+        <h1 className="text-xl sm:text-2xl font-bold sm:text-left mb-4 sm:mb-0">
+          Name Generator
+        </h1>
         {showNamesDisplay ? (
           <Button variant="ghost" onClick={() => setShowNamesDisplay(false)}>
             Back

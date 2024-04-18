@@ -1,6 +1,13 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { Heart, HelpCircle, LogOut, Plus, User } from "lucide-react";
+import {
+  CreditCard,
+  Heart,
+  HelpCircle,
+  LogOut,
+  Plus,
+  User,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +29,8 @@ export default function UserNav({ user }: any) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [profileName, setProfileName] = useState("");
+  const [isCustomer, setIsCustomer] = useState(false);
+  const [billingPortalUrl, setBillingPortalUrl] = useState("");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -40,7 +49,7 @@ export default function UserNav({ user }: any) {
       const supabase = createClient();
       let { data, error } = await supabase
         .from("profiles")
-        .select("name")
+        .select("*")
         .eq("id", user.id)
         .single();
 
@@ -48,13 +57,28 @@ export default function UserNav({ user }: any) {
         console.error("Error fetching profile:", error);
       } else if (data) {
         setProfileName(data.name);
+        if (data.customer_id) {
+          setIsCustomer(true);
+          fetchBillingSession(data.customer_id);
+        }
       }
     };
-
     if (user) {
       fetchProfile();
     }
   }, [user]);
+
+async function fetchBillingSession(customerId: string) {
+  try {
+    const response = await fetch(`/portal-session?customer_id=${customerId}`);
+    const data = await response.json();
+    if (response.ok) {
+      setBillingPortalUrl(data.session.url);
+    }
+  } catch (error) {
+    console.error("Failed to fetch billing session:", error);
+  }
+}
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -108,8 +132,6 @@ export default function UserNav({ user }: any) {
               <p className="text-xs text-muted-foreground">⌘P</p>
             </DropdownMenuItem>
           </Link>
-        </DropdownMenuGroup>
-        <DropdownMenuGroup>
           <Link href="/favorites">
             <DropdownMenuItem className="cursor-pointer justify-between">
               <div className="flex items-center">
@@ -128,6 +150,27 @@ export default function UserNav({ user }: any) {
               <p className="text-xs text-muted-foreground">⌘J</p>
             </DropdownMenuItem>
           </Link>
+          {isCustomer ? (
+            <Link href={billingPortalUrl}>
+              <DropdownMenuItem className="cursor-pointer justify-between">
+                <div className="flex items-center">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  <span>Billing</span>
+                </div>
+                <p className="text-xs text-muted-foreground">⌘I</p>
+              </DropdownMenuItem>
+            </Link>
+          ) : (
+            <Link href="/pricing">
+              <DropdownMenuItem className="cursor-pointer justify-between">
+                <div className="flex items-center">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  <span>Pricing</span>
+                </div>
+                <p className="text-xs text-muted-foreground">⌘I</p>
+              </DropdownMenuItem>
+            </Link>
+          )}
           <DropdownMenuItem
             className="cursor-pointer justify-between"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
