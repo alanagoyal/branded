@@ -96,8 +96,10 @@ export function CommandMenu({ user }: { user: any }) {
             navigateAndCloseDialog("/help");
             break;
           case "d":
-            e.preventDefault();
-            navigateAndCloseDialog(billingPortalUrl);
+            if (isCustomer) {
+              e.preventDefault();
+              navigateAndCloseDialog(billingPortalUrl);
+            }
             break;
           case "i":
             e.preventDefault();
