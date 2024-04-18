@@ -12,9 +12,15 @@ export default async function PricingPage() {
     redirect("/login");
   }
 
+  const { data: userData, error } = await supabase
+  .from("profiles")
+  .select()
+  .eq("id", user?.id)
+  .single();
+
   return (
     <div>
-      <Pricing />
+      <Pricing userData={userData} />
     </div>
   );
 }
