@@ -85,7 +85,7 @@ export function CommandMenu({ user }: { user: any }) {
             break;
           case "a":
             e.preventDefault();
-            navigateAndCloseDialog("/profile");
+            navigateAndCloseDialog("/account");
             break;
           case "f":
             e.preventDefault();
@@ -154,7 +154,7 @@ export function CommandMenu({ user }: { user: any }) {
               <CommandShortcut>⌘G</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
-          <CommandLinkItem href="/profile">
+          <CommandLinkItem href="/account">
             <CommandItem>
               <User className="mr-2 h-4 w-4" />
               <span>Account</span>

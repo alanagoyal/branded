@@ -29,7 +29,7 @@ import { useEffect, useState } from "react";
 export default function UserNav({ user }: any) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const [profileName, setProfileName] = useState("");
+  const [accountName, setAccountName] = useState("");
   const [isCustomer, setIsCustomer] = useState(false);
   const [billingPortalUrl, setBillingPortalUrl] = useState("");
   const [open, setOpen] = useState(false);
@@ -46,7 +46,7 @@ export default function UserNav({ user }: any) {
   }, []);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchAccount = async () => {
       const supabase = createClient();
       let { data, error } = await supabase
         .from("profiles")
@@ -57,7 +57,7 @@ export default function UserNav({ user }: any) {
       if (error) {
         console.error("Error fetching profile:", error);
       } else if (data) {
-        setProfileName(data.name);
+        setAccountName(data.name);
         if (data.customer_id) {
           setIsCustomer(true);
           fetchBillingSession(data.customer_id);
@@ -65,7 +65,7 @@ export default function UserNav({ user }: any) {
       }
     };
     if (user) {
-      fetchProfile();
+      fetchAccount();
     }
   }, [user]);
 
@@ -107,7 +107,7 @@ export default function UserNav({ user }: any) {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profileName}</p>
+            <p className="text-sm font-medium leading-none">{accountName}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
@@ -124,7 +124,7 @@ export default function UserNav({ user }: any) {
               <p className="text-xs text-muted-foreground">⌘G</p>
             </DropdownMenuItem>
           </Link>
-          <Link href="/profile">
+          <Link href="/account">
             <DropdownMenuItem className="cursor-pointer justify-between">
               <div className="flex items-center">
                 <User className="mr-2 h-4 w-4" />

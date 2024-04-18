@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const planId = req.nextUrl.searchParams.get("plan_id");
-
   if (!planId) {
     return new NextResponse(JSON.stringify({ error: "Plan not found" }), {
       status: 404,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   }
   try {
@@ -27,9 +29,16 @@ export async function GET(req: NextRequest) {
           "Content-Type": "application/json",
         },
       });
+    } else {
+      return new NextResponse(JSON.stringify({ error: "Plan not found" }), {
+        status: 404,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
   } catch (error) {
-    return new NextResponse(JSON.stringify({ error: "Plan not found" }), {
+    return new NextResponse(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: {
         "Content-Type": "application/json",
