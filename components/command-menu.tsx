@@ -83,7 +83,7 @@ export function CommandMenu({ user }: { user: any }) {
             e.preventDefault();
             navigateAndCloseDialog("/new");
             break;
-          case "p":
+          case "a":
             e.preventDefault();
             navigateAndCloseDialog("/profile");
             break;
@@ -91,17 +91,17 @@ export function CommandMenu({ user }: { user: any }) {
             e.preventDefault();
             navigateAndCloseDialog("/favorites");
             break;
-          case "j":
+          case "s":
             e.preventDefault();
             navigateAndCloseDialog("/help");
             break;
-          case "d":
+          case "b":
             if (isCustomer) {
               e.preventDefault();
               navigateAndCloseDialog(billingPortalUrl);
             }
             break;
-          case "i":
+          case "p":
             e.preventDefault();
             navigateAndCloseDialog("/pricing");
             break;
@@ -109,7 +109,7 @@ export function CommandMenu({ user }: { user: any }) {
             e.preventDefault();
             handleSignOut();
             break;
-          case "b":
+          case "d":
             e.preventDefault();
             setTheme(theme === "light" ? "dark" : "light");
             break;
@@ -157,8 +157,8 @@ export function CommandMenu({ user }: { user: any }) {
           <CommandLinkItem href="/profile">
             <CommandItem>
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-              <CommandShortcut>⌘P</CommandShortcut>
+              <span>Account</span>
+              <CommandShortcut>⌘A</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
           <CommandLinkItem href="/favorites">
@@ -172,7 +172,7 @@ export function CommandMenu({ user }: { user: any }) {
             <CommandItem>
               <HelpCircle className="mr-2 h-4 w-4" />
               <span>Support</span>
-              <CommandShortcut>⌘J</CommandShortcut>
+              <CommandShortcut>⌘S</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
           {isCustomer && (
@@ -180,7 +180,7 @@ export function CommandMenu({ user }: { user: any }) {
               <CommandItem>
                 <CreditCard className="mr-2 h-4 w-4" />
                 <span>Billing</span>
-                <CommandShortcut>⌘D</CommandShortcut>
+                <CommandShortcut>⌘B</CommandShortcut>
               </CommandItem>
             </CommandLinkItem>
           )}
@@ -188,7 +188,7 @@ export function CommandMenu({ user }: { user: any }) {
             <CommandItem>
               <Receipt className="mr-2 h-4 w-4" />
               <span>Pricing</span>
-              <CommandShortcut>⌘I</CommandShortcut>
+              <CommandShortcut>⌘P</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
 
@@ -201,7 +201,7 @@ export function CommandMenu({ user }: { user: any }) {
               <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
             )}
             <span>Switch Theme</span>
-            <CommandShortcut>⌘B</CommandShortcut>
+            <CommandShortcut>⌘D</CommandShortcut>
           </CommandItem>
           <CommandSeparator />
           <CommandItem onClick={handleSignOut}>

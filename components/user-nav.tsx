@@ -128,9 +128,9 @@ export default function UserNav({ user }: any) {
             <DropdownMenuItem className="cursor-pointer justify-between">
               <div className="flex items-center">
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>Account</span>
               </div>
-              <p className="text-xs text-muted-foreground">⌘P</p>
+              <p className="text-xs text-muted-foreground">⌘A</p>
             </DropdownMenuItem>
           </Link>
           <Link href="/favorites">
@@ -148,7 +148,7 @@ export default function UserNav({ user }: any) {
                 <HelpCircle className="mr-2 h-4 w-4" />
                 <span>Support</span>
               </div>
-              <p className="text-xs text-muted-foreground">⌘J</p>
+              <p className="text-xs text-muted-foreground">⌘S</p>
             </DropdownMenuItem>
           </Link>
           {isCustomer && (
@@ -158,7 +158,7 @@ export default function UserNav({ user }: any) {
                   <CreditCard className="mr-2 h-4 w-4" />
                   <span>Billing</span>
                 </div>
-                <p className="text-xs text-muted-foreground">⌘D</p>
+                <p className="text-xs text-muted-foreground">⌘B</p>
               </DropdownMenuItem>
             </Link>
           )}
@@ -168,7 +168,7 @@ export default function UserNav({ user }: any) {
                 <Receipt className="mr-2 h-4 w-4" />
                 <span>Pricing</span>
               </div>
-              <p className="text-xs text-muted-foreground">⌘I</p>
+              <p className="text-xs text-muted-foreground">⌘P</p>
             </DropdownMenuItem>
           </Link>
           <DropdownMenuItem
@@ -184,7 +184,7 @@ export default function UserNav({ user }: any) {
               )}
               <span>Switch Theme</span>
             </div>
-            <p className="text-xs text-muted-foreground">⌘B</p>
+            <p className="text-xs text-muted-foreground">⌘D</p>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
