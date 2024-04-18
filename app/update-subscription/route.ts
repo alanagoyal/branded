@@ -12,7 +12,8 @@ export async function GET(req: NextRequest) {
 
       const currentSubscription = subscriptions.data[0];
       const planId = currentSubscription.items.data[0].plan.product;
-      return new NextResponse(JSON.stringify(planId), {
+      const cancelAtPeriodEnd = currentSubscription.cancel_at_period_end;
+      return new NextResponse(JSON.stringify({ planId, cancelAtPeriodEnd, customerId }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
