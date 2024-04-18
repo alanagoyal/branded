@@ -58,10 +58,14 @@ export function CommandMenu({ user }: { user: any }) {
   }, [user]);
 
   async function fetchBillingSession(customerId: string) {
-    const response = await fetch(`/portal-session?customer_id=${customerId}`);
-    const data = await response.json();
-    if (response.ok) {
-      setBillingPortalUrl(data.session.url);
+    try {
+      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setBillingPortalUrl(data.session.url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch billing session:", error);
     }
   }
 

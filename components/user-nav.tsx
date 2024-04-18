@@ -68,13 +68,17 @@ export default function UserNav({ user }: any) {
     }
   }, [user]);
 
-  async function fetchBillingSession(customerId: string) {
+async function fetchBillingSession(customerId: string) {
+  try {
     const response = await fetch(`/portal-session?customer_id=${customerId}`);
     const data = await response.json();
     if (response.ok) {
       setBillingPortalUrl(data.session.url);
     }
+  } catch (error) {
+    console.error("Failed to fetch billing session:", error);
   }
+}
 
   const handleSignOut = async () => {
     const supabase = createClient();
