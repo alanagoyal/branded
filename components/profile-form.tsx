@@ -160,14 +160,22 @@ export default function ProfileForm({
         </form>
       </Form>
       <div className="pt-2 text-sm text-gray-500">
-        You are currently on the <strong>{planName} Plan</strong>. To change
-        your plan, please visit the{" "}
-        <a
-          href={customerId ? billingPortalUrl : "/pricing"}
-          className="underline"
-        >
-          billing portal.
-        </a>
+        You are currently on the <strong>{planName} Plan</strong>.{" "}
+        {customerId ? (
+          <>
+            To change your plan, please{" "}
+            <a href={billingPortalUrl} className="underline">
+              visit the billing portal
+            </a>.
+          </>
+        ) : (
+          <>
+            To upgrade, please{" "}
+            <a href="/pricing" className="underline">
+              visit the pricing page
+            </a>.
+          </>
+        )}
       </div>
     </div>
   );
