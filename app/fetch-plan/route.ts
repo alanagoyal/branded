@@ -1,16 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const planMapping = {
-  [process.env.FREE_PLAN_ID!]: "Free",
-  [process.env.PRO_PLAN_ID!]: "Pro",
-  [process.env.BUSINESS_PLAN_ID!]: "Business",
-  [process.env.FREE_PLAN_ID_TEST!]: "Free",
-  [process.env.PRO_PLAN_ID_TEST!]: "Pro",
-  [process.env.BUSINESS_PLAN_ID_TEST!]: "Business",
-};
-
-console.log(planMapping);
-
 export async function GET(req: NextRequest) {
   const planId = req.nextUrl.searchParams.get("plan_id");
   console.log(planId);
@@ -23,8 +12,16 @@ export async function GET(req: NextRequest) {
     });
   }
   try {
+    const planMapping = {
+        [process.env.FREE_PLAN_ID_PRODUCTION!]: "Free",
+        [process.env.PRO_PLAN_ID_PRODUCTION!]: "Pro",
+        [process.env.BUSINESS_PLAN_ID_PRODUCTION!]: "Business",
+        [process.env.FREE_PLAN_ID_TEST!]: "Free",
+        [process.env.PRO_PLAN_ID_TEST!]: "Pro",
+        [process.env.BUSINESS_PLAN_ID_TEST!]: "Business",
+      };
+
     const planName = planMapping[planId];
-    console.log(planName);
 
     if (planName) {
       return new NextResponse(JSON.stringify({ planName }), {
