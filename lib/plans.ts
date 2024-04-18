@@ -82,7 +82,7 @@ const CustomerPortal = "https://billing.stripe.com/p/login/bIY9BZ71t1uu7cscMM";
 export const PortalLink = isProduction ? CustomerPortal : TestCustomerPortal;
 
 export const baseUrl = isProduction
-  ? "https://namebase-git-pricing-changes-basecasevc.vercel.app"
+  ? "https://www.branded.ai"
   : "http://127.0.0.1:3000";
 
 export const FreePlanEntitlements = isProduction
