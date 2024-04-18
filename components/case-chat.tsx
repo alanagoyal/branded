@@ -9,11 +9,6 @@ import { generateTicketData } from "@/lib/ticket";
 
 import { useChatForm } from "./chat-form-context";
 import { Button } from "./ui/button";
-import {
-  BusinessPlanEntitlements,
-  FreePlanEntitlements,
-  ProPlanEntitlements,
-} from "@/lib/plans";
 import { createClient } from "@/utils/supabase/client";
 
 export function CaseChat({ user, userData }: { user: any; userData: any }) {
@@ -29,21 +24,10 @@ export function CaseChat({ user, userData }: { user: any; userData: any }) {
     async function fetchUserPlan() {
       if (!user) return;
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("plan_id")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching user profile:", error);
-        return;
-      }
-
-      if (profile && profile.plan_id) {
+      if (userData && userData.plan_id) {
         try {
           const response = await fetch(
-            `/fetch-plan?plan_id=${profile.plan_id}`
+            `/fetch-plan?plan_id=${userData.plan_id}`
           );
           if (!response.ok) {
             throw new Error("Failed to fetch user plan");
