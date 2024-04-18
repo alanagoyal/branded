@@ -13,12 +13,12 @@ export async function GET(req: NextRequest) {
   }
   try {
     const planMapping = {
-      [process.env.FREE_PLAN_ID as string]: "Free",
-      [process.env.PRO_PLAN_ID as string]: "Pro",
-      [process.env.BUSINESS_PLAN_ID as string]: "Business",
-      [process.env.FREE_PLAN_ID_TEST as string]: "Free",
-      [process.env.PRO_PLAN_ID_TEST as string]: "Pro",
-      [process.env.BUSINESS_PLAN_ID_TEST as string]: "Business",
+      [process.env.FREE_PLAN_ID!]: "Free",
+      [process.env.PRO_PLAN_ID!]: "Pro",
+      [process.env.BUSINESS_PLAN_ID!]: "Business",
+      [process.env.FREE_PLAN_ID_TEST!]: "Free",
+      [process.env.PRO_PLAN_ID_TEST!]: "Pro",
+      [process.env.BUSINESS_PLAN_ID_TEST!]: "Business",
     };
 
     const planName = planMapping[planId];
