@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const planId = req.nextUrl.searchParams.get("plan_id");
-  console.log(planId);
   if (!planId) {
     return new NextResponse(JSON.stringify({ error: "Plan not found" }), {
       status: 404,
