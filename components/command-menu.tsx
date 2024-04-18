@@ -17,6 +17,7 @@ import {
   LogOut,
   Plus,
   Receipt,
+  SquareGantt,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -186,8 +187,8 @@ export function CommandMenu({ user }: { user: any }) {
           )}
           <CommandLinkItem href="/pricing">
             <CommandItem>
-              <Receipt className="mr-2 h-4 w-4" />
-              <span>Pricing</span>
+              <SquareGantt className="mr-2 h-4 w-4" />
+              <span>Plans</span>
               <CommandShortcut>⌘P</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>

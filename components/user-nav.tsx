@@ -7,6 +7,7 @@ import {
   LogOut,
   Plus,
   Receipt,
+  SquareGantt,
   User,
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -165,8 +166,8 @@ export default function UserNav({ user }: any) {
           <Link href="/pricing">
             <DropdownMenuItem className="cursor-pointer justify-between">
               <div className="flex items-center">
-                <Receipt className="mr-2 h-4 w-4" />
-                <span>Pricing</span>
+                <SquareGantt className="mr-2 h-4 w-4" />
+                <span>Plans</span>
               </div>
               <p className="text-xs text-muted-foreground">⌘P</p>
             </DropdownMenuItem>
