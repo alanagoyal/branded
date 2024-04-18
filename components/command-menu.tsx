@@ -16,6 +16,7 @@ import {
   HelpCircle,
   LogOut,
   Plus,
+  Receipt,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -94,13 +95,13 @@ export function CommandMenu({ user }: { user: any }) {
             e.preventDefault();
             navigateAndCloseDialog("/help");
             break;
+          case "d":
+            e.preventDefault();
+            navigateAndCloseDialog(billingPortalUrl);
+            break;
           case "i":
             e.preventDefault();
-            if (isCustomer) {
-              navigateAndCloseDialog(billingPortalUrl);
-            } else {
-              navigateAndCloseDialog("/pricing");
-            }
+            navigateAndCloseDialog("/pricing");
             break;
           case "o":
             e.preventDefault();
@@ -172,23 +173,23 @@ export function CommandMenu({ user }: { user: any }) {
               <CommandShortcut>⌘J</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
-          {isCustomer ? (
+          {isCustomer && (
             <CommandLinkItem href={billingPortalUrl}>
               <CommandItem>
                 <CreditCard className="mr-2 h-4 w-4" />
                 <span>Billing</span>
-                <CommandShortcut>⌘I</CommandShortcut>
-              </CommandItem>
-            </CommandLinkItem>
-          ) : (
-            <CommandLinkItem href="/pricing">
-              <CommandItem>
-                <CreditCard className="mr-2 h-4 w-4" />
-                <span>Pricing</span>
-                <CommandShortcut>⌘I</CommandShortcut>
+                <CommandShortcut>⌘D</CommandShortcut>
               </CommandItem>
             </CommandLinkItem>
           )}
+          <CommandLinkItem href="/pricing">
+            <CommandItem>
+              <Receipt className="mr-2 h-4 w-4" />
+              <span>Pricing</span>
+              <CommandShortcut>⌘I</CommandShortcut>
+            </CommandItem>
+          </CommandLinkItem>
+
           <CommandItem
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           >
