@@ -68,17 +68,17 @@ export default function UserNav({ user }: any) {
     }
   }, [user]);
 
-async function fetchBillingSession(customerId: string) {
-  try {
-    const response = await fetch(`/portal-session?customer_id=${customerId}`);
-    const data = await response.json();
-    if (response.ok) {
-      setBillingPortalUrl(data.session.url);
+  async function fetchBillingSession(customerId: string) {
+    try {
+      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setBillingPortalUrl(data.session.url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch billing session:", error);
     }
-  } catch (error) {
-    console.error("Failed to fetch billing session:", error);
   }
-}
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -150,7 +150,7 @@ async function fetchBillingSession(customerId: string) {
               <p className="text-xs text-muted-foreground">⌘J</p>
             </DropdownMenuItem>
           </Link>
-          {isCustomer ? (
+          {isCustomer && (
             <Link href={billingPortalUrl}>
               <DropdownMenuItem className="cursor-pointer justify-between">
                 <div className="flex items-center">
@@ -160,17 +160,16 @@ async function fetchBillingSession(customerId: string) {
                 <p className="text-xs text-muted-foreground">⌘I</p>
               </DropdownMenuItem>
             </Link>
-          ) : (
-            <Link href="/pricing">
-              <DropdownMenuItem className="cursor-pointer justify-between">
-                <div className="flex items-center">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  <span>Pricing</span>
-                </div>
-                <p className="text-xs text-muted-foreground">⌘I</p>
-              </DropdownMenuItem>
-            </Link>
           )}
+          <Link href="/pricing">
+            <DropdownMenuItem className="cursor-pointer justify-between">
+              <div className="flex items-center">
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Pricing</span>
+              </div>
+              <p className="text-xs text-muted-foreground">⌘I</p>
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem
             className="cursor-pointer justify-between"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}

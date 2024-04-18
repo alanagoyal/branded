@@ -56,15 +56,12 @@ export default function ProfileForm({
     fetchCustomerId();
   }, []);
 
-  function fetchUserPlan() {
-    const planMapping = {
-      [FreePlanEntitlements.id]: "Free",
-      [ProPlanEntitlements.id]: "Pro",
-      [BusinessPlanEntitlements.id]: "Business",
-    };
-
-    const plan = planMapping[userData.plan_id];
-    setPlanName(plan || "Free");
+  async function fetchUserPlan() {
+    const response = await fetch(`/fetch-plan?plan_id=${userData.plan_id}`);
+    const data = await response.json();
+    if (response.ok) {
+      setPlanName(data.planName);
+    }
   }
 
   async function fetchCustomerId() {
@@ -170,14 +167,16 @@ export default function ProfileForm({
             To change your plan, please{" "}
             <a href={billingPortalUrl} className="underline">
               visit the billing portal
-            </a>.
+            </a>
+            .
           </>
         ) : (
           <>
-            To upgrade, please{" "}
+            To view available plans, please{" "}
             <a href="/pricing" className="underline">
               visit the pricing page
-            </a>.
+            </a>
+            .
           </>
         )}
       </div>

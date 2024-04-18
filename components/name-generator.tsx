@@ -121,6 +121,41 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
   const [idsList, setIdsList] = useState<string[]>([]);
   const autoSubmitted = useRef(false);
+  const [customerId, setCustomerId] = useState<string>("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
+
+  useEffect(() => {
+    fetchCustomerId();
+  }, []);
+
+  async function fetchCustomerId() {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && profile.customer_id) {
+        setCustomerId(profile.customer_id);
+        fetchBillingSession(profile.customer_id);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function fetchBillingSession(customerId: string) {
+    try {
+      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setBillingPortalUrl(data.session.url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch billing session:", error);
+    }
+  }
 
   useEffect(() => {
     if (queryDescription && !autoSubmitted.current) {
@@ -173,14 +208,16 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           .single();
 
         if (profile && profile.plan_id) {
-          if (
-            profile.plan_id === ProPlanEntitlements.id
-          ) {
-            namesLimit = ProPlanEntitlements.nameGenerations;
-          } else if (
-            profile.plan_id === BusinessPlanEntitlements.id
-          ) {
-            namesLimit = BusinessPlanEntitlements.nameGenerations;
+          const response = await fetch(
+            `/fetch-plan?plan_id=${profile.plan_id}`
+          );
+          const data = await response.json();
+          if (response.ok) {
+            if (data.planName === "Pro") {
+              namesLimit = ProPlanEntitlements.nameGenerations;
+            } else if (data.planName === "Business") {
+              namesLimit = BusinessPlanEntitlements.nameGenerations;
+            }
           }
         }
 
@@ -197,7 +234,11 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
               "You've reached the monthly limit for name generations. Upgrade your account to generate more names and enjoy more features.",
             action: (
               <ToastAction
-                onClick={() => router.push("/pricing")}
+                onClick={() =>
+                  customerId
+                    ? router.push(billingPortalUrl)
+                    : router.push("/pricing")
+                }
                 altText="Upgrade"
               >
                 Upgrade
