@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatProvider, ChatViewMessage } from "@markprompt/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { type TicketGeneratedData, CaseForm } from "@/components/case-form";
 import { Chat } from "@/components/chat";
@@ -9,17 +9,40 @@ import { generateTicketData } from "@/lib/ticket";
 
 import { useChatForm } from "./chat-form-context";
 import { Button } from "./ui/button";
-import {
-  BusinessPlanEntitlements,
-  ProPlanEntitlements,
-} from "@/lib/plans";
+import { createClient } from "@/utils/supabase/client";
 
 export function CaseChat({ user, userData }: { user: any; userData: any }) {
+  const supabase = createClient();
   const { setIsCreatingCase } = useChatForm();
   const [messages, setMessages] = useState<ChatViewMessage[]>([]);
   const [ticketData, setTicketData] = useState<TicketGeneratedData | undefined>(
     undefined
   );
+  const [planName, setPlanName] = useState("");
+
+  useEffect(() => {
+    async function fetchUserPlan() {
+      if (!user) return;
+
+      if (userData && userData.plan_id) {
+        try {
+          const response = await fetch(
+            `/fetch-plan?plan_id=${userData.plan_id}`
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch user plan");
+          }
+          const data = await response.json();
+          setPlanName(data.planName);
+        } catch (error) {
+          console.error("Error fetching user plan:", error);
+          setPlanName("Free");
+        }
+      }
+    }
+
+    fetchUserPlan();
+  }, [user]);
 
   const submitCase = useCallback(async () => {
     setIsCreatingCase(true);
@@ -103,16 +126,15 @@ export function CaseChat({ user, userData }: { user: any; userData: any }) {
           {ticketData && <CaseForm {...ticketData} />}
         </div>
       </ChatProvider>
-      {(userData.plan_id === ProPlanEntitlements.id ||
-        userData.plan_id === BusinessPlanEntitlements.id ||
-        <div className="pt-2 text-sm text-gray-500">
-          For more assistance, please reach out to{" "}
-          <a href="mailto:hi@basecase.vc" className="underline">
-            support
-          </a>
-          .
-        </div>
-      )}
+      {(planName === "Pro" || planName === "Business") && (
+          <div className="pt-2 text-sm text-gray-500">
+            For more assistance, please reach out to{" "}
+            <a href="mailto:hi@basecase.vc" className="underline">
+              support
+            </a>
+            .
+          </div>
+        )}
     </div>
   );
 }

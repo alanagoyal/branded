@@ -15,24 +15,16 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import {
-  BusinessPlanEntitlements,
-  FreePlanEntitlements,
-  PortalLink,
-  ProPlanEntitlements,
-} from "@/lib/plans";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
-const profileFormSchema = z.object({
+const accountFormSchema = z.object({
   email: z.string().email(),
   name: z.string().min(2),
 });
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-export default function ProfileForm({
+export default function AccountForm({
   user,
   userData,
 }: {
@@ -40,32 +32,22 @@ export default function ProfileForm({
   userData: any;
 }) {
   const supabase = createClient();
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
+  const form = useForm<AccountFormValues>({
+    resolver: zodResolver(accountFormSchema),
     defaultValues: {
       email: userData.email || "",
       name: userData.name || "",
     },
   });
   const [planName, setPlanName] = useState("");
-  const [customerId, setCustomerId] = useState("");
-  const [billingPortalUrl, setBillingPortalUrl] = useState("");
+  const [customerId, setCustomerId] = useState<string>("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
 
   useEffect(() => {
-    fetchUserPlan();
-    fetchCustomerId();
-  }, []);
-
-  function fetchUserPlan() {
-    const planMapping = {
-      [FreePlanEntitlements.id]: "Free",
-      [ProPlanEntitlements.id]: "Pro",
-      [BusinessPlanEntitlements.id]: "Business",
-    };
-
-    const plan = planMapping[userData.plan_id];
-    setPlanName(plan || "Free");
-  }
+    if (user) {
+      fetchCustomerId();
+    }
+  }, [user]);
 
   async function fetchCustomerId() {
     try {
@@ -96,7 +78,27 @@ export default function ProfileForm({
     }
   }
 
-  async function onSubmit(data: ProfileFormValues) {
+  useEffect(() => {
+    fetchUserPlan();
+  }, [userData]);
+
+  async function fetchUserPlan() {
+    if (!userData.plan_id) {
+      setPlanName("Free Plan");
+      return;
+    }
+    try {
+      const response = await fetch(`/fetch-plan?plan_id=${userData.plan_id}`);
+      const data = await response.json();
+      if (response.ok) {
+        setPlanName(`${data.planName} Plan`);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function onSubmit(data: AccountFormValues) {
     try {
       const updates = {
         email: userData.email,
@@ -110,18 +112,37 @@ export default function ProfileForm({
         .eq("id", user.id);
       if (error) throw error;
       toast({
-        description: "Profile updated",
+        description: "Account updated",
       });
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
-        description: "Error updating profile",
+        description: "Error updating account",
       });
     }
   }
   return (
     <div className="flex flex-col ">
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-bold mb-4">Account</h1>
+        {planName &&
+          (customerId ? (
+            <a
+              href={billingPortalUrl}
+              className="bg-[#C850C0] px-3 py-1 rounded-full text-sm text-white h-6 flex items-center justify-center"
+            >
+              {planName}
+            </a>
+          ) : (
+            <a
+              href="/pricing"
+              className="bg-[#C850C0] px-3 py-1 rounded-full text-sm text-white h-6 flex items-center justify-center"
+            >
+              {planName}
+            </a>
+          ))}
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
           <FormField
@@ -150,7 +171,7 @@ export default function ProfileForm({
                   <Input placeholder="Your name" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is the name that will be displayed on your profile
+                  This is the name that will be displayed in the dashboard
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -163,24 +184,6 @@ export default function ProfileForm({
           </div>
         </form>
       </Form>
-      <div className="pt-2 text-sm text-gray-500">
-        You are currently on the <strong>{planName} Plan</strong>.{" "}
-        {customerId ? (
-          <>
-            To change your plan, please{" "}
-            <a href={billingPortalUrl} className="underline">
-              visit the billing portal
-            </a>.
-          </>
-        ) : (
-          <>
-            To upgrade, please{" "}
-            <a href="/pricing" className="underline">
-              visit the pricing page
-            </a>.
-          </>
-        )}
-      </div>
     </div>
   );
 }

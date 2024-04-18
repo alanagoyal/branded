@@ -64,7 +64,8 @@ export default function VerifySubscription({ user }: { user: any }) {
         const { error } = await supabase
           .from("profiles")
           .update({
-            plan_id: data,
+            plan_id: data.cancelAtPeriodEnd ? null : data.planId,
+            customer_id: data.cancelAtPeriodEnd ? null : customerId,
           })
           .eq("id", user.id);
 

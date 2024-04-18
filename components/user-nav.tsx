@@ -6,6 +6,8 @@ import {
   HelpCircle,
   LogOut,
   Plus,
+  Receipt,
+  SquareGantt,
   User,
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -28,7 +30,7 @@ import { useEffect, useState } from "react";
 export default function UserNav({ user }: any) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const [profileName, setProfileName] = useState("");
+  const [accountName, setAccountName] = useState("");
   const [isCustomer, setIsCustomer] = useState(false);
   const [billingPortalUrl, setBillingPortalUrl] = useState("");
   const [open, setOpen] = useState(false);
@@ -45,7 +47,7 @@ export default function UserNav({ user }: any) {
   }, []);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchAccount = async () => {
       const supabase = createClient();
       let { data, error } = await supabase
         .from("profiles")
@@ -56,7 +58,7 @@ export default function UserNav({ user }: any) {
       if (error) {
         console.error("Error fetching profile:", error);
       } else if (data) {
-        setProfileName(data.name);
+        setAccountName(data.name);
         if (data.customer_id) {
           setIsCustomer(true);
           fetchBillingSession(data.customer_id);
@@ -64,21 +66,21 @@ export default function UserNav({ user }: any) {
       }
     };
     if (user) {
-      fetchProfile();
+      fetchAccount();
     }
   }, [user]);
 
-async function fetchBillingSession(customerId: string) {
-  try {
-    const response = await fetch(`/portal-session?customer_id=${customerId}`);
-    const data = await response.json();
-    if (response.ok) {
-      setBillingPortalUrl(data.session.url);
+  async function fetchBillingSession(customerId: string) {
+    try {
+      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setBillingPortalUrl(data.session.url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch billing session:", error);
     }
-  } catch (error) {
-    console.error("Failed to fetch billing session:", error);
   }
-}
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -106,7 +108,7 @@ async function fetchBillingSession(customerId: string) {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profileName}</p>
+            <p className="text-sm font-medium leading-none">{accountName}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
@@ -123,13 +125,13 @@ async function fetchBillingSession(customerId: string) {
               <p className="text-xs text-muted-foreground">⌘G</p>
             </DropdownMenuItem>
           </Link>
-          <Link href="/profile">
+          <Link href="/account">
             <DropdownMenuItem className="cursor-pointer justify-between">
               <div className="flex items-center">
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>Account</span>
               </div>
-              <p className="text-xs text-muted-foreground">⌘P</p>
+              <p className="text-xs text-muted-foreground">⌘A</p>
             </DropdownMenuItem>
           </Link>
           <Link href="/favorites">
@@ -147,30 +149,29 @@ async function fetchBillingSession(customerId: string) {
                 <HelpCircle className="mr-2 h-4 w-4" />
                 <span>Support</span>
               </div>
-              <p className="text-xs text-muted-foreground">⌘J</p>
+              <p className="text-xs text-muted-foreground">⌘S</p>
             </DropdownMenuItem>
           </Link>
-          {isCustomer ? (
+          {isCustomer && (
             <Link href={billingPortalUrl}>
               <DropdownMenuItem className="cursor-pointer justify-between">
                 <div className="flex items-center">
                   <CreditCard className="mr-2 h-4 w-4" />
                   <span>Billing</span>
                 </div>
-                <p className="text-xs text-muted-foreground">⌘I</p>
-              </DropdownMenuItem>
-            </Link>
-          ) : (
-            <Link href="/pricing">
-              <DropdownMenuItem className="cursor-pointer justify-between">
-                <div className="flex items-center">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  <span>Pricing</span>
-                </div>
-                <p className="text-xs text-muted-foreground">⌘I</p>
+                <p className="text-xs text-muted-foreground">⌘B</p>
               </DropdownMenuItem>
             </Link>
           )}
+          <Link href="/pricing">
+            <DropdownMenuItem className="cursor-pointer justify-between">
+              <div className="flex items-center">
+                <SquareGantt className="mr-2 h-4 w-4" />
+                <span>Plans</span>
+              </div>
+              <p className="text-xs text-muted-foreground">⌘P</p>
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem
             className="cursor-pointer justify-between"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
@@ -184,7 +185,7 @@ async function fetchBillingSession(customerId: string) {
               )}
               <span>Switch Theme</span>
             </div>
-            <p className="text-xs text-muted-foreground">⌘B</p>
+            <p className="text-xs text-muted-foreground">⌘D</p>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

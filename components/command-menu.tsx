@@ -16,6 +16,8 @@ import {
   HelpCircle,
   LogOut,
   Plus,
+  Receipt,
+  SquareGantt,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -82,31 +84,33 @@ export function CommandMenu({ user }: { user: any }) {
             e.preventDefault();
             navigateAndCloseDialog("/new");
             break;
-          case "p":
+          case "a":
             e.preventDefault();
-            navigateAndCloseDialog("/profile");
+            navigateAndCloseDialog("/account");
             break;
           case "f":
             e.preventDefault();
             navigateAndCloseDialog("/favorites");
             break;
-          case "j":
+          case "s":
             e.preventDefault();
             navigateAndCloseDialog("/help");
             break;
-          case "i":
-            e.preventDefault();
+          case "b":
             if (isCustomer) {
+              e.preventDefault();
               navigateAndCloseDialog(billingPortalUrl);
-            } else {
-              navigateAndCloseDialog("/pricing");
             }
+            break;
+          case "p":
+            e.preventDefault();
+            navigateAndCloseDialog("/pricing");
             break;
           case "o":
             e.preventDefault();
             handleSignOut();
             break;
-          case "b":
+          case "d":
             e.preventDefault();
             setTheme(theme === "light" ? "dark" : "light");
             break;
@@ -151,11 +155,11 @@ export function CommandMenu({ user }: { user: any }) {
               <CommandShortcut>⌘G</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
-          <CommandLinkItem href="/profile">
+          <CommandLinkItem href="/account">
             <CommandItem>
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-              <CommandShortcut>⌘P</CommandShortcut>
+              <span>Account</span>
+              <CommandShortcut>⌘A</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
           <CommandLinkItem href="/favorites">
@@ -169,26 +173,26 @@ export function CommandMenu({ user }: { user: any }) {
             <CommandItem>
               <HelpCircle className="mr-2 h-4 w-4" />
               <span>Support</span>
-              <CommandShortcut>⌘J</CommandShortcut>
+              <CommandShortcut>⌘S</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
-          {isCustomer ? (
+          {isCustomer && (
             <CommandLinkItem href={billingPortalUrl}>
               <CommandItem>
                 <CreditCard className="mr-2 h-4 w-4" />
                 <span>Billing</span>
-                <CommandShortcut>⌘I</CommandShortcut>
-              </CommandItem>
-            </CommandLinkItem>
-          ) : (
-            <CommandLinkItem href="/pricing">
-              <CommandItem>
-                <CreditCard className="mr-2 h-4 w-4" />
-                <span>Pricing</span>
-                <CommandShortcut>⌘I</CommandShortcut>
+                <CommandShortcut>⌘B</CommandShortcut>
               </CommandItem>
             </CommandLinkItem>
           )}
+          <CommandLinkItem href="/pricing">
+            <CommandItem>
+              <SquareGantt className="mr-2 h-4 w-4" />
+              <span>Plans</span>
+              <CommandShortcut>⌘P</CommandShortcut>
+            </CommandItem>
+          </CommandLinkItem>
+
           <CommandItem
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           >
@@ -198,7 +202,7 @@ export function CommandMenu({ user }: { user: any }) {
               <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
             )}
             <span>Switch Theme</span>
-            <CommandShortcut>⌘B</CommandShortcut>
+            <CommandShortcut>⌘D</CommandShortcut>
           </CommandItem>
           <CommandSeparator />
           <CommandItem onClick={handleSignOut}>

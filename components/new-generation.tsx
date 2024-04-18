@@ -35,6 +35,43 @@ export default function NewGeneration({
     [searchParams]
   );
   const router = useRouter();
+  const [customerId, setCustomerId] = useState<string>("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (user) {
+      fetchCustomerId();
+    }
+  }, [user]);
+
+  async function fetchCustomerId() {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && profile.customer_id) {
+        setCustomerId(profile.customer_id);
+        fetchBillingSession(profile.customer_id);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function fetchBillingSession(customerId: string) {
+    try {
+      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setBillingPortalUrl(data.session.url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch billing session:", error);
+    }
+  }
 
   async function addExistingName() {
     const updatedNamesList: { [name: string]: string } = {};
@@ -55,14 +92,16 @@ export default function NewGeneration({
           .single();
 
         if (profile && profile.plan_id) {
-          if (
-            profile.plan_id === ProPlanEntitlements.id
-          ) {
-            namesLimit = ProPlanEntitlements.nameGenerations;
-          } else if (
-            profile.plan_id === BusinessPlanEntitlements.id
-          ) {
-            namesLimit = BusinessPlanEntitlements.nameGenerations;
+          const response = await fetch(
+            `/fetch-plan?plan_id=${profile.plan_id}`
+          );
+          const data = await response.json();
+          if (response.ok) {
+            if (data.planName === "Pro") {
+              namesLimit = ProPlanEntitlements.nameGenerations;
+            } else if (data.planName === "Business") {
+              namesLimit = BusinessPlanEntitlements.nameGenerations;
+            }
           }
         }
 
@@ -79,7 +118,11 @@ export default function NewGeneration({
               "You've reached the monthly limit for name generations. Upgrade your account to generate more names and enjoy more features.",
             action: (
               <ToastAction
-                onClick={() => router.push("/pricing")}
+                onClick={() =>
+                  customerId
+                    ? router.push(billingPortalUrl)
+                    : router.push("/pricing")
+                }
                 altText="Upgrade"
               >
                 Upgrade

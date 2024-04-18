@@ -1,4 +1,4 @@
-import ProfileForm from "@/components/profile-form";
+import AccountForm from "@/components/account-form";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -20,8 +20,7 @@ export default async function Account() {
 
   return (
     <div className="w-auto px-4 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Profile</h1>
-      <ProfileForm user={user} userData={userData} />
+      <AccountForm user={user} userData={userData} />
     </div>
   );
 }

@@ -175,6 +175,43 @@ export function NamesDisplay({
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const idString = Object.values(namesList).join(",");
   const [userPlan, setUserPlan] = useState({});
+  const [customerId, setCustomerId] = useState<string>("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (user) {
+      fetchCustomerId();
+    }
+  }, [user]);
+
+  async function fetchCustomerId() {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && profile.customer_id) {
+        setCustomerId(profile.customer_id);
+        fetchBillingSession(profile.customer_id);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function fetchBillingSession(customerId: string) {
+    try {
+      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setBillingPortalUrl(data.session.url);
+      }
+    } catch (error) {
+      console.error("Failed to fetch billing session:", error);
+    }
+  }
 
   const getOneMonthAgoDate = () =>
     new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString();
@@ -197,14 +234,17 @@ export function NamesDisplay({
       console.error(error);
       return false;
     }
-
     if (count && count >= planLimits[actionId]) {
       toast({
         title: "Uh oh! Out of generations",
         description: `You've reached the monthly limit for ${actionType} this month. Upgrade your account to enjoy more features.`,
         action: (
           <ToastAction
-            onClick={() => router.push("/pricing")}
+            onClick={() =>
+              customerId
+                ? router.push(billingPortalUrl)
+                : router.push("/pricing")
+            }
             altText="Upgrade"
           >
             Upgrade
@@ -218,30 +258,51 @@ export function NamesDisplay({
 
   useEffect(() => {
     async function fetchUserPlan() {
-      const { data: profile } = await supabase
+      if (!user) return;
+
+      const { data: profile, error } = await supabase
         .from("profiles")
         .select("plan_id")
         .eq("id", user.id)
         .single();
 
-      switch (profile?.plan_id) {
-        case FreePlanEntitlements.id:
+      if (error) {
+        console.error("Error fetching user profile:", error);
+        return;
+      }
+
+      if (profile && profile.plan_id) {
+        try {
+          const response = await fetch(
+            `/fetch-plan?plan_id=${profile.plan_id}`
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch user plan");
+          }
+          const data = await response.json();
+          switch (data.planName) {
+            case "Free":
+              setUserPlan(FreePlanEntitlements);
+              break;
+            case "Pro":
+              setUserPlan(ProPlanEntitlements);
+              break;
+            case "Business":
+              setUserPlan(BusinessPlanEntitlements);
+              break;
+            default:
+              setUserPlan(FreePlanEntitlements);
+          }
+        } catch (error) {
+          console.error("Error fetching user plan:", error);
           setUserPlan(FreePlanEntitlements);
-          break;
-        case ProPlanEntitlements.id:
-          setUserPlan(ProPlanEntitlements);
-          break;
-        case BusinessPlanEntitlements.id:
-          setUserPlan(BusinessPlanEntitlements);
-          break;
-        default:
-          setUserPlan(FreePlanEntitlements);
+        }
+      } else {
+        setUserPlan(FreePlanEntitlements);
       }
     }
 
-    if (user) {
-      fetchUserPlan();
-    }
+    fetchUserPlan();
   }, [user]);
 
   const signUpLink = idString
