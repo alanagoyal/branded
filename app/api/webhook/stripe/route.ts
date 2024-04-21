@@ -26,22 +26,6 @@ export async function POST(req: any) {
     let planId;
 
     switch (event.type) {
-      case "customer.subscription.created":
-        result = event.data.object;
-        customerId = result.customer as string;
-        planId = result.items.data[0]?.plan.product as string;
-
-        const { error: createdError } = await supabase
-          .from("profiles")
-          .update({
-            plan_id: planId,
-          })
-          .eq("customer_id", customerId);
-
-        if (createdError) {
-          return Response.json({ error: createdError.message });
-        }
-        break;
       case "customer.subscription.updated":
         result = event.data.object;
         customerId = result.customer as string;
