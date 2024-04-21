@@ -30,7 +30,6 @@ export async function POST(req: any) {
         result = event.data.object;
         customerId = result.customer as string;
         planId = result.items.data[0]?.plan.product as string;
-        console.log(`creating subscription for ${customerId} with ${planId}`);
 
         const { error: createdError } = await supabase
           .from("profiles")
@@ -50,7 +49,6 @@ export async function POST(req: any) {
           ? null
           : (result.items.data[0]?.plan.product as string);
         const newCustomerId = result.cancel_at_period_end ? null : customerId;
-        console.log(`updating subscription for ${customerId} with ${planId}`);
 
         const { error: updatedError } = await supabase
           .from("profiles")
