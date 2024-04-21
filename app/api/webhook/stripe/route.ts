@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { buffer } from "node:stream/consumers";
 
 const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET!;
-console.log(endpointSecret ? "endpoint secret is set" : "endpoint secret is not set");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
