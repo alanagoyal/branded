@@ -199,8 +199,6 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-/*     setNamesList({});
-    setIdsList([]); */
 
     const oneMonthAgo = new Date(
       new Date().setMonth(new Date().getMonth() - 1)
@@ -639,6 +637,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           <div className="flex-col pt-4 space-y-4 sm:flex">
             <NamesDisplay
               namesList={namesList}
+              showRemoveButton={true}
               onRemoveName={handleRemoveName}
               user={user}
               verticalLayout={true}

@@ -226,6 +226,7 @@ export default function NewGeneration({
       {showNamesDisplay && (
         <NamesDisplay
           namesList={namesList}
+          showRemoveButton={true}
           onRemoveName={handleRemoveName}
           user={user}
           verticalLayout={true}

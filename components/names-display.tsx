@@ -142,12 +142,14 @@ const ResultLinks = ({
 
 export function NamesDisplay({
   namesList,
+  showRemoveButton,
   onRemoveName,
   user,
   verticalLayout = false,
 }: {
   namesList: any;
-  onRemoveName: (name: string) => void;
+  showRemoveButton: boolean;
+  onRemoveName?: (name: string) => void;
   user: any;
   verticalLayout: boolean;
 }) {
@@ -1065,11 +1067,17 @@ export function NamesDisplay({
                   <div className="flex-1 text-center">
                     <CardTitle>{name}</CardTitle>
                   </div>
-                  <div style={{ flex: 1 }} className="flex justify-end">
-                    <Button variant="ghost" onClick={() => onRemoveName(name)}>
-                      X
-                    </Button>
-                  </div>
+                  {showRemoveButton && onRemoveName && (
+                    <div style={{ flex: 1 }} className="flex justify-end">
+                      <Button
+                        variant="ghost"
+                        onClick={() => onRemoveName(name)}
+                      >
+                        X
+                      </Button>
+                    </div>
+                  )}
+                  {!showRemoveButton && <div style={{ flex: 1 }}></div>}
                 </div>
               </CardHeader>
               <CardContent>{renderNameContent(name)}</CardContent>
