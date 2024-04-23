@@ -322,6 +322,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       }
 
       const ids: string[] = [];
+      const tempNamesList: { [name: string]: string } = {};
       for (const name of data.response) {
         try {
           const updates = {
@@ -347,16 +348,17 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
           if (data) {
             ids.push(data?.id);
-            setNamesList((prevState) => ({
-              [name]: data?.id,
-              ...prevState,
-            }));
+            tempNamesList[name] = data?.id;
           }
         } catch (error) {
           console.error(error);
         }
       }
       setIdsList(ids);
+      setNamesList((prevState) => ({
+        ...tempNamesList,
+        ...prevState,
+      }));
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
