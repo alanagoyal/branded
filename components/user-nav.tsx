@@ -7,6 +7,7 @@ import {
   LogOut,
   Plus,
   Receipt,
+  Smile,
   SquareGantt,
   User,
 } from "lucide-react";
@@ -34,6 +35,7 @@ export default function UserNav({ user }: any) {
   const [isCustomer, setIsCustomer] = useState(false);
   const [billingPortalUrl, setBillingPortalUrl] = useState("");
   const [open, setOpen] = useState(false);
+  const [planName, setPlanName] = useState("");
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -49,7 +51,7 @@ export default function UserNav({ user }: any) {
   useEffect(() => {
     const fetchAccount = async () => {
       const supabase = createClient();
-      let { data, error } = await supabase
+      let { data: userData, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
@@ -57,11 +59,24 @@ export default function UserNav({ user }: any) {
 
       if (error) {
         console.error("Error fetching profile:", error);
-      } else if (data) {
-        setAccountName(data.name);
-        if (data.customer_id) {
+      } else if (userData) {
+        setAccountName(userData.name);
+        if (userData.customer_id) {
           setIsCustomer(true);
-          fetchBillingSession(data.customer_id);
+          fetchBillingSession(userData.customer_id);
+        }
+        if (userData.plan_id) {
+          try {
+            const response = await fetch(
+              `/fetch-plan?plan_id=${userData.plan_id}`
+            );
+            const data = await response.json();
+            if (response.ok) {
+              setPlanName(data.planName);
+            }
+          } catch (error) {
+            console.error(error);
+          }
         }
       }
     };
@@ -125,15 +140,6 @@ export default function UserNav({ user }: any) {
               <p className="text-xs text-muted-foreground">⌘G</p>
             </DropdownMenuItem>
           </Link>
-          <Link href="/account">
-            <DropdownMenuItem className="cursor-pointer justify-between">
-              <div className="flex items-center">
-                <User className="mr-2 h-4 w-4" />
-                <span>Account</span>
-              </div>
-              <p className="text-xs text-muted-foreground">⌘A</p>
-            </DropdownMenuItem>
-          </Link>
           <Link href="/favorites">
             <DropdownMenuItem className="cursor-pointer justify-between">
               <div className="flex items-center">
@@ -143,15 +149,16 @@ export default function UserNav({ user }: any) {
               <p className="text-xs text-muted-foreground">⌘F</p>
             </DropdownMenuItem>
           </Link>
-          <Link href="/help">
+          <Link href="/account">
             <DropdownMenuItem className="cursor-pointer justify-between">
               <div className="flex items-center">
-                <HelpCircle className="mr-2 h-4 w-4" />
-                <span>Support</span>
+                <User className="mr-2 h-4 w-4" />
+                <span>Account</span>
               </div>
-              <p className="text-xs text-muted-foreground">⌘S</p>
+              <p className="text-xs text-muted-foreground">⌘A</p>
             </DropdownMenuItem>
           </Link>
+          <DropdownMenuSeparator />
           {isCustomer && (
             <Link href={billingPortalUrl}>
               <DropdownMenuItem className="cursor-pointer justify-between">
@@ -172,6 +179,32 @@ export default function UserNav({ user }: any) {
               <p className="text-xs text-muted-foreground">⌘P</p>
             </DropdownMenuItem>
           </Link>
+          <Link href="/help">
+            <DropdownMenuItem className="cursor-pointer justify-between">
+              <div className="flex items-center">
+                <HelpCircle className="mr-2 h-4 w-4" />
+                <span>Support</span>
+              </div>
+              <p className="text-xs text-muted-foreground">⌘S</p>
+            </DropdownMenuItem>
+          </Link>
+          {planName === "Pro" ||
+            (planName === "Business" && (
+              <Link
+                href="https://alpharun.com/i/g1imnQ21zPOPxrwb9Y3Fq"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <DropdownMenuItem className="cursor-pointer justify-between">
+                  <div className="flex items-center">
+                    <Smile className="mr-2 h-4 w-4" />
+                    <span>Feedback</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">⌘I</p>
+                </DropdownMenuItem>
+              </Link>
+            ))}
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             className="cursor-pointer justify-between"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
