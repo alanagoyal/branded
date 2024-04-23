@@ -17,17 +17,12 @@ export default function NewGeneration({
   const searchParams = useSearchParams();
   const type = useMemo(() => searchParams.get("type"), [searchParams]);
 
-  const [showNamesDisplay, setShowNamesDisplay] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (type === "brand-only") {
-      setShowNamesDisplay(true);
-    }
-  }, [type]);
-
   function handleShowNamesDisplay() {
-    router.push("/new");
-    setShowNamesDisplay(!showNamesDisplay);
+    if (type === "brand-only") {
+      router.push("/new");
+    } else if (type === null) {
+      router.push("/new?type=brand-only");
+    }
   }
 
   return (
@@ -37,7 +32,7 @@ export default function NewGeneration({
         <h1 className="text-xl sm:text-2xl font-bold sm:text-left mb-4 sm:mb-0">
           Name Generator
         </h1>
-        {showNamesDisplay ? (
+        {type === "brand-only" ? (
           <Button variant="ghost" onClick={handleShowNamesDisplay}>
             Back
           </Button>
@@ -47,7 +42,7 @@ export default function NewGeneration({
           </Button>
         )}
       </div>
-      {showNamesDisplay ? (
+      {type === "brand-only" ? (
         <BrandGenerator user={user} names={names ?? null} />
       ) : (
         <NameGenerator user={user} names={names ?? null} />
