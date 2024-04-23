@@ -142,10 +142,12 @@ const ResultLinks = ({
 
 export function NamesDisplay({
   namesList,
+  onRemoveName,
   user,
   verticalLayout = false,
 }: {
   namesList: any;
+  onRemoveName: (name: string) => void;
   user: any;
   verticalLayout: boolean;
 }) {
@@ -1058,7 +1060,17 @@ export function NamesDisplay({
           {Object.keys(namesList).map((name, index) => (
             <Card key={index}>
               <CardHeader>
-                <CardTitle className="text-center">{name}</CardTitle>
+                <div className="flex items-center justify-between w-full">
+                  <div style={{ flex: 1 }}></div>
+                  <div className="flex-1 text-center">
+                    <CardTitle>{name}</CardTitle>
+                  </div>
+                  <div style={{ flex: 1 }} className="flex justify-end">
+                    <Button variant="ghost" onClick={() => onRemoveName(name)}>
+                      X
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>{renderNameContent(name)}</CardContent>
             </Card>

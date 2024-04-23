@@ -189,10 +189,18 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     }
   }, [names, user]);
 
+  async function handleRemoveName(name: string) {
+    setNamesList((prevState) => {
+      const newState = { ...prevState };
+      delete newState[name];
+      return newState;
+    });
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    setNamesList({});
-    setIdsList([]);
+/*     setNamesList({});
+    setIdsList([]); */
 
     const oneMonthAgo = new Date(
       new Date().setMonth(new Date().getMonth() - 1)
@@ -342,8 +350,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           if (data) {
             ids.push(data?.id);
             setNamesList((prevState) => ({
-              ...prevState,
               [name]: data?.id,
+              ...prevState,
             }));
           }
         } catch (error) {
@@ -631,8 +639,9 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           <div className="flex-col pt-4 space-y-4 sm:flex">
             <NamesDisplay
               namesList={namesList}
+              onRemoveName={handleRemoveName}
               user={user}
-              verticalLayout={!isScreenWide}
+              verticalLayout={true}
             />
             <Share idString={idsList.join("")} />
           </div>

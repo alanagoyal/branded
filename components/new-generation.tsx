@@ -73,6 +73,14 @@ export default function NewGeneration({
     }
   }
 
+  async function handleRemoveName(name: string) {
+    setNamesList((prevState) => {
+      const newState = { ...prevState };
+      delete newState[name];
+      return newState;
+    });
+  }
+
   async function addExistingName() {
     const updatedNamesList: { [name: string]: string } = {};
 
@@ -216,7 +224,12 @@ export default function NewGeneration({
       </div>
       {!showNamesDisplay && <NameGenerator user={user} names={names ?? null} />}
       {showNamesDisplay && (
-        <NamesDisplay namesList={namesList} user={user} verticalLayout={true} />
+        <NamesDisplay
+          namesList={namesList}
+          onRemoveName={handleRemoveName}
+          user={user}
+          verticalLayout={true}
+        />
       )}
     </div>
   );
