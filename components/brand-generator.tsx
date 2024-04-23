@@ -209,8 +209,8 @@ export default function BrandGenerator({ user, names }: { user: any, names: any 
 
       if (data) {
         setNamesList((prevNamesList) => ({
-          ...prevNamesList,
           [data[0].name]: data[0].id,
+          ...prevNamesList,
         }));
         setIdsList((prevIdsList) => [...prevIdsList, data[0].id]);
       }
