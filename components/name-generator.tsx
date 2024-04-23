@@ -83,11 +83,6 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     () => searchParams.get("session_id") || uuidv4(),
     [searchParams]
   );
-  const [isScreenWide, setIsScreenWide] = useState(false);
-
-  useEffect(() => {
-    setIsScreenWide(window.innerWidth >= 768);
-  }, []);
 
   let defaultValues = {};
   if (names) {
