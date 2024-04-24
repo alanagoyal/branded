@@ -610,15 +610,16 @@ export function NamesDisplay({
           purchaseLink: string;
         }[] = [];
 
+        const nameItem = namesList.find(item => item.name === name);
         const { data: npmData, error } = await supabase
           .from("npm_names")
           .select()
-          .eq("name_id", namesList.find(item => item.name === name).id);
+          .eq("name_id", nameItem ? nameItem.id : null);
 
         if (npmData && npmData.length > 0) {
           for (const result of npmData) {
             const npmCommand = result.npm_name;
-            the purchaseLink = result.purchase_link;
+            const purchaseLink = result.purchase_link;
             npmAvailability.push({ npmName: npmCommand, purchaseLink });
           }
         } else {
@@ -651,7 +652,7 @@ export function NamesDisplay({
               npm_name: npmCommand,
               purchase_link: purchaseLink,
               created_at: new Date(),
-              name_id: namesList[name],
+              name_id: nameItem ? nameItem.id : null,
               created_by: user.id,
             };
             let { data, error } = await supabase
@@ -698,10 +699,11 @@ export function NamesDisplay({
       } else {
         let logoUrl = "";
 
+        const nameItem = namesList.find(item => item.name === name);
         const { data: logoData, error } = await supabase
           .from("logos")
           .select()
-          .eq("name_id", namesList[name]);
+          .eq("name_id", nameItem ? nameItem.id : null);
 
         if (logoData && logoData.length > 0) {
           logoUrl = logoData[0].logo_url;
@@ -738,7 +740,7 @@ export function NamesDisplay({
             const updates = {
               logo_url: logoUrl,
               created_at: new Date(),
-              name_id: namesList[name],
+              name_id: nameItem ? nameItem.id : null,
               created_by: user.id,
             };
 
@@ -785,10 +787,11 @@ export function NamesDisplay({
       } else {
         let onePagerUrl = "";
 
+        const nameItem = namesList.find(item => item.name === name);
         const { data: onePagerData } = await supabase
           .from("one_pagers")
           .select()
-          .eq("name_id", namesList[name]);
+          .eq("name_id", nameItem ? nameItem.id : null);
 
         if (onePagerData && onePagerData.length > 0) {
           onePagerUrl = onePagerData[0].pdf_url;
@@ -796,7 +799,7 @@ export function NamesDisplay({
           const { data: nameData } = await supabase
             .from("names")
             .select()
-            .eq("id", namesList[name])
+            .eq("id", nameItem ? nameItem.id : null)
             .single();
 
           const { data: userData } = await supabase
@@ -810,7 +813,7 @@ export function NamesDisplay({
           const { data: logoData } = await supabase
             .from("logos")
             .select()
-            .eq("name_id", namesList[name]);
+            .eq("name_id", nameItem ? nameItem.id : null);
 
           if (logoData && logoData.length > 0) {
             logoUrl = logoData[0].logo_url;
@@ -880,7 +883,7 @@ export function NamesDisplay({
               const updates = {
                 pdf_url: onePagerUrl,
                 created_at: new Date(),
-                name_id: namesList.find(item => item.name === name).id,
+                name_id: nameItem ? nameItem.id : null,
                 created_by: user.id,
               };
 
