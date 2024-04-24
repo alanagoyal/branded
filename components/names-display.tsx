@@ -334,7 +334,7 @@ export function NamesDisplay({
     async function fetchFavoritedStatus() {
       const { data: favoritedData, error } = await supabase
         .from("names")
-        .select("name, favorited")
+        .select("id, favorited")
         .eq("created_by", user.id);
       if (error) {
         toast({
@@ -346,8 +346,8 @@ export function NamesDisplay({
       }
       if (favoritedData) {
         const favoritedMap: { [key: string]: boolean } = {};
-        favoritedData.forEach((item: { name: string; favorited: boolean }) => {
-          favoritedMap[item.name] = item.favorited;
+        favoritedData.forEach((item: { id: string; favorited: boolean }) => {
+          favoritedMap[item.id] = item.favorited;
         });
         setFavoritedNames(favoritedMap);
       }
@@ -357,18 +357,18 @@ export function NamesDisplay({
     }
   }, [namesList, user]);
 
-  async function toggleFavoriteName(name: string) {
+  async function toggleFavoriteName(nameId: string) {
     try {
-      const isFavorited = favoritedNames[name] || false;
+      const isFavorited = favoritedNames[nameId] || false;
       setFavoritedNames((prevState) => ({
         ...prevState,
-        [name]: !isFavorited,
+        [nameId]: !isFavorited,
       }));
 
       const { error } = await supabase
         .from("names")
         .update({ favorited: !isFavorited })
-        .eq("id", namesList[name]);
+        .eq("id", nameId);
 
       toast({
         description: isFavorited
@@ -920,88 +920,96 @@ export function NamesDisplay({
     return;
   };
 
-  const renderNameContent = (name: string) => (
-    <div className="flex flex-col space-y-2">
-      <ActionButton
-        name={name}
-        processing={processingDomains}
-        action={<Icons.spinner />}
-        icon={<Icons.domain />}
-        text="Check domain availability"
-        onClick={() =>
-          user
-            ? findDomainNames(name)
-            : handleActionForUnauthenticatedUser(
-                "check domain availability for"
-              )
-        }
-        status={
-          processingDomains.includes(name)
-            ? "default"
-            : domainResults[name] && domainResults[name].length === 0
-            ? "noDomains"
-            : domainResults[name] && domainResults[name].length > 0
-            ? "domainsFound"
-            : "default"
-        }
-      />
+  const renderNameContent = (name: string, nameId: string) => (
+    <div className="flex flex-col space-y-2 items-center">
+      <div className="w-1/2 text-center">
+        <ActionButton
+          name={name}
+          processing={processingDomains}
+          action={<Icons.spinner />}
+          icon={<Icons.domain />}
+          text="Check domain availability"
+          onClick={() =>
+            user
+              ? findDomainNames(name)
+              : handleActionForUnauthenticatedUser(
+                  "check domain availability for"
+                )
+          }
+          status={
+            processingDomains.includes(name)
+              ? "default"
+              : domainResults[name] && domainResults[name].length === 0
+              ? "noDomains"
+              : domainResults[name] && domainResults[name].length > 0
+              ? "domainsFound"
+              : "default"
+          }
+        />
+      </div>
       <ResultLinks results={domainResults} name={name} />
-      <ActionButton
-        name={name}
-        processing={processingNpm}
-        action={<Icons.spinner />}
-        icon={<Icons.npmPackage />}
-        text="Check npm availability"
-        onClick={() =>
-          user
-            ? findNpmNames(name)
-            : handleActionForUnauthenticatedUser("check npm availability for")
-        }
-        status={
-          processingNpm.includes(name)
-            ? "default"
-            : npmResults[name] && npmResults[name].length === 0
-            ? "noNpmPackages"
-            : npmResults[name] && npmResults[name].length > 0
-            ? "npmPackagesFound"
-            : "default"
-        }
-      />
+      <div className="w-1/2 text-center">
+        <ActionButton
+          name={name}
+          processing={processingNpm}
+          action={<Icons.spinner />}
+          icon={<Icons.npmPackage />}
+          text="Check npm availability"
+          onClick={() =>
+            user
+              ? findNpmNames(name)
+              : handleActionForUnauthenticatedUser("check npm availability for")
+          }
+          status={
+            processingNpm.includes(name)
+              ? "default"
+              : npmResults[name] && npmResults[name].length === 0
+              ? "noNpmPackages"
+              : npmResults[name] && npmResults[name].length > 0
+              ? "npmPackagesFound"
+              : "default"
+          }
+        />
+      </div>
       <ResultLinks results={npmResults} name={name} />
-      <ActionButton
-        name={name}
-        processing={processingTrademark}
-        action={<Icons.spinner />}
-        icon={<Icons.trademark />}
-        text="Check for trademarks"
-        onClick={() =>
-          user
-            ? checkTrademarks(name)
-            : handleActionForUnauthenticatedUser("check trademarks for")
-        }
-        status={
-          processingTrademark.includes(name)
-            ? "default"
-            : trademarkResults[name] && trademarkResults[name].length === 0
-            ? "noTrademarks"
-            : trademarkResults[name] && trademarkResults[name].length > 0
-            ? "trademarksFound"
-            : "default"
-        }
-      />
+      <div className="w-1/2 text-center">
+        <ActionButton
+          name={name}
+          processing={processingTrademark}
+          action={<Icons.spinner />}
+          icon={<Icons.trademark />}
+          text="Check for trademarks"
+          onClick={() =>
+            user
+              ? checkTrademarks(name)
+              : handleActionForUnauthenticatedUser("check trademarks for")
+          }
+          status={
+            processingTrademark.includes(name)
+              ? "default"
+              : trademarkResults[name] && trademarkResults[name].length === 0
+              ? "noTrademarks"
+              : trademarkResults[name] && trademarkResults[name].length > 0
+              ? "trademarksFound"
+              : "default"
+          }
+        />
+      </div>
       <ResultLinks results={trademarkResults} name={name} />
-      <ActionButton
-        name={name}
-        processing={processingLogo}
-        action={<Icons.spinner />}
-        icon={<Icons.generate />}
-        text="Generate a logo"
-        onClick={() =>
-          user
-            ? generateLogo(name)
-            : handleActionForUnauthenticatedUser("generate a logo for")
-        }
-      />
+      <div className="w-1/2 text-center">
+        <ActionButton
+          name={name}
+          processing={processingLogo}
+          action={<Icons.spinner />}
+          icon={<Icons.generate />}
+          text="Generate a logo"
+          onClick={() =>
+            user
+              ? generateLogo(name)
+              : handleActionForUnauthenticatedUser("generate a logo for")
+          }
+        />
+      </div>
       {logoResults[name] && (
         <div className="flex items-center justify-center w-full">
           <Link
@@ -1018,39 +1026,43 @@ export function NamesDisplay({
           </Link>
         </div>
       )}
-      <ActionButton
-        name={name}
-        processing={processingOnePager}
-        action={<Icons.spinner />}
-        icon={<Icons.onePager />}
-        text="Generate a one-pager"
-        onClick={() =>
-          user
-            ? createOnePager(name)
-            : handleActionForUnauthenticatedUser("generate a one-pager for")
-        }
-      />
-      {isOwner && (
-        <Button
+      <div className="w-1/2 text-center">
+        <ActionButton
+          name={name}
+          processing={processingOnePager}
+          action={<Icons.spinner />}
+          icon={<Icons.onePager />}
+          text="Generate a one-pager"
           onClick={() =>
             user
-              ? toggleFavoriteName(name)
-              : handleActionForUnauthenticatedUser("favorite")
+              ? createOnePager(name)
+              : handleActionForUnauthenticatedUser("generate a one-pager for")
           }
-          variant="ghost"
-        >
-          {favoritedNames[name] ? (
-            <>
-              <Icons.unfavorite />
-              <span className="ml-2">Remove from favorites</span>
-            </>
-          ) : (
-            <>
-              <Icons.favorite />
-              <span className="ml-2">Add to favorites</span>
-            </>
-          )}
-        </Button>
+        />
+      </div>
+      {isOwner && (
+        <div className="w-1/2 text-center">
+          <Button
+            onClick={() =>
+              user
+                ? toggleFavoriteName(nameId)
+                : handleActionForUnauthenticatedUser("favorite")
+            }
+            variant="ghost"
+          >
+            {favoritedNames[nameId] ? (
+              <>
+                <Icons.unfavorite />
+                <span className="ml-2">Remove from favorites</span>
+              </>
+            ) : (
+              <>
+                <Icons.favorite />
+                <span className="ml-2">Add to favorites</span>
+              </>
+            )}
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -1080,7 +1092,7 @@ export function NamesDisplay({
                   {!showRemoveButton && <div style={{ flex: 1 }}></div>}
                 </div>
               </CardHeader>
-              <CardContent>{renderNameContent(name)}</CardContent>
+              <CardContent>{renderNameContent(name, namesList[name])}</CardContent>
             </Card>
           ))}
         </div>
@@ -1093,7 +1105,7 @@ export function NamesDisplay({
                   <CardHeader>
                     <CardTitle className="text-center">{name}</CardTitle>
                   </CardHeader>
-                  <CardContent>{renderNameContent(name)}</CardContent>
+                  <CardContent>{renderNameContent(name, namesList[name])}</CardContent>
                 </Card>
               </CarouselItem>
             ))}
@@ -1114,3 +1126,4 @@ export function NamesDisplay({
     </div>
   );
 }
+
