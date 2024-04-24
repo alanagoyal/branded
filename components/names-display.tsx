@@ -147,9 +147,9 @@ export function NamesDisplay({
   user,
   verticalLayout = false,
 }: {
-  namesList: any;
+  namesList: Array<{ name: string; id: string }>;
   showRemoveButton: boolean;
-  onRemoveName?: (name: string) => void;
+  onRemoveName?: (nameId: string) => void;
   user: any;
   verticalLayout: boolean;
 }) {
@@ -177,7 +177,7 @@ export function NamesDisplay({
   const [processingOnePager, setProcessingOnePager] = useState<string[]>([]);
   const [onePager, setOnePager] = useState<{ [key: string]: string }>({});
   const [isOwner, setIsOwner] = useState<boolean>(false);
-  const idString = Object.values(namesList).join(",");
+  const idString = namesList.map(item => item.id).join(",");
   const [userPlan, setUserPlan] = useState({});
   const [customerId, setCustomerId] = useState<string>("");
   const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
@@ -315,11 +315,11 @@ export function NamesDisplay({
 
   useEffect(() => {
     async function getOwner() {
-      for (const name in namesList) {
+      for (const item of namesList) {
         const { data: createdBy, error } = await supabase
           .from("names")
           .select()
-          .eq("id", namesList[name])
+          .eq("id", item.id)
           .single();
         if (createdBy?.created_by === user.id) {
           setIsOwner(true);
@@ -465,7 +465,7 @@ export function NamesDisplay({
                 domain_name: domain,
                 purchase_link: purchaseLink,
                 created_at: new Date(),
-                name_id: namesList[name],
+                name_id: namesList.find(item => item.name === name).id,
                 created_by: user.id,
               };
               let { data, error } = await supabase
@@ -518,7 +518,7 @@ export function NamesDisplay({
         const { data: trademarkData, error: trademarkError } = await supabase
           .from("trademarks")
           .select()
-          .eq("name_id", namesList[name]);
+          .eq("name_id", namesList.find(item => item.name === name).id);
 
         if (trademarkData && trademarkData.length > 0) {
           trademarkData.forEach((result) => {
@@ -560,7 +560,7 @@ export function NamesDisplay({
                   description,
                   link,
                   created_at: new Date(),
-                  name_id: namesList[name],
+                  name_id: namesList.find(item => item.name === name).id,
                   created_by: user.id,
                 };
 
@@ -613,12 +613,12 @@ export function NamesDisplay({
         const { data: npmData, error } = await supabase
           .from("npm_names")
           .select()
-          .eq("name_id", namesList[name]);
+          .eq("name_id", namesList.find(item => item.name === name).id);
 
         if (npmData && npmData.length > 0) {
           for (const result of npmData) {
             const npmCommand = result.npm_name;
-            const purchaseLink = result.purchase_link;
+            the purchaseLink = result.purchase_link;
             npmAvailability.push({ npmName: npmCommand, purchaseLink });
           }
         } else {
@@ -880,7 +880,7 @@ export function NamesDisplay({
               const updates = {
                 pdf_url: onePagerUrl,
                 created_at: new Date(),
-                name_id: namesList[name],
+                name_id: namesList.find(item => item.name === name).id,
                 created_by: user.id,
               };
 
@@ -1071,19 +1071,19 @@ export function NamesDisplay({
     <div>
       {verticalLayout ? (
         <div className="flex flex-col space-y-4">
-          {Object.keys(namesList).map((name, index) => (
+          {namesList.map((item, index) => (
             <Card key={index}>
               <CardHeader>
                 <div className="flex items-center justify-between w-full">
                   <div style={{ flex: 1 }}></div>
                   <div className="flex-1 text-center">
-                    <CardTitle>{name}</CardTitle>
+                    <CardTitle>{item.name}</CardTitle>
                   </div>
                   {showRemoveButton && onRemoveName && (
                     <div style={{ flex: 1 }} className="flex justify-end">
                       <Button
                         variant="ghost"
-                        onClick={() => onRemoveName(name)}
+                        onClick={() => onRemoveName(item.id)}
                       >
                         X
                       </Button>
@@ -1092,20 +1092,20 @@ export function NamesDisplay({
                   {!showRemoveButton && <div style={{ flex: 1 }}></div>}
                 </div>
               </CardHeader>
-              <CardContent>{renderNameContent(name, namesList[name])}</CardContent>
+              <CardContent>{renderNameContent(item.name, item.id)}</CardContent>
             </Card>
           ))}
         </div>
       ) : (
         <Carousel>
           <CarouselContent>
-            {Object.keys(namesList).map((name, index) => (
+            {namesList.map((item, index) => (
               <CarouselItem key={index} className="h-auto">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-center">{name}</CardTitle>
+                    <CardTitle className="text-center">{item.name}</CardTitle>
                   </CardHeader>
-                  <CardContent>{renderNameContent(name, namesList[name])}</CardContent>
+                  <CardContent>{renderNameContent(item.name, item.id)}</CardContent>
                 </Card>
               </CarouselItem>
             ))}

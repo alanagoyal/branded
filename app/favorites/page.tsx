@@ -21,15 +21,15 @@ export default async function Favorites() {
     .eq("created_by", user?.id)
     .eq("favorited", true);
 
-  const namesList: { [name: string]: string } = {};
+  const namesList: Array<{name: string, id: string}> = [];
 
   if (names) {
-    for (const name of names) {
-      namesList[name.name] = name.id;
-    }
+    names.forEach(name => {
+      namesList.push({ name: name.name, id: name.id });
+    });
   }
 
-  return namesList && Object.keys(namesList).length > 0 ? (
+  return namesList.length > 0 ? (
     <div className="w-full px-4 flex justify-center items-center flex-col">
       <h1 className="text-2xl font-bold mb-4">Favorites</h1>
       <div className="min-h-screen w-full">

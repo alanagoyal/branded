@@ -113,7 +113,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
+  const [namesList, setNamesList] = useState<Array<{ id: string; name: string }>>([]);
   const [idsList, setIdsList] = useState<string[]>([]);
   const autoSubmitted = useRef(false);
   const [customerId, setCustomerId] = useState<string>("");
@@ -167,29 +167,20 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
   async function clear() {
     form.reset();
-    setNamesList({});
+    setNamesList([]);
   }
 
   useEffect(() => {
     if (names) {
-      const updatedNamesList: { [name: string]: string } = {};
-      for (const name of names) {
-        updatedNamesList[name.name] = name.id;
-      }
-      setNamesList(updatedNamesList);
+      const updatedNamesList = names.map(name => ({ id: name.id, name: name.name }));
 
-      for (const name of names) {
-        setIdsList((prevState) => [...prevState, name.id]);
-      }
+      setNamesList(updatedNamesList);
+      setIdsList(names.map(name => name.id));
     }
   }, [names, user]);
 
-  async function handleRemoveName(name: string) {
-    setNamesList((prevState) => {
-      const newState = { ...prevState };
-      delete newState[name];
-      return newState;
-    });
+  async function handleRemoveName(nameId: string) {
+    setNamesList(prevState => prevState.filter(item => item.id !== nameId));
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -223,143 +214,41 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             }
           }
         }
-
-        const { data: names, error } = await supabase
-          .from("names")
-          .select("*", { count: "exact" })
-          .eq("created_by", user.id)
-          .gte("created_at", oneMonthAgo);
-
-        if (names!.length >= namesLimit) {
-          toast({
-            title: "Uh oh! Out of generations",
-            description:
-              "You've reached the monthly limit for name generations. Upgrade your account to generate more names and enjoy more features.",
-            action: (
-              <ToastAction
-                onClick={() =>
-                  customerId
-                    ? router.push(billingPortalUrl)
-                    : router.push("/pricing")
-                }
-                altText="Upgrade"
-              >
-                Upgrade
-              </ToastAction>
-            ),
-          });
-          return;
-        }
-      } else {
-        const { data: names, error } = await supabase
-          .from("names")
-          .select("*", { count: "exact" })
-          .eq("session_id", sessionId)
-          .gte("created_at", oneMonthAgo);
-
-        if (names!.length >= namesLimit) {
-          toast({
-            title: "Uh oh! Out of generations",
-            description:
-              "You've reached the monthly limit for name generations. Sign up for an account to continue.",
-            action: (
-              <ToastAction
-                onClick={() => router.push("/signup")}
-                altText="Sign up"
-              >
-                Sign up
-              </ToastAction>
-            ),
-          });
-          return;
-        }
       }
 
-      const response = await fetch("/generate-names", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          description: values.description,
-          minLength: values.minLength,
-          maxLength: values.maxLength,
-          wordToInclude: values.wordToInclude,
-          wordPlacement: values.wordPlacement,
-          style: values.style,
-          tld: values.tld,
-        }),
-      });
-
-      if (!response.ok) {
-        toast({
-          variant: "destructive",
-          description: "Error generating startup names",
-        });
-        throw new Error("Failed to generate startup names");
-      }
-
-      const data = await response.json();
-
-      if (data.fallbackMessage) {
-        toast({
-          title: "Heads up! No .com names available",
-          description: data.fallbackMessage,
-        });
-      }
-
-      if (data.response.length === 0) {
-        toast({
-          title: "Uh oh! No names generated",
-          description:
-            "Looks like we can't find any names that fit your critera. Please try again.",
-        });
-      }
-
-      const ids: string[] = [];
-      const tempNamesList: { [name: string]: string } = {};
-      for (const name of data.response) {
-        try {
-          const updates = {
-            name: name,
+      const { data: generatedNames, error: generateError } = await supabase
+        .from("names")
+        .insert(
+          names.map(name => ({
+            name: name.name,
+            created_at: new Date(),
             description: values.description,
             word_to_include: values.wordToInclude,
             word_placement: values.wordPlacement,
             word_style: values.style,
             min_length: values.minLength,
             max_length: values.maxLength,
-            created_at: new Date(),
-            created_by: user?.id,
-            session_id: sessionId,
-          };
-
-          let { data, error } = await supabase
-            .from("names")
-            .upsert(updates)
-            .select("id")
-            .single();
-
-          if (error) throw error;
-
-          if (data) {
-            ids.push(data?.id);
-            tempNamesList[name] = data?.id;
-          }
-        } catch (error) {
-          console.error(error);
-        }
+            tld: values.tld,
+            created_by: user.id
+          }))
+        );
+        
+      if (generatedNames) {
+        setNamesList(generatedNames.map(name => ({
+          id: name.id,
+          name: name.name
+        })));
+        setIdsList(generatedNames.map(name => name.id));
+      } else {
+        console.error("Error generating names:", generateError);
       }
-      setIdsList(ids);
-      setNamesList((prevState) => ({
-        ...tempNamesList,
-        ...prevState,
-      }));
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error during form submission:", error);
     } finally {
       setIsLoading(false);
     }
   }
+}
 
   return (
     <>
@@ -630,7 +519,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             </div>
           </form>
         </Form>
-        {Object.keys(namesList).length > 0 && (
+        {namesList.length > 0 && (
           <div className="flex-col pt-4 space-y-4 sm:flex">
             <NamesDisplay
               namesList={namesList}
@@ -639,7 +528,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
               user={user}
               verticalLayout={true}
             />
-            <Share idString={idsList.join("")} />
+            <Share idString={idsList.join(",")}
+            />
           </div>
         )}
       </div>

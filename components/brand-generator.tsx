@@ -49,7 +49,7 @@ export default function BrandGenerator({
   const [customerId, setCustomerId] = useState<string>("");
   const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
+  const [namesList, setNamesList] = useState<Array<{ id: string, name: string }>>([]);
   const [idsList, setIdsList] = useState<string[]>([]);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -60,17 +60,14 @@ export default function BrandGenerator({
 
   useEffect(() => {
     if (names) {
-      const updatedNamesList: { [name: string]: string } = {};
+      const updatedNamesList: Array<{ id: string, name: string }> = [];
       for (const name of names) {
-        updatedNamesList[name.name] = name.id;
+        updatedNamesList.push({ name: name.name, id: name.id });
       }
       setNamesList(updatedNamesList);
-
-      for (const name of names) {
-        setIdsList((prevState) => [...prevState, name.id]);
-      }
+      setIdsList(names.map(name => name.id));
     }
-  }, [names, user]);
+  }, [user, names]);
 
   useEffect(() => {
     if (user) {
@@ -107,12 +104,8 @@ export default function BrandGenerator({
     }
   }
 
-  async function handleRemoveName(name: string) {
-    setNamesList((prevState) => {
-      const newState = { ...prevState };
-      delete newState[name];
-      return newState;
-    });
+  async function handleRemoveName(nameId: string) {
+    setNamesList(prevState => prevState.filter(item => item.id !== nameId));
   }
 
   async function addExistingName(values: z.infer<typeof formSchema>) {
@@ -210,11 +203,8 @@ export default function BrandGenerator({
         .select();
 
       if (data) {
-        setNamesList((prevNamesList) => ({
-          [data[0].name]: data[0].id,
-          ...prevNamesList,
-        }));
-        setIdsList((prevIdsList) => [...prevIdsList, data[0].id]);
+        setNamesList(prevNamesList => ([ ...prevNamesList, { name: data[0].name, id: data[0].id }]));
+        setIdsList(prevIdsList => [...prevIdsList, data[0].id]);
       }
 
       if (error) {
