@@ -17,6 +17,7 @@ import {
   LogOut,
   Plus,
   Receipt,
+  Smile,
   SquareGantt,
   User,
 } from "lucide-react";
@@ -32,6 +33,8 @@ export function CommandMenu({ user }: { user: any }) {
   const { theme, setTheme } = useTheme();
   const [isCustomer, setIsCustomer] = useState(false);
   const [billingPortalUrl, setBillingPortalUrl] = useState("");
+  const [planName, setPlanName] = useState("");
+  const [accountName, setAccountName] = useState("");
 
   const navigateAndCloseDialog = (path: string) => {
     router.push(path);
@@ -39,9 +42,9 @@ export function CommandMenu({ user }: { user: any }) {
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchAccount = async () => {
       const supabase = createClient();
-      let { data, error } = await supabase
+      let { data: userData, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
@@ -49,13 +52,29 @@ export function CommandMenu({ user }: { user: any }) {
 
       if (error) {
         console.error("Error fetching profile:", error);
-      } else if (data && data.customer_id) {
-        setIsCustomer(true);
-        fetchBillingSession(data.customer_id);
+      } else if (userData) {
+        setAccountName(userData.name);
+        if (userData.customer_id) {
+          setIsCustomer(true);
+          fetchBillingSession(userData.customer_id);
+        }
+        if (userData.plan_id) {
+          try {
+            const response = await fetch(
+              `/fetch-plan?plan_id=${userData.plan_id}`
+            );
+            const data = await response.json();
+            if (response.ok) {
+              setPlanName(data.planName);
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        }
       }
     };
     if (user) {
-      fetchProfile();
+      fetchAccount();
     }
   }, [user]);
 
@@ -96,6 +115,15 @@ export function CommandMenu({ user }: { user: any }) {
             e.preventDefault();
             navigateAndCloseDialog("/help");
             break;
+          case "i":
+            e.preventDefault();
+            if (planName === "Pro" || planName === "Business") {
+              window.open(
+                process.env.NEXT_PUBLIC_ALPHARUN_URL!,
+                "_blank"
+              );
+            }
+            break;
           case "b":
             if (isCustomer) {
               e.preventDefault();
@@ -132,15 +160,38 @@ export function CommandMenu({ user }: { user: any }) {
 
   const CommandLinkItem = ({
     href,
+    newTab,
+    onClick,
     children,
   }: {
-    href: string;
+    href?: string;
+    newTab?: boolean;
+    onClick?: () => void;
     children: React.ReactNode;
-  }) => (
-    <Link href={href} onClick={() => setOpen(false)}>
-      {children}
-    </Link>
-  );
+  }) => {
+    if (href) {
+      return (
+        <Link
+          href={href}
+          target={newTab ? "_blank" : undefined}
+          onClick={() => setOpen(false)}
+        >
+          {children}
+        </Link>
+      );
+    } else {
+      return (
+        <div
+          onClick={() => {
+            onClick?.();
+            setOpen(false);
+          }}
+        >
+          {children}
+        </div>
+      );
+    }
+  };
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
@@ -155,13 +206,6 @@ export function CommandMenu({ user }: { user: any }) {
               <CommandShortcut>⌘G</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
-          <CommandLinkItem href="/account">
-            <CommandItem>
-              <User className="mr-2 h-4 w-4" />
-              <span>Account</span>
-              <CommandShortcut>⌘A</CommandShortcut>
-            </CommandItem>
-          </CommandLinkItem>
           <CommandLinkItem href="/favorites">
             <CommandItem>
               <Heart className="mr-2 h-4 w-4" />
@@ -169,13 +213,14 @@ export function CommandMenu({ user }: { user: any }) {
               <CommandShortcut>⌘F</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
-          <CommandLinkItem href="/help">
+          <CommandLinkItem href="/account">
             <CommandItem>
-              <HelpCircle className="mr-2 h-4 w-4" />
-              <span>Support</span>
-              <CommandShortcut>⌘S</CommandShortcut>
+              <User className="mr-2 h-4 w-4" />
+              <span>Account</span>
+              <CommandShortcut>⌘A</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
+          <CommandSeparator />
           {isCustomer && (
             <CommandLinkItem href={billingPortalUrl}>
               <CommandItem>
@@ -192,18 +237,37 @@ export function CommandMenu({ user }: { user: any }) {
               <CommandShortcut>⌘P</CommandShortcut>
             </CommandItem>
           </CommandLinkItem>
-
-          <CommandItem
+          <CommandLinkItem href="/help">
+            <CommandItem>
+              <HelpCircle className="mr-2 h-4 w-4" />
+              <span>Support</span>
+              <CommandShortcut>⌘S</CommandShortcut>
+            </CommandItem>
+          </CommandLinkItem>
+          {planName === "Pro" ||
+            (planName === "Business" && (
+              <CommandLinkItem href={process.env.NEXT_PUBLIC_ALPHARUN_URL!} newTab>
+                <CommandItem>
+                  <Smile className="mr-2 h-4 w-4" />
+                  <span>Feedback</span>
+                  <CommandShortcut>⌘I</CommandShortcut>
+                </CommandItem>
+              </CommandLinkItem>
+            ))}
+          <CommandSeparator />
+          <CommandLinkItem
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           >
-            {theme === "dark" ? (
-              <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
-            )}
-            <span>Switch Theme</span>
-            <CommandShortcut>⌘D</CommandShortcut>
-          </CommandItem>
+            <CommandItem>
+              {theme === "dark" ? (
+                <Sun className="mr-2 h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Moon className="mr-2 h-4 w-4" aria-hidden="true" />
+              )}
+              <span>Switch Theme</span>
+              <CommandShortcut>⌘D</CommandShortcut>
+            </CommandItem>
+          </CommandLinkItem>
           <CommandSeparator />
           <CommandItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />

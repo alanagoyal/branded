@@ -33,7 +33,7 @@ export default async function Favorites() {
     <div className="w-full px-4 flex justify-center items-center flex-col">
       <h1 className="text-2xl font-bold mb-4">Favorites</h1>
       <div className="min-h-screen w-full">
-        <NamesDisplay namesList={namesList} user={user} verticalLayout={true} />
+        <NamesDisplay namesList={namesList} showRemoveButton={false} user={user} verticalLayout={true} />
       </div>
     </div>
   ) : (

@@ -1,34 +1,38 @@
-import { CopyIcon } from "@radix-ui/react-icons"
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
-import { Button } from "./ui/button"
-import { Label } from "./ui/label"
-import { Input } from "./ui/input"
-import { toast } from "./ui/use-toast"
+import { CopyIcon } from "@radix-ui/react-icons";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { toast } from "./ui/use-toast";
 
-
-export function Share({idString}: {idString: string}) {
-  const defaultValue = `https://branded.ai/${idString}`
+export function Share({ idString, type }: { idString: string; type?: string }) {
+  const defaultValue = type
+    ? `https://branded.ai/${idString}?type=${type}`
+    : `https://branded.ai/${idString}`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(defaultValue)
+    navigator.clipboard
+      .writeText(defaultValue)
       .then(() => {
         toast({
-          description: "Copied to clipboard"
-        })
+          description: "Copied to clipboard",
+        });
       })
       .catch((err) => {
         toast({
           variant: "destructive",
-          description: "Unable to copy to clipboard"
-        })
-        console.error('Unable to copy text: ', err);
+          description: "Unable to copy to clipboard",
+        });
+        console.error("Unable to copy text: ", err);
       });
   };
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="w-full" variant="ghost">Share</Button>
+        <Button className="w-full" variant="ghost">
+          Share
+        </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[350px]">
         <div className="flex flex-col space-y-2 text-center sm:text-left">
@@ -56,5 +60,5 @@ export function Share({idString}: {idString: string}) {
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

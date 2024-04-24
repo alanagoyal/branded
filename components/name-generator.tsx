@@ -83,11 +83,6 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     () => searchParams.get("session_id") || uuidv4(),
     [searchParams]
   );
-  const [isScreenWide, setIsScreenWide] = useState(false);
-
-  useEffect(() => {
-    setIsScreenWide(window.innerWidth >= 768);
-  }, []);
 
   let defaultValues = {};
   if (names) {
@@ -189,10 +184,16 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
     }
   }, [names, user]);
 
+  async function handleRemoveName(name: string) {
+    setNamesList((prevState) => {
+      const newState = { ...prevState };
+      delete newState[name];
+      return newState;
+    });
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    setNamesList({});
-    setIdsList([]);
 
     const oneMonthAgo = new Date(
       new Date().setMonth(new Date().getMonth() - 1)
@@ -316,6 +317,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
       }
 
       const ids: string[] = [];
+      const tempNamesList: { [name: string]: string } = {};
       for (const name of data.response) {
         try {
           const updates = {
@@ -341,16 +343,17 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
           if (data) {
             ids.push(data?.id);
-            setNamesList((prevState) => ({
-              ...prevState,
-              [name]: data?.id,
-            }));
+            tempNamesList[name] = data?.id;
           }
         } catch (error) {
           console.error(error);
         }
       }
       setIdsList(ids);
+      setNamesList((prevState) => ({
+        ...tempNamesList,
+        ...prevState,
+      }));
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -631,8 +634,10 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           <div className="flex-col pt-4 space-y-4 sm:flex">
             <NamesDisplay
               namesList={namesList}
+              showRemoveButton={true}
+              onRemoveName={handleRemoveName}
               user={user}
-              verticalLayout={!isScreenWide}
+              verticalLayout={true}
             />
             <Share idString={idsList.join("")} />
           </div>

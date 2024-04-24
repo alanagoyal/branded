@@ -6,6 +6,8 @@ export default async function Names({ params }: { params: { id: string } }) {
   const idString = params.id;
   const idRegex = /.{36}/g;
   const idsList = idString.match(idRegex);
+
+  
   const {
     data: { user },
   } = await supabase.auth.getUser();
