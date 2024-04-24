@@ -30,7 +30,7 @@ export default function NewGeneration({
       <VerifySubscription user={user} />
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
         <h1 className="text-xl sm:text-2xl font-bold sm:text-left mb-4 sm:mb-0">
-          Name Generator
+          {type === "brand-only" ? "Brand Generator" : "Name Generator"}
         </h1>
         {type === "brand-only" ? (
           <Button variant="ghost" onClick={handleShowNamesDisplay}>
