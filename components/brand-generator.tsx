@@ -32,7 +32,13 @@ const formSchema = z.object({
   name: z.string().min(1),
 });
 
-export default function BrandGenerator({ user, names }: { user: any, names: any }) {
+export default function BrandGenerator({
+  user,
+  names,
+}: {
+  user: any;
+  names: any;
+}) {
   const supabase = createClient();
   const searchParams = useSearchParams();
   const sessionId = useMemo(
@@ -65,10 +71,6 @@ export default function BrandGenerator({ user, names }: { user: any, names: any 
       }
     }
   }, [names, user]);
-
-  async function clear() {
-    form.reset();
-  }
 
   useEffect(() => {
     if (user) {
@@ -221,6 +223,7 @@ export default function BrandGenerator({ user, names }: { user: any, names: any 
     } catch (error) {
       console.error(error);
     } finally {
+      form.reset();
       setIsLoading(false);
     }
   }
@@ -239,7 +242,7 @@ export default function BrandGenerator({ user, names }: { user: any, names: any 
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input autoComplete="off" onClick={clear} {...field} />
+                  <Input autoComplete="off" {...field} />
                 </FormControl>
                 <FormDescription>
                   Enter an existing name to see domain availability, check
@@ -262,7 +265,7 @@ export default function BrandGenerator({ user, names }: { user: any, names: any 
             user={user}
             verticalLayout={true}
           />
-          <Share idString={idsList.join("")} type="brand-only"/>
+          <Share idString={idsList.join("")} type="brand-only" />
         </div>
       )}
     </div>
