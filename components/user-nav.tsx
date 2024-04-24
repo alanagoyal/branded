@@ -191,7 +191,7 @@ export default function UserNav({ user }: any) {
           {planName === "Pro" ||
             (planName === "Business" && (
               <Link
-                href="https://alpharun.com/i/g1imnQ21zPOPxrwb9Y3Fq"
+                href={process.env.NEXT_PUBLIC_ALPHARUN_URL!}
                 rel="noopener noreferrer"
                 target="_blank"
               >

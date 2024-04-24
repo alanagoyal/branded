@@ -119,7 +119,7 @@ export function CommandMenu({ user }: { user: any }) {
             e.preventDefault();
             if (planName === "Pro" || planName === "Business") {
               window.open(
-                "https://alpharun.com/i/g1imnQ21zPOPxrwb9Y3Fq",
+                process.env.NEXT_PUBLIC_ALPHARUN_URL!,
                 "_blank"
               );
             }
@@ -246,10 +246,7 @@ export function CommandMenu({ user }: { user: any }) {
           </CommandLinkItem>
           {planName === "Pro" ||
             (planName === "Business" && (
-              <CommandLinkItem
-                href="https://alpharun.com/i/g1imnQ21zPOPxrwb9Y3Fq"
-                newTab
-              >
+              <CommandLinkItem href={process.env.NEXT_PUBLIC_ALPHARUN_URL!} newTab>
                 <CommandItem>
                   <Smile className="mr-2 h-4 w-4" />
                   <span>Feedback</span>
