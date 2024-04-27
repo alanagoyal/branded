@@ -118,6 +118,24 @@ export default function BrandGenerator({
   async function addExistingName(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
+    const { data: existingName, error } = await supabase
+      .from("names")
+      .select("*")
+      .eq("name", values.name)
+      .is("description", null)
+      .eq("created_by", user?.id);
+
+    if (existingName && existingName.length > 0) {
+      setNamesList((prevNamesList) => ({
+        ...prevNamesList,
+        [existingName[0].name]: existingName[0].id,
+      }));
+      setIdsList((prevIdsList) => [...prevIdsList, existingName[0].id]);
+      form.reset();
+      setIsLoading(false);
+      return;
+    }
+
     const oneMonthAgo = new Date(
       new Date().setMonth(new Date().getMonth() - 1)
     ).toISOString();
