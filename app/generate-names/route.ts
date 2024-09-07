@@ -68,7 +68,7 @@ export async function POST(req: Request, res: NextResponse) {
     const completion = await traced(
       async (span) => {
         const response = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
+          model: "gpt-4o-mini",
           messages: [
             {
               role: "system",

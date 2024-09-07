@@ -21,7 +21,7 @@ export async function POST(req: Request, res: NextResponse) {
         let userMessageContent = `Please write one paragraph pitching a startup named ${name} that has the following description: ${description}`;
 
         const completion = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
+          model: "gpt-4o-mini",
           seed: 123,
           messages: [
             {
