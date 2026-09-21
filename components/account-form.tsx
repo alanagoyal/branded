@@ -1,4 +1,6 @@
 "use client";
+
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -136,12 +138,12 @@ export default function AccountForm({
               {planName}
             </a>
           ) : (
-            <a
+            <Link
               href="/pricing"
               className="bg-[#C850C0] px-3 py-1 rounded-full text-sm text-white h-6 flex items-center justify-center"
             >
               {planName}
-            </a>
+            </Link>
           ))}
       </div>
       <Form {...form}>

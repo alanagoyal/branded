@@ -10,7 +10,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(req: Request, res: NextResponse) {
+export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { name } = body;
@@ -24,7 +24,9 @@ export async function POST(req: Request, res: NextResponse) {
       style: "vivid",
     });
 
-    const imageUrl = image.data[0].url;
+    const imageUrl = image.data?.[0]?.url;
+
+    if (!imageUrl) throw new Error("Image provider returned no image");
 
     return new Response(JSON.stringify({ imageUrl }), {
       status: 200,
