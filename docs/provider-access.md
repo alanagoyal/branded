@@ -37,6 +37,14 @@ The server verifies name ownership, bounds the provider output to 1 MB, checks c
 
 PDF creation accepts a small POST body containing the owned name ID and content; image bytes never travel in the URL. Because logo rows remain owner-editable, PDF loading revalidates the JPEG's encoded size, MIME prefix, magic bytes, and dimensions, and rejects SVG/HTML. Legacy Azure image links remain supported with redirects disabled and a 5 MB fetch cap. Expired legacy images are omitted from the PDF.
 
+### Local PDF rendering and downloads
+
+The OneDoc SDK and React-print dependencies are removed: their configured `api.fileforge.com` endpoint failed DNS resolution during the release smoke check. PDF generation now uses the pinned `@react-pdf/renderer` locally, with automatic page wrapping and bundled SIL-licensed Noto Sans fonts. See its [Node rendering API](https://react-pdf.org/docs/v4/node) and [font documentation](https://react-pdf.org/docs/v4/fonts). Accented Latin, Greek, Cyrillic, and common punctuation render offline; the bundled fonts do not cover every writing system. Next.js explicitly includes the font files in the `/one-pager` function bundle.
+
+After verifying name ownership and reserving PDF usage, the server renders the logo, company name, pitch, founder, and authenticated contact email. It caps the PDF at 2 MB and saves its base64 data URL in the existing owner-scoped `one_pagers.pdf_url` column before returning success. Existing account/name cascades delete these bytes; no Storage bucket or migration is introduced. Downloads use a short-lived browser Blob URL, avoiding expired vendor links and blocked data-URL navigation. Saved PDFs can be downloaded repeatedly without provider work or quota consumption. Old remote PDF links regenerate on the next request, consuming the usual text/PDF allowances.
+
+`ONEDOC_API_KEY` is no longer used and may be removed from local/hosting configuration. PDF generation does not send document contents to a remote PDF service; one-pager text still uses the configured text-generation provider.
+
 ## Data access and sharing
 
 Names and npm records are owner-only. npm writes must also reference a name owned by the caller. Anonymous enumeration/inserts and cross-owner updates/deletes are denied by database grants and RLS.
@@ -50,4 +58,4 @@ Legacy raw-ID links now work only for the owner. Owners can recreate public link
 - `npm test`: mocked-service tests exercise route authentication, validation, fail-closed billing/usage errors, quotas, domain shortages, sharing ownership and PDF URL protection without paid calls.
 - `npx tsc --noEmit` and `npm run lint`.
 - `supabase/tests/provider-access.sql`: run in a disposable local database after the migration, inside a transaction and roll it back. It creates fixture users, asserts RLS/grants and quota behavior, and must never run against production. The migration and assertions were also executed successfully in an isolated PGlite PostgreSQL instance; this verifies SQL behavior but not multi-connection contention.
-- Local HTTP smoke checks verify provider endpoints and share creation return 401 without a session, and `/new` displays its sign-in prompt. A single real logo-provider request with the configured model/settings returned a valid 47,499-byte JPEG in 10.4 seconds; the image was visually checked. Database ownership/persistence and PDF rendering are tested with mocks, not production writes.
+- Local HTTP smoke checks verify provider endpoints and share creation return 401 without a session, and `/new` displays its sign-in prompt. A single real logo-provider request with the configured model/settings returned a valid 47,499-byte JPEG in 10.4 seconds; the image was visually checked. Tests exercise the real local PDF renderer with short/long Unicode content and inspect generated PDF bytes; sample PDFs with the real logo were rendered to images and visually checked. Database ownership/persistence uses mocks, not production writes.

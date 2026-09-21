@@ -32,9 +32,9 @@ test("non-JSON authentication failure still asks for sign-in", async () => {
   await assert.rejects(responses.readProviderResponse(new Response("Unauthorized", { status: 401 })), /Sign in/);
 });
 
-function harness({ cached = true, status = 429, logoUrl = "https://example.com/logo.png" } = {}) {
+function harness({ cached = true, status = 429, logoUrl = "https://example.com/logo.png", pdfUrl = "data:application/pdf;base64,JVBERi0xLjcK", fetchResponse } = {}) {
   let cursor = 0, fetches = 0;
-  const state = [], queries = [], errors = [];
+  const state = [], queries = [], errors = [], downloads = [];
   const identity = (tag) => ({ children, ...props }) => React.createElement(tag, props, children);
   const box = identity("div");
   const supabase = { from(table) {
@@ -42,6 +42,7 @@ function harness({ cached = true, status = 429, logoUrl = "https://example.com/l
     const builder = {
       select(columns, options) { query.count = options?.count; return this; },
       eq() { return this; }, in() { return this; }, ilike() { return this; },
+      single() { return Promise.resolve({ data: { description: 'Company description' } }); },
       gte() { throw new Error("Saved-record quota must not block provider actions"); },
       then(resolve, reject) {
         queries.push(query);
@@ -52,7 +53,7 @@ function harness({ cached = true, status = 429, logoUrl = "https://example.com/l
           if (table === "domains") data = [{ domain_name: "orbit.com", purchase_link: "https://orbit.com" }];
           if (table === "npm_names") data = [{ npm_name: "npm i orbit", purchase_link: "https://npmjs.com/orbit" }];
           if (table === "trademarks") data = [{ keyword: "Orbit", description: "record", link: "https://example.com/trademark" }];
-          if (table === "one_pagers") data = [{ pdf_url: "https://example.com/one.pdf" }];
+          if (table === "one_pagers") data = [{ pdf_url: pdfUrl }];
         }
         return Promise.resolve({ data, error: null, count: 100000 }).then(resolve, reject);
       },
@@ -67,6 +68,7 @@ function harness({ cached = true, status = 429, logoUrl = "https://example.com/l
     } },
     "@/utils/supabase/client": { createClient: () => supabase },
     "@/lib/provider-response": responses,
+    "@/lib/pdf-download": { PDF_DATA_PREFIX: "data:application/pdf;base64,", downloadPdf: (url, name) => downloads.push({ url, name }) },
     "./provider-error": { showProviderError: (error) => errors.push(error) },
     "./icons": { Icons: new Proxy({}, { get: () => box }) },
     "./ui/button": { Button: identity("button") },
@@ -76,7 +78,7 @@ function harness({ cached = true, status = 429, logoUrl = "https://example.com/l
     "./ui/carousel": Object.fromEntries(["Carousel", "CarouselContent", "CarouselItem", "CarouselNext", "CarouselPrevious"].map((name) => [name, box])),
     "next/navigation": { useRouter: () => ({ refresh() {} }) },
     "./ui/toast": { ToastAction: box },
-  }, { fetch: async () => { fetches++; return Response.json({ error: status === 401 ? "Sign in to continue." : "You've reached the monthly limit for this feature." }, { status }); } });
+  }, { fetch: async (...args) => { fetches++; if (fetchResponse) return fetchResponse(...args); return Response.json({ error: status === 401 ? "Sign in to continue." : "You've reached the monthly limit for this feature." }, { status }); } });
   function expand(node) {
     if (Array.isArray(node)) return node.flatMap(expand);
     if (!node || typeof node !== "object") return [];
@@ -93,7 +95,7 @@ function harness({ cached = true, status = 429, logoUrl = "https://example.com/l
     return node == null ? "" : String(node);
   }
   function button(label) { return render().find((node) => node.type === "button" && text(node) === label); }
-  return { render, button, queries, errors, fetches: () => fetches };
+  return { render, button, queries, errors, downloads, fetches: () => fetches };
 }
 
 for (const label of ["Check domain availability", "Check npm availability", "Check for trademarks", "Generate a logo", "Generate a one-pager"]) {
@@ -167,4 +169,26 @@ test('expired legacy logo URLs request a replacement instead of displaying a bro
   await ui.button('Generate a logo').props.onClick();
   assert.equal(ui.fetches(), 1);
   assert.equal(ui.errors[0].status, 429);
+});
+
+test('saved PDF downloads again without re-generating text or consuming usage', async () => {
+  const ui = harness();
+  await ui.button('Generate a one-pager').props.onClick();
+  await ui.button('Generate a one-pager').props.onClick();
+  assert.equal(ui.fetches(), 0); assert.equal(ui.downloads.length, 2);
+  assert.equal(ui.downloads[0].name, 'Orbit');
+  assert.ok(ui.downloads[0].url.startsWith('data:application/pdf;base64,'));
+});
+
+test('legacy vendor PDF regenerates, sends only name ID/content, and downloads server-persisted result', async () => {
+  const calls = [];
+  const ui = harness({ pdfUrl: 'https://expired-vendor.example/old.pdf', fetchResponse: async (url, options) => {
+    calls.push({ url, body: JSON.parse(options.body) });
+    return Response.json(url === '/generate-one-pager-content' ? { response: 'A clear pitch.' } : { link: 'data:application/pdf;base64,JVBERi0xLjcK' });
+  } });
+  await ui.button('Generate a one-pager').props.onClick();
+  assert.equal(ui.errors.length, 0); assert.equal(ui.downloads.length, 1);
+  assert.deepEqual(calls.map(c => c.url), ['/generate-one-pager-content', '/one-pager']);
+  assert.deepEqual(calls[1].body, { nameId: 'saved-id', content: 'A clear pitch.' });
+  assert.ok(ui.downloads[0].url.startsWith('data:application/pdf;base64,'));
 });

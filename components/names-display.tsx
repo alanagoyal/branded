@@ -2,6 +2,7 @@
 import type { NameRecord } from "@/lib/name-records";
 import { createClient } from "@/utils/supabase/client";
 import { readProviderResponse } from "@/lib/provider-response";
+import { downloadPdf, PDF_DATA_PREFIX } from "@/lib/pdf-download";
 import { showProviderError } from "./provider-error";
 import { Icons } from "./icons";
 import { Button } from "./ui/button";
@@ -513,81 +514,40 @@ export function NamesDisplay({
   async function createOnePager(name: string, nameId: string) {
     try {
       setProcessingOnePager((prev) => [...prev, nameId]);
-      const showingAvailability = onePager[nameId];
-      if (showingAvailability) {
-        setOnePager((prev) => {
-          const updatedResults = { ...prev };
-          delete updatedResults[nameId];
-          return updatedResults;
-        });
-      } else {
-        let onePagerUrl = "";
-
-        const { data: onePagerData } = await supabase
-          .from("one_pagers")
-          .select()
-          .eq("name_id", nameId);
-
-        if (onePagerData && onePagerData.length > 0) {
-          onePagerUrl = onePagerData[0].pdf_url;
+      let onePagerUrl = onePager[nameId];
+      if (!onePagerUrl) {
+        const { data: saved, error: savedError } = await supabase.from("one_pagers")
+          .select("pdf_url").eq("name_id", nameId);
+        if (savedError) throw savedError;
+        const stored = saved?.[0]?.pdf_url;
+        // Remote vendor links expire. Only locally generated, durable PDFs are reused.
+        if (stored?.startsWith(PDF_DATA_PREFIX)) {
+          onePagerUrl = stored;
         } else {
-          const { data: nameData } = await supabase
-            .from("names")
-            .select()
-            .eq("id", nameId)
-            .single();
-
-          const response = await fetch("/generate-one-pager-content", {
+          const { data: nameData, error: nameError } = await supabase.from("names")
+            .select("description").eq("id", nameId).single();
+          if (nameError) throw nameError;
+          const textResponse = await fetch("/generate-one-pager-content", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: name,
-              description: nameData.description,
-            }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, description: nameData?.description }),
           });
-
-          const data = await readProviderResponse(response);
-
-          const content = data.response;
-
-          if (content) {
-            const response = await fetch("/one-pager", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ nameId, content }),
-            });
-
-            const data = await readProviderResponse(response);
-            onePagerUrl = data.link;
-
-            const updates = {
-              pdf_url: onePagerUrl,
-              created_at: new Date(),
-              name_id: nameId,
-              created_by: user.id,
-            };
-
-            let { data: insertData, error } = await supabase
-              .from("one_pagers")
-              .insert(updates);
-
-            if (error) throw error;
-          }
+          const { response: content } = await readProviderResponse(textResponse);
+          const pdfResponse = await fetch("/one-pager", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nameId, content }),
+          });
+          const data = await readProviderResponse(pdfResponse);
+          onePagerUrl = data.link;
         }
-
-        window.open(onePagerUrl, "_blank");
-
-        setOnePager((prev) => ({
-          ...prev,
-          [nameId]: onePagerUrl,
-        }));
       }
+      downloadPdf(onePagerUrl, name);
+      setOnePager((prev) => ({ ...prev, [nameId]: onePagerUrl }));
     } catch (error) {
       showProviderError(error);
     } finally {
-      setProcessingOnePager((prev) => prev.filter((n) => n !== nameId));
+      setProcessingOnePager((prev) => prev.filter((id) => id !== nameId));
     }
   }
 

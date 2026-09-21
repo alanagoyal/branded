@@ -112,9 +112,7 @@ test('PDF signed-out requests never render or fetch a logo', async () => {
   const route = load('app/one-pager/route.tsx', {
     'next/server': next, zod, '@/lib/provider-access': access,
     '@/lib/one-pager-logo': { onePagerLogo: () => { providerCalls++; } },
-    '@onedoc/react-print': { compile: () => { providerCalls++; } },
-    '@onedoc/client': { Onedoc: class { render() { providerCalls++; } } },
-    '../documents/one-pager': { OnePager() {} }, react: {},
+    '@/lib/one-pager-pdf': { createOnePagerPdf: () => { providerCalls++; } },
   });
   const response = await route.POST(request({}, 'one-pager'));
   assert.equal(response.status, 401); assert.equal(providerCalls, 0);

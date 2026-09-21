@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  outputFileTracingIncludes: { "/one-pager": ["./assets/fonts/*.ttf"] },
   images: {
     remotePatterns: [
       {
