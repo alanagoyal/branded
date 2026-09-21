@@ -13,8 +13,6 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@markprompt/react": "^0.40.3",
-    "@onedoc/client": "^0.1.29",
-    "@onedoc/react-print": "^0.1.126",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -31,6 +29,7 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
+    "@react-pdf/renderer": "4.9.0",
     "@stripe/stripe-js": "^3.3.0",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.114.0",

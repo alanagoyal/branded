@@ -54,9 +54,7 @@ function harness({ owner = true, dbError = false, output = validJpeg, saved = fa
   });
   const pdf = load('app/one-pager/route.tsx', {
     '@/lib/provider-access': accessMock, '@/lib/one-pager-logo': logos, 'next/server': next, zod,
-    '@onedoc/react-print': { compile: async element => { operations.push('compile'); assert.equal(element.props.logoUrl, logo); assert.equal(element.props.userData.email, 'owner@example.test'); return '<html/>'; } },
-    '@onedoc/client': { Onedoc: class { async render() { operations.push('render'); return { link: 'https://pdf.example/one.pdf' }; } } },
-    '../documents/one-pager': { OnePager() {} }, react: { createElement: (type, props) => ({ type, props }) },
+    '@/lib/one-pager-pdf': { createOnePagerPdf: async input => { operations.push('render'); assert.equal(input.logoUrl, logo); assert.equal(input.email, 'owner@example.test'); return 'data:application/pdf;base64,JVBERi0xLjcK'; } },
   });
   return { route, pdf, queries, writes, operations, providerRequests };
 }
@@ -102,7 +100,9 @@ test('PDF retrieves owner logo internally; base64 never needs to fit in a URL or
   const h = harness();
   const response = await h.pdf.POST(request({ nameId, content: 'Pitch.', logoUrl: 'https://evil.example/', userData: { email: 'forged@example.test' } }, 'one-pager'));
   assert.equal(response.status, 200);
-  assert.deepEqual(h.operations, ['reserve', 'compile', 'render']);
+  assert.deepEqual(h.operations, ['reserve', 'render', 'persist']);
+  assert.equal(h.writes[0].value.pdf_url, 'data:application/pdf;base64,JVBERi0xLjcK');
+  assert.equal(h.writes[0].value.created_by, 'owner');
   assert.ok(h.queries.filter(q => q.table === 'names' || q.table === 'logos').every(q => q.filters.some(([key,value]) => key === 'created_by' && value === 'owner')));
 });
 test('PDF rejects foreign names and malformed or non-raster data in directly editable logo rows', async () => {
@@ -111,4 +111,14 @@ test('PDF rejects foreign names and malformed or non-raster data in directly edi
     assert.equal((await h.pdf.POST(request({ nameId, content: 'Pitch.' }, 'one-pager'))).status, options.owner === false ? 404 : 400);
     assert.deepEqual(h.operations, options.owner === false ? [] : ['reserve']);
   }
+});
+
+test('PDF quota exhaustion and failed persistence never return a successful saved document', async () => {
+  const exhausted = harness({ quota: true });
+  assert.equal((await exhausted.pdf.POST(request({ nameId, content: 'Pitch.' }, 'one-pager'))).status, 429);
+  assert.deepEqual(exhausted.operations, ['reserve']);
+  assert.equal(exhausted.writes.length, 0);
+  const failed = harness({ dbError: true });
+  assert.equal((await failed.pdf.POST(request({ nameId, content: 'Pitch.' }, 'one-pager'))).status, 502);
+  assert.deepEqual(failed.operations, ['reserve', 'render', 'persist']);
 });
