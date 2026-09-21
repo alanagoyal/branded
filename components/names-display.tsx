@@ -478,8 +478,11 @@ export function NamesDisplay({
           .select()
           .eq("name_id", nameId);
 
-        if (logoData && logoData.length > 0) {
-          logoUrl = logoData[0].logo_url;
+        const savedLogo = logoData?.[0]?.logo_url;
+        // Legacy DALL-E links expire. Replace expired assets on the next request.
+        const expires = savedLogo?.startsWith("https:") ? new URL(savedLogo).searchParams.get("se") : null;
+        if (savedLogo && (!expires || Date.parse(expires) > Date.now())) {
+          logoUrl = savedLogo;
         } else {
           const response = await fetch("/generate-logo", {
             method: "POST",
@@ -487,24 +490,12 @@ export function NamesDisplay({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              name: name,
+              nameId,
             }),
           });
 
           const data = await readProviderResponse(response);
           logoUrl = data.imageUrl;
-
-          const updates = {
-            logo_url: logoUrl,
-            created_at: new Date(),
-            name_id: nameId,
-            created_by: user.id,
-          };
-
-          let { data: insertData, error } = await supabase
-            .from("logos")
-            .insert(updates);
-          if (error) throw error;
         }
 
         setLogoResults((prev) => ({
@@ -546,23 +537,6 @@ export function NamesDisplay({
             .eq("id", nameId)
             .single();
 
-          const { data: userData } = await supabase
-            .from("profiles")
-            .select()
-            .eq("id", user.id)
-            .single();
-
-          let logoUrl = null;
-
-          const { data: logoData } = await supabase
-            .from("logos")
-            .select()
-            .eq("name_id", nameId);
-
-          if (logoData && logoData.length > 0) {
-            logoUrl = logoData[0].logo_url;
-          }
-
           const response = await fetch("/generate-one-pager-content", {
             method: "POST",
             headers: {
@@ -579,15 +553,11 @@ export function NamesDisplay({
           const content = data.response;
 
           if (content) {
-            const response = await fetch(
-              `/one-pager?content=${encodeURIComponent(
-                JSON.stringify(content)
-              )}&nameData=${encodeURIComponent(
-                JSON.stringify(nameData)
-              )}&userData=${encodeURIComponent(
-                JSON.stringify(userData)
-              )}&logoUrl=${encodeURIComponent(JSON.stringify(logoUrl))}`
-            );
+            const response = await fetch("/one-pager", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ nameId, content }),
+            });
 
             const data = await readProviderResponse(response);
             onePagerUrl = data.link;
@@ -726,18 +696,20 @@ export function NamesDisplay({
       </div>
       {logoResults[nameId] && (
         <div className="flex items-center justify-center w-full">
-          <Link
+          <a
             href={logoResults[nameId]}
+            download={logoResults[nameId].startsWith("data:") ? `${name}-logo.jpg` : undefined}
             target="_blank"
             className="cursor-pointer"
           >
             <Image
               src={logoResults[nameId]}
+              unoptimized={logoResults[nameId].startsWith("data:")}
               alt={name}
               width={200}
               height={200}
             />
-          </Link>
+          </a>
         </div>
       )}
       <div className="w-1/2 text-center">
@@ -840,4 +812,3 @@ export function NamesDisplay({
     </div>
   );
 }
-

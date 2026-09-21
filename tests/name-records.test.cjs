@@ -10,7 +10,7 @@ function load(file, mocks = {}) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
   }).outputText;
   const exports = {};
-  vm.runInNewContext(output, { exports, console, window: { open() {} }, require(name) {
+  vm.runInNewContext(output, { exports, console, URL, window: { open() {} }, require(name) {
     if (name in mocks) return mocks[name];
     if (["react", "react/jsx-runtime"].includes(name)) return require(name);
     throw new Error(`Unexpected import: ${name}`);
