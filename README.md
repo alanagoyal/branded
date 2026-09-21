@@ -50,10 +50,11 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+npm run test:pdf-runtime
 npm audit --omit=dev
 ```
 
-Pull requests and pushes to `main` run lint, TypeScript, unit tests, an isolated fresh-schema SQL check, and the production build. CI installs the lockfile with `npm ci`, does not auto-fix or commit files, and receives no production secrets. Existing lint warnings should be addressed independently; errors fail CI.
+Pull requests and pushes to `main` run lint, TypeScript, unit tests, an isolated fresh-schema SQL check, and the production build with an authenticated PDF request. `test:pdf-runtime` builds and starts Next against a local synthetic Auth/database fixture, verifies traced font and React assets, and renders a PDF without production credentials or provider calls. It replaces the local build with fixture configuration; run `npm run build` again before normal application use. CI installs the lockfile with `npm ci`, does not auto-fix or commit files, and receives no production secrets. Existing lint warnings should be addressed independently; errors fail CI.
 
 Database permission/usage tests supplied with the billing and access changes must also be run against a disposable local database before applying migrations. Never point migration tests at production. Docker/local database availability is required for full Supabase integration validation.
 

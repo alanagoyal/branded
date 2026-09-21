@@ -1,4 +1,3 @@
-import React from "react";
 import path from "node:path";
 import { Document, Font, Image, Link, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 import { MAX_PDF_BYTES, PDF_DATA_PREFIX } from "./pdf-download";
@@ -31,24 +30,28 @@ export type OnePagerInput = {
 // All inputs come from bounded route validation and owner-scoped database reads.
 // Fonts are bundled; the renderer never requests a third-party document service.
 export async function createOnePagerPdf(input: OnePagerInput): Promise<string> {
-  const bytes = await renderToBuffer(
-    <Document title={input.name} author={input.founder || undefined}>
-      <Page size="A4" style={styles.page} wrap>
-        <View style={styles.heading} wrap={false}>
-          {/* eslint-disable-next-line jsx-a11y/alt-text */}
-          {input.logoUrl && <Image src={input.logoUrl} style={styles.logo} />}
-          <Text style={styles.title}>{input.name}</Text>
-          {input.founder && <Text style={styles.founder}>{input.founder} · Founder &amp; CEO</Text>}
-        </View>
-        <Text style={styles.content} orphans={3} widows={3} minPresenceAhead={65}>{input.content}</Text>
-        <View style={styles.contact} wrap={false}>
-          <Text>To learn more, please contact</Text>
-          <Link src={`mailto:${input.email}`} style={styles.email}>{input.email}</Link>
-        </View>
-        <Text style={styles.pageNumber} fixed render={({ pageNumber, totalPages }) => totalPages > 1 ? `${pageNumber} / ${totalPages}` : ""} />
-      </Page>
-    </Document>
+  // Bypass Next's React alias: the external renderer must receive elements from
+  // its installed React version. Keep Node's loader outside webpack rewriting.
+  const { createRequire } = await import(/* webpackIgnore: true */ "node:module");
+  const { createElement }: typeof import("react") = createRequire(path.join(process.cwd(), "package.json"))("react");
+  const document = createElement(Document, { title: input.name, author: input.founder || undefined },
+    createElement(Page, { size: "A4", style: styles.page, wrap: true },
+      createElement(View, { style: styles.heading, wrap: false },
+        input.logoUrl ? createElement(Image, { src: input.logoUrl, style: styles.logo }) : null,
+        createElement(Text, { style: styles.title }, input.name),
+        input.founder ? createElement(Text, { style: styles.founder }, input.founder + " · Founder & CEO") : null,
+      ),
+      createElement(Text, { style: styles.content, orphans: 3, widows: 3, minPresenceAhead: 65 }, input.content),
+      createElement(View, { style: styles.contact, wrap: false },
+        createElement(Text, {}, "To learn more, please contact"),
+        createElement(Link, { src: "mailto:" + input.email, style: styles.email }, input.email),
+      ),
+      createElement(Text, { style: styles.pageNumber, fixed: true,
+        render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) => totalPages > 1 ? pageNumber + " / " + totalPages : "",
+      }),
+    ),
   );
+  const bytes = await renderToBuffer(document);
   if (bytes.length > MAX_PDF_BYTES || bytes.subarray(0, 5).toString() !== "%PDF-") throw new Error("Unable to create a bounded PDF.");
   return PDF_DATA_PREFIX + bytes.toString("base64");
 }
