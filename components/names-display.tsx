@@ -1,5 +1,7 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
+import { readProviderResponse } from "@/lib/provider-response";
+import { showProviderError } from "./provider-error";
 import { Icons } from "./icons";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
@@ -17,11 +19,6 @@ import {
 } from "./ui/carousel";
 import { useRouter } from "next/navigation";
 import { ToastAction } from "./ui/toast";
-import {
-  BusinessPlanEntitlements,
-  FreePlanEntitlements,
-  ProPlanEntitlements,
-} from "@/lib/plans";
 
 const ActionButton = ({
   name,
@@ -178,136 +175,7 @@ export function NamesDisplay({
   const [onePager, setOnePager] = useState<{ [key: string]: string }>({});
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const idString = Object.values(namesList).join(",");
-  const [userPlan, setUserPlan] = useState({});
-  const [customerId, setCustomerId] = useState<string>("");
-  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
 
-  useEffect(() => {
-    if (user) {
-      fetchCustomerId();
-    }
-  }, [user]);
-
-  async function fetchCustomerId() {
-    try {
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (profile && profile.customer_id) {
-        setCustomerId(profile.customer_id);
-        fetchBillingSession(profile.customer_id);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function fetchBillingSession(customerId: string) {
-    try {
-      const response = await fetch(`/portal-session?customer_id=${customerId}`);
-      const data = await response.json();
-      if (response.ok) {
-        setBillingPortalUrl(data.session.url);
-      }
-    } catch (error) {
-      console.error("Failed to fetch billing session:", error);
-    }
-  }
-
-  const getOneMonthAgoDate = () =>
-    new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString();
-
-  async function checkLimit(
-    userId: string,
-    tableName: string,
-    planLimits: any,
-    actionType: string,
-    actionId: string
-  ) {
-    const oneMonthAgo = getOneMonthAgoDate();
-    const { count, error } = await supabase
-      .from(tableName)
-      .select("*", { count: "exact" })
-      .eq("created_by", userId)
-      .gte("created_at", oneMonthAgo);
-
-    if (error) {
-      console.error(error);
-      return false;
-    }
-    if (count && count >= planLimits[actionId]) {
-      toast({
-        title: "Uh oh! Out of generations",
-        description: `You've reached the monthly limit for ${actionType} this month. Upgrade your account to enjoy more features.`,
-        action: (
-          <ToastAction
-            onClick={() =>
-              customerId
-                ? router.push(billingPortalUrl)
-                : router.push("/pricing")
-            }
-            altText="Upgrade"
-          >
-            Upgrade
-          </ToastAction>
-        ),
-      });
-      return false;
-    }
-    return true;
-  }
-
-  useEffect(() => {
-    async function fetchUserPlan() {
-      if (!user) return;
-
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("plan_id")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching user profile:", error);
-        return;
-      }
-
-      if (profile && profile.plan_id) {
-        try {
-          const response = await fetch(
-            `/fetch-plan?plan_id=${profile.plan_id}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch user plan");
-          }
-          const data = await response.json();
-          switch (data.planName) {
-            case "Free":
-              setUserPlan(FreePlanEntitlements);
-              break;
-            case "Pro":
-              setUserPlan(ProPlanEntitlements);
-              break;
-            case "Business":
-              setUserPlan(BusinessPlanEntitlements);
-              break;
-            default:
-              setUserPlan(FreePlanEntitlements);
-          }
-        } catch (error) {
-          console.error("Error fetching user plan:", error);
-          setUserPlan(FreePlanEntitlements);
-        }
-      } else {
-        setUserPlan(FreePlanEntitlements);
-      }
-    }
-
-    fetchUserPlan();
-  }, [user]);
 
   const signUpLink = idString
     ? `/signup?ids=${idString.replace(/,/g, "")}`
@@ -377,22 +245,11 @@ export function NamesDisplay({
       });
       router.refresh();
     } catch (error) {
-      console.error(error);
+      showProviderError(error);
     }
   }
 
   async function findDomainNames(name: string) {
-    if (
-      !(await checkLimit(
-        user.id,
-        "domains",
-        userPlan,
-        "domain lookups",
-        "domainLookups"
-      ))
-    ) {
-      return;
-    }
     try {
       setProcessingDomains((prev) => [...prev, name]);
       const showingAvailability = domainResults[name];
@@ -438,23 +295,7 @@ export function NamesDisplay({
             `/find-domain-availability?query=${sanitizedName}`
           );
 
-          if (!response.ok) {
-            toast({
-              variant: "destructive",
-              description: "Error finding domain availability",
-            });
-            throw new Error("Error finding domain availability");
-          }
-
-          const data = await response.json();
-
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: "Error finding domain availability",
-            });
-            throw new Error("Error finding domain availability");
-          }
+          const data = await readProviderResponse(response);
 
           for (const result of data.availabilityResults) {
             if (result.available) {
@@ -482,24 +323,13 @@ export function NamesDisplay({
         }));
       }
     } catch (error) {
-      console.error(error);
+      showProviderError(error);
     } finally {
       setProcessingDomains((prev) => prev.filter((n) => n !== name));
     }
   }
 
   async function checkTrademarks(name: string) {
-    if (
-      !(await checkLimit(
-        user.id,
-        "trademarks",
-        userPlan,
-        "trademark checks",
-        "trademarkChecks"
-      ))
-    ) {
-      return;
-    }
     try {
       setProcessingTrademark((prev) => [...prev, name]);
       const showingAvailability = trademarkResults[name];
@@ -539,15 +369,7 @@ export function NamesDisplay({
             }
           );
 
-          if (!response.ok) {
-            throw new Error("Error finding trademarks");
-          }
-
-          const data = await response.json();
-
-          if (data.error) {
-            throw new Error("Error finding trademarks");
-          }
+          const data = await readProviderResponse(response);
 
           if (data.items.length > 0) {
             for (const item of data.items.slice(0, 5)) {
@@ -577,24 +399,13 @@ export function NamesDisplay({
         setTrademarkResults((prev) => ({ ...prev, [name]: trademarkStatus }));
       }
     } catch (error) {
-      console.error(error);
+      showProviderError(error);
     } finally {
       setProcessingTrademark((prev) => prev.filter((n) => n !== name));
     }
   }
 
   async function findNpmNames(name: string) {
-    if (
-      !(await checkLimit(
-        user.id,
-        "npm_names",
-        userPlan,
-        "npm lookups",
-        "npmNameLookups"
-      ))
-    ) {
-      return;
-    }
     try {
       setProcessingNpm((prev) => [...prev, name]);
       const showingAvailability = npmResults[name];
@@ -626,23 +437,7 @@ export function NamesDisplay({
             `/find-npm-availability?query=${name.toLowerCase()}`
           );
 
-          if (!response.ok) {
-            toast({
-              variant: "destructive",
-              description: "Error finding npm availability",
-            });
-            throw new Error("Error finding npm availability");
-          }
-
-          const data = await response.json();
-
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: "Error finding npm availability",
-            });
-            throw new Error("Error finding npm availability");
-          }
+          const data = await readProviderResponse(response);
 
           if (data.available) {
             const npmCommand = `npm i ${name.toLowerCase()}`;
@@ -667,24 +462,13 @@ export function NamesDisplay({
         }));
       }
     } catch (error) {
-      console.error(error);
+      showProviderError(error);
     } finally {
       setProcessingNpm((prev) => prev.filter((n) => n !== name));
     }
   }
 
   async function generateLogo(name: string) {
-    if (
-      !(await checkLimit(
-        user.id,
-        "logos",
-        userPlan,
-        "logo generations",
-        "logoGenerations"
-      ))
-    ) {
-      return;
-    }
     try {
       setProcessingLogo((prev) => [...prev, name]);
       const showingAvailability = logoResults[name];
@@ -716,37 +500,20 @@ export function NamesDisplay({
             }),
           });
 
-          if (!response.ok) {
-            toast({
-              variant: "destructive",
-              description: "Error generating logo",
-            });
-            throw new Error("Error generating logo");
-          }
+          const data = await readProviderResponse(response);
+          logoUrl = data.imageUrl;
 
-          const data = await response.json();
+          const updates = {
+            logo_url: logoUrl,
+            created_at: new Date(),
+            name_id: namesList[name],
+            created_by: user.id,
+          };
 
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: "Error generating logo",
-            });
-            throw new Error("Error generating logo");
-          } else {
-            logoUrl = data.imageUrl;
-
-            const updates = {
-              logo_url: logoUrl,
-              created_at: new Date(),
-              name_id: namesList[name],
-              created_by: user.id,
-            };
-
-            let { data: insertData, error } = await supabase
-              .from("logos")
-              .insert(updates);
-            if (error) throw error;
-          }
+          let { data: insertData, error } = await supabase
+            .from("logos")
+            .insert(updates);
+          if (error) throw error;
         }
 
         setLogoResults((prev) => ({
@@ -755,24 +522,13 @@ export function NamesDisplay({
         }));
       }
     } catch (error) {
-      console.error(error);
+      showProviderError(error);
     } finally {
       setProcessingLogo((prev) => prev.filter((n) => n !== name));
     }
   }
 
   async function createOnePager(name: string) {
-    if (
-      !(await checkLimit(
-        user.id,
-        "one_pagers",
-        userPlan,
-        "one pager generations",
-        "onePagerGenerations"
-      ))
-    ) {
-      return;
-    }
     try {
       setProcessingOnePager((prev) => [...prev, name]);
       const showingAvailability = onePager[name];
@@ -827,23 +583,7 @@ export function NamesDisplay({
             }),
           });
 
-          if (!response.ok) {
-            toast({
-              variant: "destructive",
-              description: "Error generating one pager content",
-            });
-            throw new Error("Error generating one pager content");
-          }
-
-          const data = await response.json();
-
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: "Error generating one pager content",
-            });
-            throw new Error("Error generating one pager content");
-          }
+          const data = await readProviderResponse(response);
 
           const content = data.response;
 
@@ -858,38 +598,21 @@ export function NamesDisplay({
               )}&logoUrl=${encodeURIComponent(JSON.stringify(logoUrl))}`
             );
 
-            if (!response.ok) {
-              toast({
-                variant: "destructive",
-                description: "Error generating PDF",
-              });
-              throw new Error("Error generating PDF");
-            }
+            const data = await readProviderResponse(response);
+            onePagerUrl = data.link;
 
-            const data = await response.json();
+            const updates = {
+              pdf_url: onePagerUrl,
+              created_at: new Date(),
+              name_id: namesList[name],
+              created_by: user.id,
+            };
 
-            if (data.error) {
-              toast({
-                variant: "destructive",
-                description: "Error generating PDF",
-              });
-              throw new Error("Error generating PDF");
-            } else {
-              onePagerUrl = data.link;
+            let { data: insertData, error } = await supabase
+              .from("one_pagers")
+              .insert(updates);
 
-              const updates = {
-                pdf_url: onePagerUrl,
-                created_at: new Date(),
-                name_id: namesList[name],
-                created_by: user.id,
-              };
-
-              let { data: insertData, error } = await supabase
-                .from("one_pagers")
-                .insert(updates);
-
-              if (error) throw error;
-            }
+            if (error) throw error;
           }
         }
 
@@ -901,7 +624,7 @@ export function NamesDisplay({
         }));
       }
     } catch (error) {
-      console.error(error);
+      showProviderError(error);
     } finally {
       setProcessingOnePager((prev) => prev.filter((n) => n !== name));
     }
