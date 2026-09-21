@@ -53,14 +53,14 @@ npm run build
 npm audit --omit=dev
 ```
 
-Pull requests and pushes to `main` run lint, TypeScript, unit tests, and the production build. CI installs the lockfile with `npm ci`, does not auto-fix or commit files, and receives no production secrets. Existing lint warnings should be addressed independently; errors fail CI.
+Pull requests and pushes to `main` run lint, TypeScript, unit tests, an isolated fresh-schema SQL check, and the production build. CI installs the lockfile with `npm ci`, does not auto-fix or commit files, and receives no production secrets. Existing lint warnings should be addressed independently; errors fail CI.
 
 Database permission/usage tests supplied with the billing and access changes must also be run against a disposable local database before applying migrations. Never point migration tests at production. Docker/local database availability is required for full Supabase integration validation.
 
-For an additional isolated PostgreSQL check without Docker, install PGlite into a temporary directory (it is not an application dependency):
+To run the same isolated PostgreSQL schema check as CI without Docker, install PGlite into a temporary directory (it is not an application dependency):
 
 ```sh
-npm install --prefix /private/tmp/branded-schema-check --no-package-lock --no-audit --no-fund @electric-sql/pglite@0.3.14
+npm install --prefix /private/tmp/branded-schema-check --no-package-lock --ignore-scripts --no-audit --no-fund @electric-sql/pglite@0.5.8
 NODE_PATH=/private/tmp/branded-schema-check/node_modules node scripts/test-schema-sql.cjs
 ```
 

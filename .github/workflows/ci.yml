@@ -37,4 +37,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - name: Check fresh application schema
+        run: |
+          npm install --prefix "$RUNNER_TEMP/branded-sql" --no-package-lock --ignore-scripts --no-audit --no-fund @electric-sql/pglite@0.5.8
+          NODE_PATH="$RUNNER_TEMP/branded-sql/node_modules" node scripts/test-schema-sql.cjs
       - run: npm run build
