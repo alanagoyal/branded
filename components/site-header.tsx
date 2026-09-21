@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Wordmark from "./wordmark";
 
 export async function SiteHeader() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

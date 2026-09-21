@@ -4,11 +4,12 @@ import { createClient } from "@/utils/supabase/server";
 import { signup } from "./actions";
 
 export default async function Signup({
-  searchParams,
+  searchParams: searchParamsPromise,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const supabase = createClient();
+  const searchParams = await searchParamsPromise;
+  const supabase = await createClient();
   const idString = searchParams.ids as string;
 
   const {
