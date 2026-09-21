@@ -1,4 +1,6 @@
 "use client";
+
+import { SUPPORT_NEW_ISSUE_URL } from "@/lib/support";
 import React, { useEffect, useState } from "react";
 import {
   CommandDialog,
@@ -32,7 +34,7 @@ export function CommandMenu({ user }: { user: any }) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [isCustomer, setIsCustomer] = useState(false);
-  const [billingPortalUrl, setBillingPortalUrl] = useState("mailto:hi@basecase.vc?subject=Billing%20help");
+  const [billingPortalUrl, setBillingPortalUrl] = useState(SUPPORT_NEW_ISSUE_URL);
   const [planName, setPlanName] = useState("");
   const [accountName, setAccountName] = useState("");
 

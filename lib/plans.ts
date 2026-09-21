@@ -7,7 +7,7 @@ const UnauthenticatedEntitlements = {
   onePagerGenerations: 0,
   trademarkChecks: 0,
   logoGenerations: 0,
-  support: "Basic email",
+  support: "GitHub issues",
 };
 
 const ProductionEntitlements = {
@@ -19,7 +19,7 @@ const ProductionEntitlements = {
     onePagerGenerations: 3,
     trademarkChecks: 1,
     logoGenerations: 1,
-    support: "AI-assisted",
+    support: "GitHub issues",
   },
   ProPlan: {
     link: "/checkout?plan=pro",
@@ -29,7 +29,7 @@ const ProductionEntitlements = {
     onePagerGenerations: 25,
     trademarkChecks: 5,
     logoGenerations: 5,
-    support: "Basic email",
+    support: "GitHub issues",
   },
   BusinessPlan: {
     link: "/checkout?plan=business",
@@ -39,7 +39,7 @@ const ProductionEntitlements = {
     onePagerGenerations: 100,
     trademarkChecks: 50,
     logoGenerations: 50,
-    support: "Advanced email & phone",
+    support: "GitHub issues",
   },
 };
 
@@ -52,7 +52,7 @@ const TestEntitlements = {
     onePagerGenerations: 3,
     trademarkChecks: 1,
     logoGenerations: 1,
-    support: "AI-assisted",
+    support: "GitHub issues",
   },
   ProPlan: {
     link: "/checkout?plan=pro",
@@ -62,7 +62,7 @@ const TestEntitlements = {
     onePagerGenerations: 25,
     trademarkChecks: 5,
     logoGenerations: 5,
-    support: "Basic email",
+    support: "GitHub issues",
   },
   BusinessPlan: {
     link: "/checkout?plan=business",
@@ -72,7 +72,7 @@ const TestEntitlements = {
     onePagerGenerations: 100,
     trademarkChecks: 25,
     logoGenerations: 25,
-    support: "Advanced email & phone",
+    support: "GitHub issues",
   },
 };
 

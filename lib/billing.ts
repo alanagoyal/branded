@@ -51,7 +51,7 @@ export async function syncBilling(stripe: Stripe, customerId: string, eventId?: 
 export function billingFailure(error: unknown) {
   if (error instanceof BillingError) return Response.json({ error: error.message }, { status: error.status });
   console.error("Billing operation failed");
-  return Response.json({ error: "Billing is unavailable. Please try again or email hi@basecase.vc." }, { status: 503 });
+  return Response.json({ error: "Billing is unavailable. Please try again or create a GitHub issue from Help." }, { status: 503 });
 }
 export function requireBillingOrigin(request: Request) {
   if (request.headers.get("origin") !== new URL(request.url).origin) throw new BillingError("Invalid request origin.", 403);

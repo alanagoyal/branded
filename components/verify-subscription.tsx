@@ -1,5 +1,7 @@
 "use client";
 
+import { SUPPORT_NEW_ISSUE_URL } from "@/lib/support";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -30,5 +32,5 @@ export default function VerifySubscription({ user }: { user: any }) {
     return () => { active = false; };
   }, [checkoutId, refreshBilling, user, router]);
 
-  return error ? <p role="alert">{error} <a className="underline" href="mailto:hi@basecase.vc">Contact support</a></p> : null;
+  return error ? <p role="alert">{error} <a className="underline" href={SUPPORT_NEW_ISSUE_URL}>Create a GitHub issue</a></p> : null;
 }

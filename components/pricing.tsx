@@ -1,5 +1,7 @@
 "use client";
 
+import { SUPPORT_NEW_ISSUE_URL } from "@/lib/support";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icons } from "./icons";
@@ -23,7 +25,7 @@ const freePlanDetails = {
     `${FreePlanEntitlements.onePagerGenerations} one-pager generations`,
     `${FreePlanEntitlements.trademarkChecks} trademark check`,
     `${FreePlanEntitlements.logoGenerations} logo generation`,
-    "AI-assisted support",
+    "GitHub issue support",
   ],
 };
 
@@ -40,7 +42,7 @@ const proPlanDetails = {
     `${ProPlanEntitlements.onePagerGenerations} one-pager generations`,
     `${ProPlanEntitlements.trademarkChecks} trademark checks`,
     `${ProPlanEntitlements.logoGenerations} logo generations`,
-    "Basic email support",
+    "GitHub issue support",
   ],
 };
 
@@ -56,13 +58,13 @@ const businessPlanDetails = {
     `${BusinessPlanEntitlements.onePagerGenerations} one-pager generations`,
     `${BusinessPlanEntitlements.trademarkChecks} trademark checks`,
     `${BusinessPlanEntitlements.logoGenerations} logo generations`,
-    "Advanced email & phone support",
+    "GitHub issue support",
   ],
 };
 
 export default function Pricing({ userData, hasSubscription }: { userData: any; hasSubscription: boolean }) {
   const isCustomer = hasSubscription;
-  const [billingPortalUrl, setBillingPortalUrl] = useState("mailto:hi@basecase.vc?subject=Billing%20help");
+  const [billingPortalUrl, setBillingPortalUrl] = useState(SUPPORT_NEW_ISSUE_URL);
   
   useEffect(() => {
     if (userData && userData.customer_id) {

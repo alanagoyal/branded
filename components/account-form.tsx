@@ -1,5 +1,7 @@
 "use client";
 
+import { SUPPORT_NEW_ISSUE_URL } from "@/lib/support";
+
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +46,7 @@ export default function AccountForm({
   });
   const [planName, setPlanName] = useState("");
   const [customerId, setCustomerId] = useState<string>("");
-  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("mailto:hi@basecase.vc?subject=Billing%20help");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>(SUPPORT_NEW_ISSUE_URL);
 
   useEffect(() => {
     if (user) {

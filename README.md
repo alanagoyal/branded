@@ -31,7 +31,7 @@ Open http://127.0.0.1:3000 (the configured local Auth URL). Set Supabase Auth's 
 - Names/logo/content generation: OpenAI and, for traced requests, Braintrust.
 - Domain lookups: Whoxy. Trademark lookups: RapidAPI.
 - PDF rendering: OneDoc.
-- Support chat: Markprompt public project key. Omit `NEXT_PUBLIC_API_URL` to use the SDK endpoint default; an empty override is not equivalent. The help page also provides a real support email path without chat.
+- Support: [GitHub issues](https://github.com/alanagoyal/branded/issues). No support-provider credentials are required.
 - Account deletion: Supabase service-role key plus Stripe access to check active billing.
 - Billing: Stripe secret key, webhook signing secret, and `STRIPE_PRO_PRICE_ID` / `STRIPE_BUSINESS_PRICE_ID` recurring price IDs. Follow the [billing rollout](docs/billing-rollout.md) before enabling checkout.
 
