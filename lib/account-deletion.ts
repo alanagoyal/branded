@@ -1,0 +1,52 @@
+import type Stripe from "stripe";
+
+// Billing IDs in profiles are user-editable. Never use one to mutate Stripe.
+// Check Stripe directly, including customers whose profile link was lost when
+// the old webhook cleared customer_id on cancellation.
+export async function checkDeletionBilling(
+  stripe: Stripe,
+  email: string,
+  customerId: string | null,
+): Promise<string | null> {
+  const customerIds = new Set<string>();
+  if (customerId) {
+    const customer = await stripe.customers.retrieve(customerId);
+    if (!customer.deleted) {
+      if (customer.email?.toLowerCase() !== email.toLowerCase()) {
+        return "We couldn't verify your billing account. Please email hi@basecase.vc before deleting your account.";
+      }
+      customerIds.add(customer.id);
+    }
+  }
+
+  for await (const customer of stripe.customers.list({ email, limit: 100 })) {
+    customerIds.add(customer.id);
+  }
+
+  for (const id of Array.from(customerIds)) {
+    for await (const subscription of stripe.subscriptions.list({
+      customer: id,
+      status: "all",
+      limit: 100,
+    })) {
+      if (
+        subscription.status !== "canceled" &&
+        subscription.status !== "incomplete_expired" &&
+        !subscription.cancel_at_period_end &&
+        !subscription.cancel_at
+      ) {
+        return "Please cancel your subscription using Manage billing before deleting your account, then try again.";
+      }
+    }
+    // A future schedule can start billing even without a current subscription.
+    for await (const schedule of stripe.subscriptionSchedules.list({
+      customer: id,
+      limit: 100,
+    })) {
+      if (schedule.status === "not_started" || schedule.status === "active") {
+        return "Your billing account has a subscription schedule. Please email hi@basecase.vc to cancel it before deleting your account.";
+      }
+    }
+  }
+  return null;
+}

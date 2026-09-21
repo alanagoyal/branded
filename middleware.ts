@@ -1,17 +1,7 @@
 import { updateSession } from '@/utils/supabase/middleware'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Debug endpoint for build verification  
-  if (request.nextUrl.pathname === '/_build_info') {
-    const info = {
-      node: process.version,
-      platform: process.platform,
-      ts: Date.now(),
-      vars: process.env
-    }
-    return NextResponse.json(info)
-  }
   return await updateSession(request)
 }
 

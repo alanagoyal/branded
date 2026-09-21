@@ -16,6 +16,7 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
+import { DeleteAccount } from "./delete-account";
 
 const accountFormSchema = z.object({
   email: z.string().email(),
@@ -35,8 +36,8 @@ export default function AccountForm({
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
     defaultValues: {
-      email: userData.email || "",
-      name: userData.name || "",
+      email: userData?.email || user.email || "",
+      name: userData?.name || "",
     },
   });
   const [planName, setPlanName] = useState("");
@@ -83,7 +84,7 @@ export default function AccountForm({
   }, [userData]);
 
   async function fetchUserPlan() {
-    if (!userData.plan_id) {
+    if (!userData?.plan_id) {
       setPlanName("Free Plan");
       return;
     }
@@ -101,7 +102,7 @@ export default function AccountForm({
   async function onSubmit(data: AccountFormValues) {
     try {
       const updates = {
-        email: userData.email,
+        email: user.email,
         name: data.name,
         updated_at: new Date(),
       };
@@ -184,6 +185,7 @@ export default function AccountForm({
           </div>
         </form>
       </Form>
+      <DeleteAccount />
     </div>
   );
 }
