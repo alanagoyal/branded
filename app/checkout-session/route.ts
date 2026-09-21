@@ -44,11 +44,12 @@ export async function POST(request: Request) {
       p_user_id: user.id, p_plan: body.plan,
     });
     if (reservationError) throw reservationError;
-    const reservation = reservationData as { token: string; plan: string; expires_at: number };
+    if (!reservationData) throw new BillingError("Account deletion is in progress. Checkout is unavailable.");
+    let reservation = reservationData as { token: string; plan: string; expires_at: number };
     if (reservation.plan !== body.plan) {
       throw new BillingError("A checkout for another plan is already open. Complete that checkout or try again after it expires (within 35 minutes).");
     }
-    const session = await stripe.checkout.sessions.create({
+    const createSession = () => stripe.checkout.sessions.create({
       expires_at: reservation.expires_at,
       mode: "subscription", customer: account.customer_id, client_reference_id: user.id,
       line_items: [{ price, quantity: 1 }],
@@ -56,6 +57,23 @@ export async function POST(request: Request) {
       success_url: `${baseUrl}/new?checkout_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/pricing`,
     }, { idempotencyKey: `branded-checkout-${reservation.token}` });
+    let session;
+    try { session = await createSession(); }
+    catch (error) {
+      // Stripe does not store idempotent results for parameter-validation
+      // failures. Only this definite pre-execution rejection can renew expiry;
+      // network errors, 500s and concurrent-request conflicts keep the attempt.
+      const failure = error as { type?: string; param?: string };
+      if (failure.type !== "StripeInvalidRequestError" || failure.param !== "expires_at" ||
+        reservation.expires_at > Math.floor(Date.now() / 1000) + 30 * 60) throw error;
+      const { data: renewed, error: renewError } = await admin.rpc("renew_billing_checkout", {
+        p_user_id: user.id, p_token: reservation.token, p_expires_at: reservation.expires_at,
+      });
+      if (renewError) throw renewError;
+      if (!renewed) throw new BillingError("Checkout changed. Please try again.");
+      reservation = renewed as typeof reservation;
+      session = await createSession();
+    }
     return Response.json({ url: session.url });
   } catch (error) { return billingFailure(error); }
 }

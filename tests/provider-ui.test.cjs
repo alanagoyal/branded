@@ -10,7 +10,7 @@ function load(file, mocks = {}, globals = {}) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
   }).outputText;
   const exports = {};
-  vm.runInNewContext(output, { exports, Error, console, window: { open() {} }, ...globals, require(name) {
+  vm.runInNewContext(output, { exports, Error, console, URL, window: { open() {} }, ...globals, require(name) {
     if (name in mocks) return mocks[name];
     if (["react", "react/jsx-runtime"].includes(name)) return require(name);
     throw new Error(`Unexpected import: ${name}`);
@@ -32,7 +32,7 @@ test("non-JSON authentication failure still asks for sign-in", async () => {
   await assert.rejects(responses.readProviderResponse(new Response("Unauthorized", { status: 401 })), /Sign in/);
 });
 
-function harness({ cached = true, status = 429 } = {}) {
+function harness({ cached = true, status = 429, logoUrl = "https://example.com/logo.png" } = {}) {
   let cursor = 0, fetches = 0;
   const state = [], queries = [], errors = [];
   const identity = (tag) => ({ children, ...props }) => React.createElement(tag, props, children);
@@ -48,7 +48,7 @@ function harness({ cached = true, status = 429 } = {}) {
         let data = [];
         if (cached) {
           if (table === "names") data = [{ id: "saved-id" }];
-          if (table === "logos") data = [{ logo_url: "https://example.com/logo.png" }];
+          if (table === "logos") data = [{ logo_url: logoUrl }];
           if (table === "domains") data = [{ domain_name: "orbit.com", purchase_link: "https://orbit.com" }];
           if (table === "npm_names") data = [{ npm_name: "npm i orbit", purchase_link: "https://npmjs.com/orbit" }];
           if (table === "trademarks") data = [{ keyword: "Orbit", description: "record", link: "https://example.com/trademark" }];
@@ -151,3 +151,20 @@ for (const status of [401, 429]) {
     assert.equal(loading.at(-1), false);
   });
 }
+
+test('saved JPEG data URLs render directly and download without calling a provider', async () => {
+  const logoUrl = 'data:image/jpeg;base64,/9j/2Q==';
+  const ui = harness({ logoUrl });
+  await ui.button('Generate a logo').props.onClick();
+  assert.equal(ui.fetches(), 0);
+  const image = ui.render().find(node => node.type === 'img' && node.props.src === logoUrl);
+  assert.equal(image.props.unoptimized, true);
+  const link = ui.render().find(node => node.type === 'a' && node.props.href === logoUrl);
+  assert.equal(link.props.download, 'Orbit-logo.jpg');
+});
+test('expired legacy logo URLs request a replacement instead of displaying a broken image', async () => {
+  const ui = harness({ logoUrl: 'https://oaidalleapiprodscus.blob.core.windows.net/logo.png?se=2024-01-01T00%3A00%3A00Z' });
+  await ui.button('Generate a logo').props.onClick();
+  assert.equal(ui.fetches(), 1);
+  assert.equal(ui.errors[0].status, 429);
+});

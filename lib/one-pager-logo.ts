@@ -1,9 +1,17 @@
 import { AccessError } from "./provider-access";
+import { JPEG_DATA_PREFIX, jpegDataUrl } from "./logo-image";
 
 // PDF rendering must never fetch an arbitrary caller URL. Fetch known image
 // storage ourselves with redirects disabled, then embed a size-limited image.
 export async function onePagerLogo(value: string | null): Promise<string | null> {
   if (!value) return null;
+  if (value.startsWith("data:")) {
+    try {
+      if (!value.startsWith(JPEG_DATA_PREFIX)) throw new Error("Unsupported image format");
+      return jpegDataUrl(value.slice(JPEG_DATA_PREFIX.length));
+    } catch { throw new AccessError(400, "Invalid logo image."); }
+  }
+  if (value.length > 4000) throw new AccessError(400, "Invalid logo URL.");
   const url = new URL(value);
   if (url.protocol !== "https:" || url.hostname !== "oaidalleapiprodscus.blob.core.windows.net" || url.port || url.username || url.password) {
     throw new AccessError(400, "Unsupported logo URL.");

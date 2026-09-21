@@ -17,7 +17,7 @@ function setup({ user = { id: 'owner' }, billing = null, billingError = null, qu
   const calls = [];
   const access = load('lib/provider-access.ts', {
     'next/server': next, zod, 'server-only': {},
-    '@/utils/supabase/server': { createClient: async () => ({ auth: { getUser: async () => ({ data: { user } }) } }) },
+    '@/utils/supabase/server': { createClient: async () => ({ auth: { getUser: async () => ({ data: { user } }) }, from: table => ({ select() { return this; }, eq() { return this; }, limit() { return this; }, maybeSingle: async () => ({ data: table === 'names' ? { name: 'Orbit' } : null }) }) }) },
     '@supabase/supabase-js': { createClient: () => ({
       from: table => ({ select: fields => ({ eq: (column, value) => ({ maybeSingle: async () => {
         calls.push({ table, fields, column, value }); return { data: billing, error: billingError };
@@ -68,7 +68,7 @@ function routeHarness(route, options = {}) {
     this.images = { generate: async () => { providerCalls++; return { data: [{ url: 'https://image.example' }] }; } };
   } }
   const routeModule = load(`app/${route}/route.ts`, {
-    '@/lib/provider-access': access, zod, 'next/server': next, openai: { OpenAI },
+    '@/lib/provider-access': access, '@/lib/logo-image': load('lib/logo-image.ts', {}), zod, 'next/server': next, openai: { OpenAI },
     braintrust: { initLogger() {}, wrapOpenAI: x => x, traced: async fn => fn({ log() {} }) },
   }, { fetch: async url => { providerCalls++; return { ok: true, json: async () => ({ domain_registered: String(url).includes('Alpha') ? 'no' : 'yes' }) }; } });
   return { routeModule, calls, providerCalls: () => providerCalls };
@@ -85,7 +85,7 @@ test('invalid generation requests and exhausted quota never reach OpenAI', async
   assert.equal((await invalid.routeModule.POST(request({}))).status, 400);
   assert.equal(invalid.providerCalls(), 0); assert.equal(invalid.calls.length, 0);
   const limited = routeHarness('generate-logo', { quota: 'monthly' });
-  assert.equal((await limited.routeModule.POST(request({ name: 'Alpha' }))).status, 429);
+  assert.equal((await limited.routeModule.POST(request({ nameId: '20000000-0000-4000-8000-000000000001' }))).status, 429);
   assert.equal(limited.providerCalls(), 0);
 });
 test('domain filter keeps the one verified result and warns about shortage', async () => {
@@ -97,7 +97,7 @@ test('domain filter keeps the one verified result and warns about shortage', asy
 });
 test('PDF logos reject arbitrary/credential URLs before any fetch and disable redirects', async () => {
   const { access } = setup(); let fetches = 0;
-  const logo = load('lib/one-pager-logo.ts', { './provider-access': access }, { fetch: async (url, options) => {
+  const logo = load('lib/one-pager-logo.ts', { './provider-access': access, './logo-image': load('lib/logo-image.ts', {}) }, { fetch: async (url, options) => {
     fetches++; assert.equal(options.redirect, 'error');
     return new Response(new Uint8Array([1, 2, 3]), { headers: { 'content-type': 'image/png' } });
   } });
@@ -116,7 +116,7 @@ test('PDF signed-out requests never render or fetch a logo', async () => {
     '@onedoc/client': { Onedoc: class { render() { providerCalls++; } } },
     '../documents/one-pager': { OnePager() {} }, react: {},
   });
-  const response = await route.GET(new Request('https://branded.ai/one-pager'));
+  const response = await route.POST(request({}, 'one-pager'));
   assert.equal(response.status, 401); assert.equal(providerCalls, 0);
 });
 test('share creation rejects another owner’s name and creates no public token', async () => {

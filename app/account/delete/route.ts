@@ -14,6 +14,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Type DELETE to confirm." }, { status: 400 });
   }
 
+  let releaseGuard: (() => Promise<void>) | undefined;
+  let deletionSubmitted = false;
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -22,6 +24,15 @@ export async function POST(request: NextRequest) {
     }
 
     const admin = await supabaseAdmin();
+    const { data: deletionToken, error: guardError } = await admin.rpc("begin_account_deletion", { p_user_id: user.id });
+    if (guardError) throw guardError;
+    if (!deletionToken) {
+      return NextResponse.json({ error: "A checkout or account deletion is already in progress. An open checkout must expire before deletion. If this remains blocked, contact support from Help." }, { status: 409 });
+    }
+    releaseGuard = async () => {
+      const { error } = await admin.rpc("finish_account_deletion", { p_user_id: user.id, p_token: deletionToken });
+      if (error) console.error("Account deletion guard release failed");
+    };
     const { data: profile, error: profileError } = await admin
       .from("profiles")
       .select("customer_id")
@@ -48,6 +59,7 @@ export async function POST(request: NextRequest) {
     // the profile and its generated records atomically with the auth user.
     const { error: signOutError } = await supabase.auth.signOut();
     if (signOutError) throw signOutError;
+    deletionSubmitted = true;
     const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
     if (deleteError) throw deleteError;
 
@@ -58,5 +70,9 @@ export async function POST(request: NextRequest) {
       { error: "We couldn't delete your account. Please sign in and try again, or create a GitHub issue from Help." },
       { status: 500 },
     );
+  } finally {
+    // Once submitted, even a timeout may mean Auth is still deleting. Never
+    // reopen checkout in that uncertain window. Success cascades the guard away.
+    if (!deletionSubmitted) await releaseGuard?.().catch(() => console.error("Account deletion guard release failed"));
   }
 }
