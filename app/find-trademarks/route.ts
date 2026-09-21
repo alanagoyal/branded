@@ -1,33 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { requireUser, reserveUsage, accessError } from "@/lib/provider-access";
 
-const rapidApiKey = process.env.RAPID_API_KEY!;
 export async function GET(req: NextRequest) {
-  const searchTerm = req.nextUrl.searchParams.get("searchTerm")!;
-  const url = `https://uspto-trademark.p.rapidapi.com/v1/trademarkSearch/${searchTerm}/active`;
-  const options = {
-    method: "GET",
-    headers: {
-      "X-RapidAPI-Key": rapidApiKey,
-      "X-RapidAPI-Host": "uspto-trademark.p.rapidapi.com",
-    },
-  };
-
   try {
-    const response = await fetch(url, options);
-    const result = await response.json();
-    return new NextResponse(JSON.stringify(result), {
-      status: 200, 
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const { user } = await requireUser(req);
+    const searchTerm = z.string().min(1).max(100).regex(/^[a-zA-Z0-9][a-zA-Z0-9 -]*$/).parse(req.nextUrl.searchParams.get("searchTerm"));
+    await reserveUsage(user.id, "trademarks");
+    const response = await fetch(`https://uspto-trademark.p.rapidapi.com/v1/trademarkSearch/${encodeURIComponent(searchTerm)}/active`, {
+      headers: { "X-RapidAPI-Key": process.env.RAPID_API_KEY!, "X-RapidAPI-Host": "uspto-trademark.p.rapidapi.com" },
+      cache: "no-store", signal: AbortSignal.timeout(10000),
     });
-  } catch (error) {
-    console.error(error);
-    return new NextResponse(JSON.stringify({ error: 'Failed to fetch data' }), {
-      status: 500, 
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  }
+    if (!response.ok) throw new Error("Trademark provider failed");
+    return NextResponse.json(await response.json(), { headers: { "Cache-Control": "no-store" } });
+  } catch (error) { return accessError(error); }
 }

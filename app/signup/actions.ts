@@ -10,7 +10,7 @@ export async function signup(
   idString: string,
   origin: string
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { email, password } = formData;
   const { data, error } = await supabase.auth.signUp({
     email,

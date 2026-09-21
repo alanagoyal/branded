@@ -1,27 +1,34 @@
+import { z } from "zod";
+import { requireUser, reserveUsage, readBody, nameSchema, accessError } from "@/lib/provider-access";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
-import { init, initLogger, traced, wrapOpenAI } from "braintrust";
+import { initLogger, traced, wrapOpenAI } from "braintrust";
 
 const logger = initLogger({ projectName: "namebase" });
 const openai = wrapOpenAI(
   new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
+    timeout: 20000,
+    maxRetries: 0,
     baseURL: "https://braintrustproxy.com/v1",
   })
 );
-export async function POST(req: Request, res: NextResponse) {
+export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const { user } = await requireUser(req);
+    const body = await readBody(req, z.object({ name: nameSchema, description: z.string().trim().max(4000).nullish() }));
+    await reserveUsage(user.id, "onePagerContent");
     const {
       name, description
     } = body;
 
     const output = await traced(
       async (span) => {
-        let userMessageContent = `Please write one paragraph pitching a startup named ${name} that has the following description: ${description}`;
+        let userMessageContent = `Please write one paragraph pitching a startup named ${name}. ${description ? `Use this description: ${description}` : "No company description was provided. Use the name as context and avoid inventing specific products, traction, funding, or customer claims."}`;
 
         const completion = await openai.chat.completions.create({
           model: "gpt-4o-mini",
+          max_tokens: 1000,
           seed: 123,
           messages: [
             {
@@ -57,6 +64,6 @@ export async function POST(req: Request, res: NextResponse) {
       },
     });
   } catch (error) {
-    return NextResponse.json({ error });
+    return accessError(error);
   }
 }

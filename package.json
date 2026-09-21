@@ -7,12 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/*.test.cjs",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@markprompt/react": "^0.40.3",
-    "@million/lint": "^0.0.73",
     "@onedoc/client": "^0.1.29",
     "@onedoc/react-print": "^0.1.126",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -32,18 +32,17 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@stripe/stripe-js": "^3.3.0",
-    "@supabase/ssr": "^0.1.0",
-    "@supabase/supabase-js": "^2.39.7",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.114.0",
     "@vercel/analytics": "^1.2.2",
     "@vercel/og": "^0.6.2",
-    "braintrust": "^0.0.101",
+    "braintrust": "3.34.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
     "embla-carousel-react": "^8.0.0",
     "lucide-react": "^0.340.0",
-    "million": "^3.0.6",
-    "next": "^14.1.0",
+    "next": "15.5.25",
     "next-themes": "^0.2.1",
     "npm-name": "^8.0.0",
     "openai": "^4.28.0",
@@ -57,7 +56,7 @@
     "stripe": "^15.1.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "uuidv4": "^6.2.13",
+    "uuid": "11.1.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -67,10 +66,21 @@
     "@types/react-syntax-highlighter": "^15.5.11",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
-    "eslint-config-next": "14.1.0",
+    "eslint-config-next": "15.5.25",
     "postcss": "^8",
-    "supabase": "^1.162.4",
+    "supabase": "2.117.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.28"
+    },
+    "refractor": {
+      "prismjs": "1.30.0"
+    }
+  },
+  "engines": {
+    "node": ">=22.13.0"
   }
 }

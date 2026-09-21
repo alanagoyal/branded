@@ -1,81 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { requireUser, reserveUsage, accessError } from "@/lib/provider-access";
 
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  let name = req.nextUrl.searchParams.get("query");
-
-  if (!name) {
-    return new NextResponse(
-      JSON.stringify({ error: "Query parameter 'name' is missing or empty." }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
-
-  name = name.toLowerCase();
-
-  const tlds = [
-    ".com",
-    ".ai",
-    ".io",
-    ".co",
-    ".dev",
-    ".app",
-  ];
-  const domains: string[] = [];
-
-  tlds.forEach((tld) => {
-    const domain = `${name}${tld}`.toLowerCase();
-    domains.push(domain);
-  });
-
   try {
-    const fetchPromises = domains.map((domain) =>
-      fetch(
-        `https://api.whoxy.com/?key=${process.env.WHOXY_API_KEY}&whois=${domain}`
-      )
-    );
-
-    const responses = await Promise.all(fetchPromises);
-
-    const dataPromises = responses.map((response) => {
-      if (!response.ok) {
-        console.error("Response not OK", response);
-        throw new Error("Failed to fetch WHOIS data");
-      }
-      return response.json().then(data => {
-        return data;
-      });
-    });
-    
-    const results = await Promise.all(dataPromises);
-    
-    const availabilityResults = results
-      .map((data, index) => ({
-        domain: domains[index],
-        available: data.domain_registered && data.domain_registered.toLowerCase() === "no",
-      }))
-      .filter((result) => result.available);
-        
-    return new NextResponse(
-      JSON.stringify({ availabilityResults: availabilityResults.slice(0, 3) }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    
-  } catch (error) {
-    return new NextResponse(
-      JSON.stringify({ error: "Failed to fetch WHOIS data" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
+    const { user } = await requireUser(req);
+    const name = z.string().regex(/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/)
+      .parse(req.nextUrl.searchParams.get("query")).toLowerCase();
+    await reserveUsage(user.id, "domains");
+    const domains = ["com", "ai", "io", "co", "dev", "app"].map(tld => `${name}.${tld}`);
+    const results = await Promise.all(domains.map(async domain => {
+      const response = await fetch(`https://api.whoxy.com/?key=${process.env.WHOXY_API_KEY}&whois=${encodeURIComponent(domain)}`, { cache: "no-store", signal: AbortSignal.timeout(10000) });
+      if (!response.ok) throw new Error("WHOIS lookup failed");
+      const data = await response.json();
+      return { domain, available: data.domain_registered?.toLowerCase() === "no" };
+    }));
+    return NextResponse.json({ availabilityResults: results.filter(result => result.available).slice(0, 3) }, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) { return accessError(error); }
 }

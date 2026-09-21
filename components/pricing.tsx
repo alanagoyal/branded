@@ -60,20 +60,19 @@ const businessPlanDetails = {
   ],
 };
 
-export default function Pricing({ userData }: { userData: any }) {
-  const [isCustomer, setIsCustomer] = useState(false);
-  const [billingPortalUrl, setBillingPortalUrl] = useState("");
+export default function Pricing({ userData, hasSubscription }: { userData: any; hasSubscription: boolean }) {
+  const isCustomer = hasSubscription;
+  const [billingPortalUrl, setBillingPortalUrl] = useState("mailto:hi@basecase.vc?subject=Billing%20help");
   
   useEffect(() => {
     if (userData && userData.customer_id) {
-      setIsCustomer(true);
       fetchBillingSession(userData.customer_id);
     }
   }, [userData]);
 
   async function fetchBillingSession(customerId: string) {
     try {
-      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const response = await fetch("/portal-session", { method: "POST" });
       const data = await response.json();
       if (response.ok) {
         setBillingPortalUrl(data.session.url);
