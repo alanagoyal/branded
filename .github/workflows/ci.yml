@@ -40,4 +40,5 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/branded-sql" --no-package-lock --ignore-scripts --no-audit --no-fund @electric-sql/pglite@0.5.8
           NODE_PATH="$RUNNER_TEMP/branded-sql/node_modules" node scripts/test-schema-sql.cjs
-      - run: npm run build
+      - name: Build and verify PDF runtime bundle
+        run: npm run test:pdf-runtime

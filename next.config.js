@@ -1,7 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  outputFileTracingIncludes: { "/one-pager": ["./assets/fonts/*.ttf"] },
+  outputFileTracingIncludes: {
+    "/one-pager": [
+      "./assets/fonts/*.ttf",
+      "./node_modules/react/**/*",
+      // PDFKit loads these through package imports at runtime. Static tracing
+      // misses them, including the default Helvetica font used at startup.
+      "./node_modules/pdfkit/js/standard-fonts/**/*",
+      "./node_modules/pdfkit/js/data/**/*",
+    ],
+  },
   images: {
     remotePatterns: [
       {
