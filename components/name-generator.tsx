@@ -34,6 +34,7 @@ import { toast } from "./ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { NamesDisplay } from "./names-display";
+import { mergeNameRecords, removeNameRecord, type NameRecord } from "@/lib/name-records";
 import { Switch } from "./ui/switch";
 import {
   BusinessPlanEntitlements,
@@ -85,7 +86,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   );
 
   let defaultValues = {};
-  if (names) {
+  if (names?.length) {
     defaultValues = {
       description: names[0].description,
       wordToInclude: names[0].word_to_include,
@@ -113,8 +114,8 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
-  const [idsList, setIdsList] = useState<string[]>([]);
+  const [namesList, setNamesList] = useState<NameRecord[]>([]);
+  const idsList = namesList.map(({ id }) => id);
   const autoSubmitted = useRef(false);
   const [customerId, setCustomerId] = useState<string>("");
   const [billingPortalUrl, setBillingPortalUrl] = useState<string>("mailto:hi@basecase.vc?subject=Billing%20help");
@@ -167,29 +168,17 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
   async function clear() {
     form.reset();
-    setNamesList({});
+    setNamesList([]);
   }
 
   useEffect(() => {
     if (names) {
-      const updatedNamesList: { [name: string]: string } = {};
-      for (const name of names) {
-        updatedNamesList[name.name] = name.id;
-      }
-      setNamesList(updatedNamesList);
-
-      for (const name of names) {
-        setIdsList((prevState) => [...prevState, name.id]);
-      }
+      setNamesList(mergeNameRecords(names));
     }
   }, [names, user]);
 
-  async function handleRemoveName(name: string) {
-    setNamesList((prevState) => {
-      const newState = { ...prevState };
-      delete newState[name];
-      return newState;
-    });
+  async function handleRemoveName(id: string) {
+    setNamesList((records) => removeNameRecord(records, id));
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -303,7 +292,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
 
       if (data.fallbackMessage) {
         toast({
-          title: "Heads up! No .com names available",
+          title: "Domain availability",
           description: data.fallbackMessage,
         });
       }
@@ -316,8 +305,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
         });
       }
 
-      const ids: string[] = [];
-      const tempNamesList: { [name: string]: string } = {};
+      const tempNamesList: NameRecord[] = [];
       for (const name of data.response) {
         try {
           const updates = {
@@ -342,18 +330,13 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
           if (error) throw error;
 
           if (data) {
-            ids.push(data?.id);
-            tempNamesList[name] = data?.id;
+            tempNamesList.push({ id: data.id, name });
           }
         } catch (error) {
           console.error(error);
         }
       }
-      setIdsList(ids);
-      setNamesList((prevState) => ({
-        ...tempNamesList,
-        ...prevState,
-      }));
+      setNamesList((records) => mergeNameRecords(tempNamesList, records));
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -630,7 +613,7 @@ export function NameGenerator({ user, names }: { user: any; names: any }) {
             </div>
           </form>
         </Form>
-        {Object.keys(namesList).length > 0 && (
+        {namesList.length > 0 && (
           <div className="flex-col pt-4 space-y-4 sm:flex">
             <NamesDisplay
               namesList={namesList}
