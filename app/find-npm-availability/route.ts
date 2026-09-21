@@ -1,32 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { requireUser, reserveUsage, accessError } from "@/lib/provider-access";
 
 export async function GET(req: NextRequest) {
-  const packageName = req.nextUrl.searchParams.get("query");
-
   try {
-    const encodedNamespace = encodeURIComponent(packageName!).replace('%2F', '%2f');
-    const response = await fetch(`https://registry.npmjs.org/${encodedNamespace}`);
-
-    if (response.ok) {
-      return new NextResponse(JSON.stringify({ available: false }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } else if (response.status === 404) {
-      return new NextResponse(JSON.stringify({ available: true }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } else {
-      return new NextResponse(JSON.stringify({ error: "Unexpected response status from the registry" }), {
-        status: response.status,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-  } catch (error) {
-    return new NextResponse(JSON.stringify({ error: "Failed to fetch NPM registry" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+    const { user } = await requireUser(req);
+    const packageName = z.string().min(1).max(214).regex(/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/).parse(req.nextUrl.searchParams.get("query"));
+    await reserveUsage(user.id, "npmAvailability");
+    const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`, { cache: "no-store", signal: AbortSignal.timeout(10000) });
+    if (!response.ok && response.status !== 404) throw new Error("NPM registry failed");
+    return NextResponse.json({ available: response.status === 404 }, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) { return accessError(error); }
 }

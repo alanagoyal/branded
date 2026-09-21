@@ -24,7 +24,6 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
       OPENAI_API_KEY: ci-placeholder
       BRAINTRUST_API_KEY: ci-placeholder
-      ONEDOC_API_KEY: ci-placeholder
       STRIPE_SECRET_KEY: sk_test_ci_placeholder
       STRIPE_ENDPOINT_SECRET: whsec_ci_placeholder
     steps:

@@ -4,19 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createClient } from "@/utils/supabase/client";
+import { showProviderError } from "./provider-error";
 import { NamesDisplay } from "./names-display";
 import { mergeNameRecords, removeNameRecord, type NameRecord } from "@/lib/name-records";
 import { useRouter, useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import { ToastAction } from "./ui/toast";
 import { toast } from "./ui/use-toast";
 import { Icons } from "./icons";
-import {
-  BusinessPlanEntitlements,
-  FreePlanEntitlements,
-  ProPlanEntitlements,
-  UnauthenticatedEntitlements,
-} from "@/lib/plans";
 import {
   Form,
   FormControl,
@@ -47,8 +41,6 @@ export default function BrandGenerator({
     [searchParams]
   );
   const router = useRouter();
-  const [customerId, setCustomerId] = useState<string>("");
-  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("mailto:hi@basecase.vc?subject=Billing%20help");
   const [isLoading, setIsLoading] = useState(false);
   const [namesList, setNamesList] = useState<NameRecord[]>([]);
   const idsList = namesList.map(({ id }) => id);
@@ -65,40 +57,6 @@ export default function BrandGenerator({
     }
   }, [names, user]);
 
-  useEffect(() => {
-    if (user) {
-      fetchCustomerId();
-    }
-  }, [user]);
-
-  async function fetchCustomerId() {
-    try {
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (profile && profile.customer_id) {
-        setCustomerId(profile.customer_id);
-        fetchBillingSession(profile.customer_id);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function fetchBillingSession(customerId: string) {
-    try {
-      const response = await fetch("/portal-session", { method: "POST" });
-      const data = await response.json();
-      if (response.ok) {
-        setBillingPortalUrl(data.session.url);
-      }
-    } catch (error) {
-      console.error("Failed to fetch billing session:", error);
-    }
-  }
 
   async function handleRemoveName(id: string) {
     setNamesList((records) => removeNameRecord(records, id));
@@ -107,98 +65,20 @@ export default function BrandGenerator({
   async function addExistingName(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    const { data: existingName, error } = await supabase
-      .from("names")
-      .select("*")
-      .eq("name", values.name)
-      .is("description", null)
-      .eq("created_by", user?.id);
-
-    if (existingName && existingName.length > 0) {
-      setNamesList((records) => mergeNameRecords(records, [existingName[0]]));
-      form.reset();
-      setIsLoading(false);
-      return;
-    }
-
-    const oneMonthAgo = new Date(
-      new Date().setMonth(new Date().getMonth() - 1)
-    ).toISOString();
-
     try {
-      let namesLimit = UnauthenticatedEntitlements.nameGenerations;
+      const { data: existingName, error: lookupError } = await supabase
+        .from("names")
+        .select("*")
+        .eq("name", values.name)
+        .is("description", null)
+        .eq("created_by", user?.id);
 
-      if (user) {
-        namesLimit = FreePlanEntitlements.nameGenerations;
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("plan_id")
-          .eq("id", user.id)
-          .single();
+      if (lookupError) throw lookupError;
 
-        if (profile && profile.plan_id) {
-          const response = await fetch(
-            `/fetch-plan?plan_id=${profile.plan_id}`
-          );
-          const data = await response.json();
-          if (response.ok) {
-            if (data.planName === "Pro") {
-              namesLimit = ProPlanEntitlements.nameGenerations;
-            } else if (data.planName === "Business") {
-              namesLimit = BusinessPlanEntitlements.nameGenerations;
-            }
-          }
-        }
-
-        const { data: names, error } = await supabase
-          .from("names")
-          .select("*", { count: "exact" })
-          .eq("created_by", user.id)
-          .gte("created_at", oneMonthAgo);
-
-        if (names!.length >= namesLimit) {
-          toast({
-            title: "Uh oh! Out of generations",
-            description:
-              "You've reached the monthly limit for name generations. Upgrade your account to generate more names and enjoy more features.",
-            action: (
-              <ToastAction
-                onClick={() =>
-                  customerId
-                    ? router.push(billingPortalUrl)
-                    : router.push("/pricing")
-                }
-                altText="Upgrade"
-              >
-                Upgrade
-              </ToastAction>
-            ),
-          });
-          return;
-        }
-      } else {
-        const { data: names, error } = await supabase
-          .from("names")
-          .select("*", { count: "exact" })
-          .eq("session_id", sessionId)
-          .gte("created_at", oneMonthAgo);
-
-        if (names!.length >= namesLimit) {
-          toast({
-            title: "Uh oh! Out of generations",
-            description:
-              "You've reached the monthly limit for name generations. Sign up for an account to continue.",
-            action: (
-              <ToastAction
-                onClick={() => router.push("/signup")}
-                altText="Sign up"
-              >
-                Sign up
-              </ToastAction>
-            ),
-          });
-          return;
-        }
+      if (existingName && existingName.length > 0) {
+        setNamesList((records) => mergeNameRecords(records, [existingName[0]]));
+        form.reset();
+        return;
       }
 
       const updates = {
@@ -216,11 +96,9 @@ export default function BrandGenerator({
         setNamesList((records) => mergeNameRecords([data[0]], records));
       }
 
-      if (error) {
-        console.error(error);
-      }
+      if (error) throw error;
     } catch (error) {
-      console.error(error);
+      showProviderError(error);
     } finally {
       form.reset();
       setIsLoading(false);

@@ -1,7 +1,7 @@
 const isProduction = process.env.NODE_ENV === "production";
 
 const UnauthenticatedEntitlements = {
-  nameGenerations: 3,
+  nameGenerations: 0,
   domainLookups: 0,
   npmNameLookups: 0,
   onePagerGenerations: 0,

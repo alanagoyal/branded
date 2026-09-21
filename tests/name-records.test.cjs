@@ -10,7 +10,7 @@ function load(file, mocks = {}) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
   }).outputText;
   const exports = {};
-  vm.runInNewContext(output, { exports, console, window: { open() {} }, require(name) {
+  vm.runInNewContext(output, { exports, console, URL, window: { open() {} }, require(name) {
     if (name in mocks) return mocks[name];
     if (["react", "react/jsx-runtime"].includes(name)) return require(name);
     throw new Error(`Unexpected import: ${name}`);
@@ -51,7 +51,7 @@ function harness({ verticalLayout = true } = {}) {
         if (table === "domains") data = [{ domain_name: `${id}.com`, purchase_link: `https://${id}.com` }];
         if (table === "npm_names") data = [{ npm_name: `npm i ${id}`, purchase_link: `https://npmjs.com/${id}` }];
         if (table === "trademarks") data = [{ keyword: id, description: "record", link: `https://example.com/${id}` }];
-        if (table === "one_pagers") data = [{ pdf_url: `https://example.com/${id}.pdf` }];
+        if (table === "one_pagers") data = [{ pdf_url: `data:application/pdf;base64,${id}` }];
         return Promise.resolve({ data, error: null, count: 0 }).then(resolve, reject);
       },
     };
@@ -64,6 +64,9 @@ function harness({ verticalLayout = true } = {}) {
       return [state[index], (value) => { state[index] = typeof value === "function" ? value(state[index]) : value; }];
     } },
     "@/utils/supabase/client": { createClient: () => supabase },
+    "@/lib/pdf-download": { PDF_DATA_PREFIX: "data:application/pdf;base64,", downloadPdf() {} },
+    "@/lib/provider-response": load("lib/provider-response.ts"),
+    "./provider-error": { showProviderError(error) { throw error; } },
     "./icons": { Icons: new Proxy({}, { get: () => box }) },
     "./ui/button": { Button: identity("button") },
     "./ui/use-toast": { toast() {} },

@@ -1,40 +1,43 @@
+import { z } from "zod";
+import { requireUser, reserveUsage, readBody, nameSchema, accessError, AccessError } from "@/lib/provider-access";
+import { jpegDataUrl } from "@/lib/logo-image";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
-import { init, initLogger, traced, wrapOpenAI } from "braintrust";
 
-export const maxDuration = 30;
+export const maxDuration = 180;
 export const dynamic = "force-dynamic";
-
-const logger = initLogger({ projectName: "namebase" });
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 120000, maxRetries: 0 });
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { name } = body;
-
+    const { user, client } = await requireUser(req);
+    const { nameId } = await readBody(req, z.object({ nameId: z.string().uuid() }));
+    const { data: name, error: nameError } = await client.from("names").select("name")
+      .eq("id", nameId).eq("created_by", user.id).maybeSingle();
+    if (nameError) throw nameError;
+    if (!name) throw new AccessError(404, "Name not found.");
+    const nameText = nameSchema.parse(name.name);
+    const { data: saved, error: savedError } = await client.from("logos").select("id")
+      .eq("name_id", nameId).eq("created_by", user.id).limit(1).maybeSingle();
+    if (savedError) throw savedError;
+    await reserveUsage(user.id, "logos");
     const image = await openai.images.generate({
-      model: "dall-e-3",
-      prompt: `Your task is to create a sleek, minimalist logo for a startup named ${name}. The design should be a vector-style image, presented directly on a clean, white background without any additional elements or context. Aim for simplicity and modernity, drawing inspiration from the minimalist aesthetics of companies like OpenAI, Stripe, Airbnb, and Uber. The logo should not be integrated into merchandise or mockups, but should stand alone as a pure, simple design. `,
+      model: "gpt-image-2.5-flare",
+      prompt: `Create a sleek, minimalist logo for a startup named ${nameText}. Present the vector-style design directly on a clean white background. The logo should stand alone, not appear on merchandise or in a mockup.`,
       n: 1,
-      quality: "hd",
+      quality: "medium",
       size: "1024x1024",
-      style: "vivid",
+      output_format: "jpeg",
+      output_compression: 80,
     });
-
-    const imageUrl = image.data?.[0]?.url;
-
-    if (!imageUrl) throw new Error("Image provider returned no image");
-
-    return new Response(JSON.stringify({ imageUrl }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } catch (error) {
-    return NextResponse.json({ error });
-  }
+    const imageUrl = jpegDataUrl(image.data?.[0]?.b64_json || "");
+    // Persist before responding: images survive provider URL expiry and are
+    // deleted by the existing name/profile/account foreign-key cascades.
+    const record = { logo_url: imageUrl, name_id: nameId, created_by: user.id };
+    const { error } = saved
+      ? await client.from("logos").update(record).eq("id", saved.id).eq("created_by", user.id)
+      : await client.from("logos").insert(record);
+    if (error) throw error;
+    return NextResponse.json({ imageUrl }, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) { return accessError(error); }
 }
