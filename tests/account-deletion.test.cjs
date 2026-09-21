@@ -87,19 +87,23 @@ test("already deleted Stripe customer does not block account deletion", async ()
 });
 
 function route({ user = { id: "authenticated-user", email }, authError = null, profileError = null,
-  billingError = null, billingThrows = false, signOutError = null, deleteError = null } = {}) {
+  billingError = null, billingThrows = false, signOutError = null, deleteError = null, mappingReadError = null, trustedCustomerId = null } = {}) {
   const calls = [];
+  const checks = [];
+  let table;
   const supabase = { auth: {
     getUser: async () => ({ data: { user }, error: authError }),
     signOut: async () => { calls.push(["signOut"]); return { error: signOutError }; },
   } };
   const query = {
     select() { return this; },
-    eq(key, value) { calls.push(["profile", key, value]); return this; },
-    maybeSingle: async () => ({ data: { customer_id: "cus_1" }, error: profileError }),
+    eq(key, value) { calls.push([table === "billing_accounts" ? "billing" : "profile", key, value]); return this; },
+    maybeSingle: async () => table === "billing_accounts"
+      ? ({ data: trustedCustomerId ? { customer_id: trustedCustomerId } : null, error: mappingReadError })
+      : ({ data: { customer_id: "cus_1" }, error: profileError }),
   };
   const admin = {
-    from: () => query,
+    from: (name) => { table = name; return query; },
     auth: { admin: { deleteUser: async (id) => { calls.push(["delete", id]); return { error: deleteError }; } } },
   };
   const { POST } = load("app/account/delete/route.ts", {
@@ -107,12 +111,13 @@ function route({ user = { id: "authenticated-user", email }, authError = null, p
     stripe: class Stripe {},
     "@/utils/supabase/server": { createClient: () => supabase },
     "@/supabase/admin": { supabaseAdmin: async () => admin },
-    "@/lib/account-deletion": { checkDeletionBilling: async () => {
+    "@/lib/account-deletion": { checkDeletionBilling: async (...args) => {
+      checks.push(args.slice(1));
       if (billingThrows) throw new Error("Stripe unavailable");
       return billingError;
     } },
   });
-  return { POST, calls };
+  return { POST, calls, checks };
 }
 function request({ origin = "https://www.branded.ai", confirmation = "DELETE", malformed = false } = {}) {
   return {
@@ -127,7 +132,7 @@ function request({ origin = "https://www.branded.ai", confirmation = "DELETE", m
 test("deletes only authenticated user, ignoring caller-supplied identities", async () => {
   const { POST, calls } = route();
   assert.equal((await POST(request())).status, 200);
-  assert.deepEqual(calls, [["profile", "id", "authenticated-user"], ["signOut"], ["delete", "authenticated-user"]]);
+  assert.deepEqual(calls, [["profile", "id", "authenticated-user"], ["billing", "user_id", "authenticated-user"], ["signOut"], ["delete", "authenticated-user"]]);
 });
 for (const origin of ["https://attacker.example", null]) {
   test(`rejects invalid or missing origin: ${origin}`, async () => {
@@ -148,7 +153,7 @@ test("unauthenticated requests cannot delete", async () => {
   assert.equal((await POST(request())).status, 401);
   assert.equal(calls.length, 0);
 });
-for (const failure of [{ profileError: new Error("DB unavailable") }, { billingThrows: true }, { signOutError: new Error("Auth unavailable") }]) {
+for (const failure of [{ profileError: new Error("DB unavailable") }, { mappingReadError: new Error("Billing DB unavailable") }, { billingThrows: true }, { signOutError: new Error("Auth unavailable") }]) {
   test(`dependency failure does not delete account: ${Object.keys(failure)[0]}`, async () => {
     const { POST, calls } = route(failure);
     assert.equal((await POST(request())).status, 500);
@@ -158,7 +163,7 @@ for (const failure of [{ profileError: new Error("DB unavailable") }, { billingT
 test("billing block leaves user signed in with account intact", async () => {
   const { POST, calls } = route({ billingError: "Cancel first" });
   assert.equal((await POST(request())).status, 409);
-  assert.deepEqual(calls.map(([op]) => op), ["profile"]);
+  assert.deepEqual(calls.map(([op]) => op), ["profile", "billing"]);
 });
 test("failed auth deletion is never reported as success", async () => {
   const { POST } = route({ deleteError: new Error("Deletion failed") });
@@ -178,4 +183,34 @@ test("former build-info URL follows normal middleware instead of exposing enviro
   });
   assert.equal(await middleware({ nextUrl: new URL("https://www.branded.ai/_build_info") }), response);
   assert.deepEqual(seen, ["/_build_info"]);
+});
+
+
+test("deletion checks authoritative mapping independently from the profile mirror", async () => {
+  const { POST, checks } = route({ trustedCustomerId: "cus_canonical" });
+  assert.equal((await POST(request())).status, 200);
+  assert.deepEqual(Array.from(checks[0]), [email, "cus_1", "cus_canonical"]);
+});
+test("trusted mapping catches renewed billing when mirror is missing and emails changed", async () => {
+  const stripe = billing({ linkedEmail: "old@example.com", subscriptions: [{ status: "active" }] });
+  assert.match(await checkDeletionBilling(stripe, email, null, "cus_canonical"), /cancel your subscription/);
+  assert.equal(stripe.calls.find(([op]) => op === "subscriptions")[1].customer, "cus_canonical");
+});
+test("verified mapping allows scheduled cancellation despite changed billing email", async () => {
+  const stripe = billing({ linkedEmail: "old@example.com", subscriptions: [{ status: "active", cancel_at_period_end: true }] });
+  assert.equal(await checkDeletionBilling(stripe, email, "cus_canonical", "cus_canonical"), null);
+});
+test("trusted mapping does not skip a separate legacy linked customer or email-discovered customer", async () => {
+  const stripe = billing({ customers: [{ id: "cus_email" }] });
+  stripe.subscriptions.list = ({ customer }) => {
+    stripe.calls.push(["subscriptions", { customer }]);
+    return iterable(customer === "cus_email" ? [{ status: "active" }] : []);
+  };
+  assert.match(await checkDeletionBilling(stripe, email, "cus_legacy", "cus_canonical"), /cancel your subscription/);
+  assert.deepEqual(stripe.calls.filter(([op]) => op === "subscriptions").map(([, params]) => params.customer), ["cus_canonical", "cus_legacy", "cus_email"]);
+});
+test("canonical Stripe lookup failure leaves deletion blocked", async () => {
+  const stripe = billing();
+  stripe.customers.retrieve = async () => { throw new Error("Stripe unavailable"); };
+  await assert.rejects(checkDeletionBilling(stripe, email, null, "cus_canonical"), /Stripe unavailable/);
 });

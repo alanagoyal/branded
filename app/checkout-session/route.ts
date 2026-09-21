@@ -30,9 +30,11 @@ export async function POST(request: Request) {
       if (insertError && insertError.code !== "23505") throw insertError;
       account = await billingAccount(user.id);
       if (!account) throw new Error("Billing mapping was not saved");
-      const { error: profileError } = await admin.from("profiles").update({ customer_id: account.customer_id, plan_id: null }).eq("id", user.id);
-      if (profileError) throw profileError;
     }
+    // Repair a missing mirror after an earlier partial checkout attempt. The
+    // canonical mapping remains authoritative even if this compatibility write fails.
+    const { error: profileError } = await admin.from("profiles").update({ customer_id: account.customer_id }).eq("id", user.id);
+    if (profileError) throw profileError;
     for await (const subscription of stripe.subscriptions.list({ customer: account.customer_id, status: "all", limit: 100 })) {
       if (!["canceled", "incomplete_expired"].includes(subscription.status)) {
         throw new BillingError("You already have a subscription. Use Manage billing to change it.");
