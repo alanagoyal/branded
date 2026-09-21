@@ -12,7 +12,7 @@ const UnauthenticatedEntitlements = {
 
 const ProductionEntitlements = {
   FreePlan: {
-    link: "https://buy.stripe.com/cN200gaSn0pR9dm6oo",
+    link: "/new",
     nameGenerations: 10,
     domainLookups: 5,
     npmNameLookups: 5,
@@ -22,7 +22,7 @@ const ProductionEntitlements = {
     support: "AI-assisted",
   },
   ProPlan: {
-    link: "https://buy.stripe.com/3cscN2aSn2xZ89i001",
+    link: "/checkout?plan=pro",
     nameGenerations: 100,
     domainLookups: 50,
     npmNameLookups: 50,
@@ -32,7 +32,7 @@ const ProductionEntitlements = {
     support: "Basic email",
   },
   BusinessPlan: {
-    link: "https://buy.stripe.com/bIY5kA7GbfkLcpy6oq",
+    link: "/checkout?plan=business",
     nameGenerations: 500,
     domainLookups: 250,
     npmNameLookups: 250,
@@ -45,7 +45,7 @@ const ProductionEntitlements = {
 
 const TestEntitlements = {
   FreePlan: {
-    link: "https://buy.stripe.com/test_9AQ6oz67kfZMbdK6oq",
+    link: "/new",
     nameGenerations: 10,
     domainLookups: 5,
     npmNameLookups: 5,
@@ -55,7 +55,7 @@ const TestEntitlements = {
     support: "AI-assisted",
   },
   ProPlan: {
-    link: "https://buy.stripe.com/test_6oE8wHbrE3d0chO289",
+    link: "/checkout?plan=pro",
     nameGenerations: 100,
     domainLookups: 50,
     npmNameLookups: 50,
@@ -65,7 +65,7 @@ const TestEntitlements = {
     support: "Basic email",
   },
   BusinessPlan: {
-    link: "https://buy.stripe.com/test_fZe3cn7boaFs6Xu5kn",
+    link: "/checkout?plan=business",
     nameGenerations: 500,
     domainLookups: 250,
     npmNameLookups: 250,

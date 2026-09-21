@@ -9,6 +9,18 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      billing_accounts: {
+        Row: { user_id: string; customer_id: string; plan_id: string | null; plan_tier: string; subscription_id: string | null; subscription_status: string | null; current_period_end: string | null; cancel_at_period_end: boolean; revision: number; checkout_token: string | null; checkout_plan: string | null; checkout_expires_at: string | null }
+        Insert: { user_id: string; customer_id: string; plan_id?: string | null; plan_tier?: string; subscription_id?: string | null; subscription_status?: string | null; current_period_end?: string | null; cancel_at_period_end?: boolean; revision?: number }
+        Update: { plan_id?: string | null; plan_tier?: string; subscription_id?: string | null; subscription_status?: string | null; current_period_end?: string | null; cancel_at_period_end?: boolean; revision?: number }
+        Relationships: []
+      }
+      billing_webhook_events: {
+        Row: { event_id: string; processed_at: string }
+        Insert: { event_id: string; processed_at?: string }
+        Update: { event_id?: string; processed_at?: string }
+        Relationships: []
+      }
       domains: {
         Row: {
           created_at: string
@@ -312,6 +324,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      reserve_billing_checkout: {
+        Args: { p_user_id: string; p_plan: string }
+        Returns: Json
+      }
+      apply_billing_snapshot: {
+        Args: { p_customer_id: string; p_revision: number; p_snapshot: Json; p_event_id?: string | null }
+        Returns: boolean
+      }
+
       checkIfUser: {
         Args: {
           given_mail: string

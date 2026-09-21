@@ -85,7 +85,7 @@ function harness({ cached = true, status = 429 } = {}) {
   }
   function render() {
     cursor = 0;
-    return expand(NamesDisplay({ namesList: { Orbit: "saved-id" }, showRemoveButton: false, user: { id: "owner" }, verticalLayout: true }));
+    return expand(NamesDisplay({ namesList: [{ id: "saved-id", name: "Orbit" }], showRemoveButton: false, user: { id: "owner" }, verticalLayout: true }));
   }
   function text(node) {
     if (Array.isArray(node)) return node.map(text).join("");
@@ -129,6 +129,7 @@ for (const status of [401, 429]) {
       uuid: { v4: () => "session" },
       "@/utils/supabase/client": { createClient: () => ({ from() { throw new Error("Should not query saved records before asking the server"); } }) },
       "@/lib/provider-response": responses,
+      "@/lib/name-records": load("lib/name-records.ts"),
       "./provider-error": { showProviderError: (error) => errors.push(error) },
       "next/navigation": { useRouter: () => ({}), useSearchParams: () => new URLSearchParams() },
       "./ui/use-toast": { toast() {} },

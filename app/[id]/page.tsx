@@ -1,9 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
 import NewGeneration from "@/components/new-generation";
 
-export default async function Names({ params }: { params: { id: string } }) {
-  const supabase = createClient();
-  const idString = params.id;
+export default async function Names({ params }: { params: Promise<{ id: string }> }) {
+  const supabase = await createClient();
+  const idString = (await params).id;
   const idRegex = /.{36}/g;
   const idsList = idString.match(idRegex);
 

@@ -13,7 +13,7 @@ const openai = wrapOpenAI(
     baseURL: "https://braintrustproxy.com/v1",
   })
 );
-export async function POST(req: Request, res: NextResponse) {
+export async function POST(req: Request) {
   try {
     const { user } = await requireUser(req);
     const body = await readBody(req, z.object({ name: nameSchema, description: z.string().trim().max(4000).nullish() }));

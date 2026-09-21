@@ -1,4 +1,5 @@
 "use client";
+import type { NameRecord } from "@/lib/name-records";
 import { createClient } from "@/utils/supabase/client";
 import { readProviderResponse } from "@/lib/provider-response";
 import { showProviderError } from "./provider-error";
@@ -21,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { ToastAction } from "./ui/toast";
 
 const ActionButton = ({
-  name,
+  nameId,
   processing,
   action,
   icon,
@@ -29,7 +30,7 @@ const ActionButton = ({
   onClick,
   status,
 }: {
-  name: string;
+  nameId: string;
   processing: string[];
   action: React.ReactNode;
   icon: React.ReactNode;
@@ -51,7 +52,7 @@ const ActionButton = ({
     </>
   );
 
-  if (processing.includes(name)) {
+  if (processing.includes(nameId)) {
     content = (
       <>
         {action}
@@ -105,7 +106,7 @@ const ActionButton = ({
   return (
     <Button
       variant="ghost"
-      disabled={processing.includes(name)}
+      disabled={processing.includes(nameId)}
       onClick={onClick}
     >
       {content}
@@ -115,15 +116,15 @@ const ActionButton = ({
 
 const ResultLinks = ({
   results,
-  name,
+  nameId,
 }: {
   results: { [key: string]: any[] };
-  name: string;
+  nameId: string;
 }) => (
   <>
-    {results[name] &&
+    {results[nameId] &&
       Object.keys(results).length > 0 &&
-      results[name].map((result, idx) => (
+      results[nameId].map((result, idx) => (
         <div key={idx} className="flex items-center justify-center w-full">
           <Link
             href={result.purchaseLink || result.link}
@@ -144,9 +145,9 @@ export function NamesDisplay({
   user,
   verticalLayout = false,
 }: {
-  namesList: any;
+  namesList: NameRecord[];
   showRemoveButton: boolean;
-  onRemoveName?: (name: string) => void;
+  onRemoveName?: (id: string) => void;
   user: any;
   verticalLayout: boolean;
 }) {
@@ -173,8 +174,8 @@ export function NamesDisplay({
   }>({});
   const [processingOnePager, setProcessingOnePager] = useState<string[]>([]);
   const [onePager, setOnePager] = useState<{ [key: string]: string }>({});
-  const [isOwner, setIsOwner] = useState<boolean>(false);
-  const idString = Object.values(namesList).join(",");
+  const [ownedNameIds, setOwnedNameIds] = useState<string[]>([]);
+  const idString = namesList.map(({ id }) => id).join(",");
 
 
   const signUpLink = idString
@@ -182,20 +183,17 @@ export function NamesDisplay({
     : "/signup";
 
   useEffect(() => {
+    let active = true;
+    setOwnedNameIds([]);
     async function getOwner() {
-      for (const name in namesList) {
-        const { data: createdBy, error } = await supabase
-          .from("names")
-          .select()
-          .eq("id", namesList[name])
-          .single();
-        if (createdBy?.created_by === user.id) {
-          setIsOwner(true);
-          break;
-        }
-      }
+      const { data } = await supabase
+        .from("names")
+        .select("id")
+        .in("id", namesList.map(({ id }) => id))
+        .eq("created_by", user.id);
+      if (active) setOwnedNameIds((data ?? []).map(({ id }) => id));
     }
-    if (user) {
+    if (user && namesList.length) {
       getOwner();
     }
 
@@ -217,12 +215,13 @@ export function NamesDisplay({
         favoritedData.forEach((item: { id: string; favorited: boolean }) => {
           favoritedMap[item.id] = item.favorited;
         });
-        setFavoritedNames(favoritedMap);
+        if (active) setFavoritedNames(favoritedMap);
       }
     }
     if (user) {
       fetchFavoritedStatus();
     }
+    return () => { active = false; };
   }, [namesList, user]);
 
   async function toggleFavoriteName(nameId: string) {
@@ -238,6 +237,8 @@ export function NamesDisplay({
         .update({ favorited: !isFavorited })
         .eq("id", nameId);
 
+      if (error) throw error;
+
       toast({
         description: isFavorited
           ? "Removed from favorites"
@@ -249,15 +250,15 @@ export function NamesDisplay({
     }
   }
 
-  async function findDomainNames(name: string) {
+  async function findDomainNames(name: string, nameId: string) {
     try {
-      setProcessingDomains((prev) => [...prev, name]);
-      const showingAvailability = domainResults[name];
+      setProcessingDomains((prev) => [...prev, nameId]);
+      const showingAvailability = domainResults[nameId];
 
       if (showingAvailability) {
         setDomainResults((prev) => {
           const updatedResults = { ...prev };
-          delete updatedResults[name];
+          delete updatedResults[nameId];
           return updatedResults;
         });
       } else {
@@ -266,20 +267,10 @@ export function NamesDisplay({
           purchaseLink: string;
         }[] = [];
 
-        const { data: nameData, error: nameError } = await supabase
-          .from("names")
-          .select()
-          .ilike("name", name.toLowerCase());
-
-        let nameIds: string[] = [];
-        if (nameData && nameData.length > 0) {
-          nameIds = nameData.map((item: any) => item.id);
-        }
-
         const { data: domainData, error: domainError } = await supabase
           .from("domains")
           .select()
-          .in("name_id", nameIds);
+          .eq("name_id", nameId);
 
         if (domainData && domainData.length > 0) {
           domainData.forEach((result) => {
@@ -306,7 +297,7 @@ export function NamesDisplay({
                 domain_name: domain,
                 purchase_link: purchaseLink,
                 created_at: new Date(),
-                name_id: namesList[name],
+                name_id: nameId,
                 created_by: user.id,
               };
               let { data, error } = await supabase
@@ -319,24 +310,24 @@ export function NamesDisplay({
         }
         setDomainResults((prev) => ({
           ...prev,
-          [name]: domainStatus,
+          [nameId]: domainStatus,
         }));
       }
     } catch (error) {
       showProviderError(error);
     } finally {
-      setProcessingDomains((prev) => prev.filter((n) => n !== name));
+      setProcessingDomains((prev) => prev.filter((n) => n !== nameId));
     }
   }
 
-  async function checkTrademarks(name: string) {
+  async function checkTrademarks(name: string, nameId: string) {
     try {
-      setProcessingTrademark((prev) => [...prev, name]);
-      const showingAvailability = trademarkResults[name];
+      setProcessingTrademark((prev) => [...prev, nameId]);
+      const showingAvailability = trademarkResults[nameId];
       if (showingAvailability) {
         setTrademarkResults((prev) => {
           const updatedResults = { ...prev };
-          delete updatedResults[name];
+          delete updatedResults[nameId];
           return updatedResults;
         });
       } else {
@@ -348,7 +339,7 @@ export function NamesDisplay({
         const { data: trademarkData, error: trademarkError } = await supabase
           .from("trademarks")
           .select()
-          .eq("name_id", namesList[name]);
+          .eq("name_id", nameId);
 
         if (trademarkData && trademarkData.length > 0) {
           trademarkData.forEach((result) => {
@@ -382,7 +373,7 @@ export function NamesDisplay({
                   description,
                   link,
                   created_at: new Date(),
-                  name_id: namesList[name],
+                  name_id: nameId,
                   created_by: user.id,
                 };
 
@@ -396,23 +387,23 @@ export function NamesDisplay({
             }
           }
         }
-        setTrademarkResults((prev) => ({ ...prev, [name]: trademarkStatus }));
+        setTrademarkResults((prev) => ({ ...prev, [nameId]: trademarkStatus }));
       }
     } catch (error) {
       showProviderError(error);
     } finally {
-      setProcessingTrademark((prev) => prev.filter((n) => n !== name));
+      setProcessingTrademark((prev) => prev.filter((n) => n !== nameId));
     }
   }
 
-  async function findNpmNames(name: string) {
+  async function findNpmNames(name: string, nameId: string) {
     try {
-      setProcessingNpm((prev) => [...prev, name]);
-      const showingAvailability = npmResults[name];
+      setProcessingNpm((prev) => [...prev, nameId]);
+      const showingAvailability = npmResults[nameId];
       if (showingAvailability) {
         setNpmResults((prev) => {
           const updatedResults = { ...prev };
-          delete updatedResults[name];
+          delete updatedResults[nameId];
           return updatedResults;
         });
       } else {
@@ -424,7 +415,7 @@ export function NamesDisplay({
         const { data: npmData, error } = await supabase
           .from("npm_names")
           .select()
-          .eq("name_id", namesList[name]);
+          .eq("name_id", nameId);
 
         if (npmData && npmData.length > 0) {
           for (const result of npmData) {
@@ -446,7 +437,7 @@ export function NamesDisplay({
               npm_name: npmCommand,
               purchase_link: purchaseLink,
               created_at: new Date(),
-              name_id: namesList[name],
+              name_id: nameId,
               created_by: user.id,
             };
             let { data, error } = await supabase
@@ -458,25 +449,25 @@ export function NamesDisplay({
         }
         setNpmResults((prev) => ({
           ...prev,
-          [name]: npmAvailability,
+          [nameId]: npmAvailability,
         }));
       }
     } catch (error) {
       showProviderError(error);
     } finally {
-      setProcessingNpm((prev) => prev.filter((n) => n !== name));
+      setProcessingNpm((prev) => prev.filter((n) => n !== nameId));
     }
   }
 
-  async function generateLogo(name: string) {
+  async function generateLogo(name: string, nameId: string) {
     try {
-      setProcessingLogo((prev) => [...prev, name]);
-      const showingAvailability = logoResults[name];
+      setProcessingLogo((prev) => [...prev, nameId]);
+      const showingAvailability = logoResults[nameId];
 
       if (showingAvailability) {
         setLogoResults((prev) => {
           const updatedResults = { ...prev };
-          delete updatedResults[name];
+          delete updatedResults[nameId];
           return updatedResults;
         });
       } else {
@@ -485,7 +476,7 @@ export function NamesDisplay({
         const { data: logoData, error } = await supabase
           .from("logos")
           .select()
-          .eq("name_id", namesList[name]);
+          .eq("name_id", nameId);
 
         if (logoData && logoData.length > 0) {
           logoUrl = logoData[0].logo_url;
@@ -506,7 +497,7 @@ export function NamesDisplay({
           const updates = {
             logo_url: logoUrl,
             created_at: new Date(),
-            name_id: namesList[name],
+            name_id: nameId,
             created_by: user.id,
           };
 
@@ -518,24 +509,24 @@ export function NamesDisplay({
 
         setLogoResults((prev) => ({
           ...prev,
-          [name]: logoUrl,
+          [nameId]: logoUrl,
         }));
       }
     } catch (error) {
       showProviderError(error);
     } finally {
-      setProcessingLogo((prev) => prev.filter((n) => n !== name));
+      setProcessingLogo((prev) => prev.filter((n) => n !== nameId));
     }
   }
 
-  async function createOnePager(name: string) {
+  async function createOnePager(name: string, nameId: string) {
     try {
-      setProcessingOnePager((prev) => [...prev, name]);
-      const showingAvailability = onePager[name];
+      setProcessingOnePager((prev) => [...prev, nameId]);
+      const showingAvailability = onePager[nameId];
       if (showingAvailability) {
         setOnePager((prev) => {
           const updatedResults = { ...prev };
-          delete updatedResults[name];
+          delete updatedResults[nameId];
           return updatedResults;
         });
       } else {
@@ -544,7 +535,7 @@ export function NamesDisplay({
         const { data: onePagerData } = await supabase
           .from("one_pagers")
           .select()
-          .eq("name_id", namesList[name]);
+          .eq("name_id", nameId);
 
         if (onePagerData && onePagerData.length > 0) {
           onePagerUrl = onePagerData[0].pdf_url;
@@ -552,7 +543,7 @@ export function NamesDisplay({
           const { data: nameData } = await supabase
             .from("names")
             .select()
-            .eq("id", namesList[name])
+            .eq("id", nameId)
             .single();
 
           const { data: userData } = await supabase
@@ -566,7 +557,7 @@ export function NamesDisplay({
           const { data: logoData } = await supabase
             .from("logos")
             .select()
-            .eq("name_id", namesList[name]);
+            .eq("name_id", nameId);
 
           if (logoData && logoData.length > 0) {
             logoUrl = logoData[0].logo_url;
@@ -604,7 +595,7 @@ export function NamesDisplay({
             const updates = {
               pdf_url: onePagerUrl,
               created_at: new Date(),
-              name_id: namesList[name],
+              name_id: nameId,
               created_by: user.id,
             };
 
@@ -620,13 +611,13 @@ export function NamesDisplay({
 
         setOnePager((prev) => ({
           ...prev,
-          [name]: onePagerUrl,
+          [nameId]: onePagerUrl,
         }));
       }
     } catch (error) {
       showProviderError(error);
     } finally {
-      setProcessingOnePager((prev) => prev.filter((n) => n !== name));
+      setProcessingOnePager((prev) => prev.filter((n) => n !== nameId));
     }
   }
 
@@ -647,101 +638,101 @@ export function NamesDisplay({
     <div className="flex flex-col space-y-2 items-center">
       <div className="w-1/2 text-center">
         <ActionButton
-          name={name}
+          nameId={nameId}
           processing={processingDomains}
           action={<Icons.spinner />}
           icon={<Icons.domain />}
           text="Check domain availability"
           onClick={() =>
             user
-              ? findDomainNames(name)
+              ? findDomainNames(name, nameId)
               : handleActionForUnauthenticatedUser(
                   "check domain availability for"
                 )
           }
           status={
-            processingDomains.includes(name)
+            processingDomains.includes(nameId)
               ? "default"
-              : domainResults[name] && domainResults[name].length === 0
+              : domainResults[nameId] && domainResults[nameId].length === 0
               ? "noDomains"
-              : domainResults[name] && domainResults[name].length > 0
+              : domainResults[nameId] && domainResults[nameId].length > 0
               ? "domainsFound"
               : "default"
           }
         />
       </div>
-      <ResultLinks results={domainResults} name={name} />
+      <ResultLinks results={domainResults} nameId={nameId} />
       <div className="w-1/2 text-center">
         <ActionButton
-          name={name}
+          nameId={nameId}
           processing={processingNpm}
           action={<Icons.spinner />}
           icon={<Icons.npmPackage />}
           text="Check npm availability"
           onClick={() =>
             user
-              ? findNpmNames(name)
+              ? findNpmNames(name, nameId)
               : handleActionForUnauthenticatedUser("check npm availability for")
           }
           status={
-            processingNpm.includes(name)
+            processingNpm.includes(nameId)
               ? "default"
-              : npmResults[name] && npmResults[name].length === 0
+              : npmResults[nameId] && npmResults[nameId].length === 0
               ? "noNpmPackages"
-              : npmResults[name] && npmResults[name].length > 0
+              : npmResults[nameId] && npmResults[nameId].length > 0
               ? "npmPackagesFound"
               : "default"
           }
         />
       </div>
-      <ResultLinks results={npmResults} name={name} />
+      <ResultLinks results={npmResults} nameId={nameId} />
       <div className="w-1/2 text-center">
         <ActionButton
-          name={name}
+          nameId={nameId}
           processing={processingTrademark}
           action={<Icons.spinner />}
           icon={<Icons.trademark />}
           text="Check for trademarks"
           onClick={() =>
             user
-              ? checkTrademarks(name)
+              ? checkTrademarks(name, nameId)
               : handleActionForUnauthenticatedUser("check trademarks for")
           }
           status={
-            processingTrademark.includes(name)
+            processingTrademark.includes(nameId)
               ? "default"
-              : trademarkResults[name] && trademarkResults[name].length === 0
+              : trademarkResults[nameId] && trademarkResults[nameId].length === 0
               ? "noTrademarks"
-              : trademarkResults[name] && trademarkResults[name].length > 0
+              : trademarkResults[nameId] && trademarkResults[nameId].length > 0
               ? "trademarksFound"
               : "default"
           }
         />
       </div>
-      <ResultLinks results={trademarkResults} name={name} />
+      <ResultLinks results={trademarkResults} nameId={nameId} />
       <div className="w-1/2 text-center">
         <ActionButton
-          name={name}
+          nameId={nameId}
           processing={processingLogo}
           action={<Icons.spinner />}
           icon={<Icons.generate />}
           text="Generate a logo"
           onClick={() =>
             user
-              ? generateLogo(name)
+              ? generateLogo(name, nameId)
               : handleActionForUnauthenticatedUser("generate a logo for")
           }
         />
       </div>
-      {logoResults[name] && (
+      {logoResults[nameId] && (
         <div className="flex items-center justify-center w-full">
           <Link
-            href={logoResults[name]}
+            href={logoResults[nameId]}
             target="_blank"
             className="cursor-pointer"
           >
             <Image
-              src={logoResults[name]}
+              src={logoResults[nameId]}
               alt={name}
               width={200}
               height={200}
@@ -751,19 +742,19 @@ export function NamesDisplay({
       )}
       <div className="w-1/2 text-center">
         <ActionButton
-          name={name}
+          nameId={nameId}
           processing={processingOnePager}
           action={<Icons.spinner />}
           icon={<Icons.onePager />}
           text="Generate a one-pager"
           onClick={() =>
             user
-              ? createOnePager(name)
+              ? createOnePager(name, nameId)
               : handleActionForUnauthenticatedUser("generate a one-pager for")
           }
         />
       </div>
-      {isOwner && (
+      {ownedNameIds.includes(nameId) && (
         <div className="w-1/2 text-center">
           <Button
             onClick={() =>
@@ -794,8 +785,8 @@ export function NamesDisplay({
     <div>
       {verticalLayout ? (
         <div className="flex flex-col space-y-4">
-          {Object.keys(namesList).map((name, index) => (
-            <Card key={index}>
+          {namesList.map(({ name, id: nameId }) => (
+            <Card key={nameId}>
               <CardHeader>
                 <div className="flex items-center justify-between w-full">
                   <div style={{ flex: 1 }}></div>
@@ -806,7 +797,7 @@ export function NamesDisplay({
                     <div style={{ flex: 1 }} className="flex justify-end">
                       <Button
                         variant="ghost"
-                        onClick={() => onRemoveName(name)}
+                        onClick={() => onRemoveName(nameId)}
                       >
                         X
                       </Button>
@@ -815,20 +806,20 @@ export function NamesDisplay({
                   {!showRemoveButton && <div style={{ flex: 1 }}></div>}
                 </div>
               </CardHeader>
-              <CardContent>{renderNameContent(name, namesList[name])}</CardContent>
+              <CardContent>{renderNameContent(name, nameId)}</CardContent>
             </Card>
           ))}
         </div>
       ) : (
         <Carousel>
           <CarouselContent>
-            {Object.keys(namesList).map((name, index) => (
-              <CarouselItem key={index} className="h-auto">
+            {namesList.map(({ name, id: nameId }) => (
+              <CarouselItem key={nameId} className="h-auto">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-center">{name}</CardTitle>
                   </CardHeader>
-                  <CardContent>{renderNameContent(name, namesList[name])}</CardContent>
+                  <CardContent>{renderNameContent(name, nameId)}</CardContent>
                 </Card>
               </CarouselItem>
             ))}

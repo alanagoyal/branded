@@ -6,7 +6,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Favorites() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -21,15 +21,9 @@ export default async function Favorites() {
     .eq("created_by", user?.id)
     .eq("favorited", true);
 
-  const namesList: { [name: string]: string } = {};
+  const namesList = names ?? [];
 
-  if (names) {
-    for (const name of names) {
-      namesList[name.name] = name.id;
-    }
-  }
-
-  return namesList && Object.keys(namesList).length > 0 ? (
+  return namesList.length > 0 ? (
     <div className="w-full px-4 flex justify-center items-center flex-col">
       <h1 className="text-2xl font-bold mb-4">Favorites</h1>
       <div className="min-h-screen w-full">

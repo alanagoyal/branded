@@ -39,7 +39,7 @@ async function checkDomainAvailability(domain: string) {
   return data.domain_registered?.toLowerCase() === "no";
 }
 
-export async function POST(req: Request, res: NextResponse) {
+export async function POST(req: Request) {
   try {
     const { user } = await requireUser(req);
     const body = await readBody(req, nameRequestSchema);

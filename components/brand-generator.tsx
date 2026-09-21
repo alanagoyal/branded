@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/utils/supabase/client";
 import { showProviderError } from "./provider-error";
 import { NamesDisplay } from "./names-display";
+import { mergeNameRecords, removeNameRecord, type NameRecord } from "@/lib/name-records";
 import { useRouter, useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "./ui/use-toast";
@@ -41,8 +42,8 @@ export default function BrandGenerator({
   );
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [namesList, setNamesList] = useState<{ [name: string]: string }>({});
-  const [idsList, setIdsList] = useState<string[]>([]);
+  const [namesList, setNamesList] = useState<NameRecord[]>([]);
+  const idsList = namesList.map(({ id }) => id);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,25 +53,13 @@ export default function BrandGenerator({
 
   useEffect(() => {
     if (names) {
-      const updatedNamesList: { [name: string]: string } = {};
-      for (const name of names) {
-        updatedNamesList[name.name] = name.id;
-      }
-      setNamesList(updatedNamesList);
-
-      for (const name of names) {
-        setIdsList((prevState) => [...prevState, name.id]);
-      }
+      setNamesList(mergeNameRecords(names));
     }
   }, [names, user]);
 
 
-  async function handleRemoveName(name: string) {
-    setNamesList((prevState) => {
-      const newState = { ...prevState };
-      delete newState[name];
-      return newState;
-    });
+  async function handleRemoveName(id: string) {
+    setNamesList((records) => removeNameRecord(records, id));
   }
 
   async function addExistingName(values: z.infer<typeof formSchema>) {
@@ -87,11 +76,7 @@ export default function BrandGenerator({
       if (lookupError) throw lookupError;
 
       if (existingName && existingName.length > 0) {
-        setNamesList((prevNamesList) => ({
-          ...prevNamesList,
-          [existingName[0].name]: existingName[0].id,
-        }));
-        setIdsList((prevIdsList) => [...prevIdsList, existingName[0].id]);
+        setNamesList((records) => mergeNameRecords(records, [existingName[0]]));
         form.reset();
         return;
       }
@@ -108,11 +93,7 @@ export default function BrandGenerator({
         .select();
 
       if (data) {
-        setNamesList((prevNamesList) => ({
-          [data[0].name]: data[0].id,
-          ...prevNamesList,
-        }));
-        setIdsList((prevIdsList) => [...prevIdsList, data[0].id]);
+        setNamesList((records) => mergeNameRecords([data[0]], records));
       }
 
       if (error) throw error;
@@ -152,7 +133,7 @@ export default function BrandGenerator({
           </Button>
         </form>
       </Form>
-      {Object.keys(namesList).length > 0 && (
+      {namesList.length > 0 && (
         <div className="flex-col pt-4 space-y-4 sm:flex">
           <NamesDisplay
             namesList={namesList}

@@ -593,15 +593,8 @@ using ((auth.uid() = created_by));
 
 
 
-alter table "auth"."flow_state" add column "auth_code_issued_at" timestamp with time zone;
-
-alter table "auth"."saml_providers" add column "name_id_format" text;
-
-alter table "auth"."saml_relay_states" drop column "from_ip_address";
-
-alter table "auth"."users" add column "is_anonymous" boolean not null default false;
-
-CREATE INDEX users_is_anonymous_idx ON auth.users USING btree (is_anonymous);
+-- Supabase Auth owns its internal schema. Application migrations only add
+-- the profile trigger; fresh installs must not replay historical Auth diffs.
 
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
