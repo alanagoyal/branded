@@ -1,5 +1,7 @@
 "use client";
 
+import { SUPPORT_NEW_ISSUE_URL } from "@/lib/support";
+
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { PortalLink } from "@/lib/plans";
@@ -31,7 +33,7 @@ export function DeleteAccount() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Account deletion failed.");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Please try again or email hi@basecase.vc.");
+      setError(error instanceof Error ? error.message : "Please try again or create a GitHub issue from Help.");
       setPending(false);
       return;
     }
@@ -56,7 +58,7 @@ export function DeleteAccount() {
       </p>
       <p className="text-sm">
         <a href={PortalLink} className="underline">Manage billing</a>
-        {" · "}<a href="mailto:hi@basecase.vc" className="underline">Contact support</a>
+        {" · "}<a href={SUPPORT_NEW_ISSUE_URL} className="underline">Create a GitHub issue</a>
       </p>
       <Dialog open={open} onOpenChange={(value) => {
         if (pending) return;

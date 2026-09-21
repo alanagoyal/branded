@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Account deletion failed:", error);
     return NextResponse.json(
-      { error: "We couldn't delete your account. Please sign in and try again, or email hi@basecase.vc." },
+      { error: "We couldn't delete your account. Please sign in and try again, or create a GitHub issue from Help." },
       { status: 500 },
     );
   } finally {

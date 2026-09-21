@@ -1,5 +1,7 @@
 "use client";
 
+import { SUPPORT_NEW_ISSUE_URL } from "@/lib/support";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -25,6 +27,6 @@ export function Checkout({ plan }: { plan: "pro" | "business" }) {
     <h1 className="text-2xl font-semibold">Subscribe to {plan === "pro" ? "Pro" : "Business"}</h1>
     <p>Review your subscription and payment details on Stripe.</p>
     <Button onClick={start} disabled={busy}>{busy ? "Opening checkout…" : "Continue to checkout"}</Button>
-    {error && <p role="alert">{error} <a href="mailto:hi@basecase.vc" className="underline">Contact support</a></p>}
+    {error && <p role="alert">{error} <a href={SUPPORT_NEW_ISSUE_URL} className="underline">Create a GitHub issue</a></p>}
   </div>;
 }

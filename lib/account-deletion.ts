@@ -21,7 +21,7 @@ export async function checkDeletionBilling(
     const customer = await stripe.customers.retrieve(customerId);
     if (!customer.deleted) {
       if (customer.email?.toLowerCase() !== email.toLowerCase()) {
-        return "We couldn't verify your billing account. Please email hi@basecase.vc before deleting your account.";
+        return "We couldn't verify your billing account. Please create a GitHub issue from Help before deleting your account.";
       }
       customerIds.add(customer.id);
     }
@@ -59,7 +59,7 @@ export async function checkDeletionBilling(
       limit: 100,
     })) {
       if (schedule.status === "not_started" || schedule.status === "active") {
-        return "Your billing account has a subscription schedule. Please email hi@basecase.vc to cancel it before deleting your account.";
+        return "Your billing account has a subscription schedule. Please create a GitHub issue from Help to cancel it before deleting your account.";
       }
     }
   }

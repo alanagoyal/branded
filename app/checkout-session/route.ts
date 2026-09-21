@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => null);
     if (body?.plan !== "pro" && body?.plan !== "business") throw new BillingError("Invalid plan.", 400);
     const price = billingPrices()[body.plan as "pro" | "business"];
-    if (!price) throw new BillingError("Checkout is not configured. Please email hi@basecase.vc.", 503);
+    if (!price) throw new BillingError("Checkout is not configured. Please create a GitHub issue from Help.", 503);
     const stripe = stripeClient();
     const admin = await supabaseAdmin();
     let account = await billingAccount(user.id);
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       // of ownership. Do not risk starting a second subscription for a legacy user.
       const existing = await stripe.customers.list({ email: user.email, limit: 1 });
       if (profile.customer_id || existing.data.length) {
-        throw new BillingError("Please email hi@basecase.vc to verify your existing billing account before starting another subscription.");
+        throw new BillingError("Please create a GitHub issue from Help to verify your existing billing account before starting another subscription.");
       }
       const customer = await stripe.customers.create({ email: user.email, metadata: { branded_user_id: user.id } }, {
         idempotencyKey: `branded-customer-${user.id}`,

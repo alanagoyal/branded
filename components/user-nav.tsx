@@ -1,4 +1,6 @@
 "use client";
+
+import { SUPPORT_NEW_ISSUE_URL } from "@/lib/support";
 import { createClient } from "@/utils/supabase/client";
 import {
   CreditCard,
@@ -33,7 +35,7 @@ export default function UserNav({ user }: any) {
   const { theme, setTheme } = useTheme();
   const [accountName, setAccountName] = useState("");
   const [isCustomer, setIsCustomer] = useState(false);
-  const [billingPortalUrl, setBillingPortalUrl] = useState("mailto:hi@basecase.vc?subject=Billing%20help");
+  const [billingPortalUrl, setBillingPortalUrl] = useState(SUPPORT_NEW_ISSUE_URL);
   const [open, setOpen] = useState(false);
   const [planName, setPlanName] = useState("");
 
