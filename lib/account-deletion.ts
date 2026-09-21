@@ -32,6 +32,13 @@ export async function checkDeletionBilling(
   }
 
   for (const id of Array.from(customerIds)) {
+    // An unpaid Checkout can create a subscription after account deletion.
+    // Read-only even for historical customer links whose ownership is uncertain.
+    for await (const session of stripe.checkout.sessions.list({ customer: id, status: "open", limit: 100 })) {
+      if (session.mode === "subscription") {
+        return "A subscription checkout is still open. Please wait for it to expire before deleting your account.";
+      }
+    }
     for await (const subscription of stripe.subscriptions.list({
       customer: id,
       status: "all",

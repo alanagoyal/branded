@@ -238,6 +238,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_deletion_token: string | null
           created_at: string | null
           customer_id: string | null
           email: string | null
@@ -247,6 +248,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          account_deletion_token?: string | null
           created_at?: string | null
           customer_id?: string | null
           email?: string | null
@@ -256,6 +258,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          account_deletion_token?: string | null
           created_at?: string | null
           customer_id?: string | null
           email?: string | null
@@ -324,6 +327,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      begin_account_deletion: {
+        Args: { p_user_id: string }
+        Returns: string | null
+      }
+      finish_account_deletion: {
+        Args: { p_user_id: string; p_token: string }
+        Returns: undefined
+      }
+      renew_billing_checkout: {
+        Args: { p_user_id: string; p_token: string; p_expires_at: number }
+        Returns: Json
+      }
       reserve_billing_checkout: {
         Args: { p_user_id: string; p_plan: string }
         Returns: Json
