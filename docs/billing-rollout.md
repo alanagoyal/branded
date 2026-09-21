@@ -5,7 +5,7 @@ This change requires a database migration and server configuration before deploy
 ## Deploy in this order
 
 1. Configure `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_ENDPOINT_SECRET`, `STRIPE_PRO_PRICE_ID`, and `STRIPE_BUSINESS_PRICE_ID` in the server environment. The last two are existing recurring `price_...` IDs, not `prod_...` IDs. Use test prices with a test key and live prices with a live key. All supported paid subscriptions must use those prices; unknown prices fail closed to free entitlements. Review any historical prices before rollout and migrate/extend the explicit allowlist as necessary.
-2. Apply `20260921145451_server_owned_billing.sql` using the normal reviewed migration process. Do not insert trusted ownership from the old `profiles.customer_id` or `profiles.plan_id` columns. Those were client-writable.
+2. Apply `20260921145451_server_owned_billing.sql` and then `20260921162256_billing_checkout_deletion_guards.sql` using the normal reviewed migration process. Do not insert trusted ownership from the old `profiles.customer_id` or `profiles.plan_id` columns. Those were client-writable.
 3. Reconcile existing paying customers as described below, **before deploying this application or enabling server quotas**. Otherwise unreconciled users receive free entitlements and billing portal requests direct them to support. The quota migration depends on `billing_accounts` and must follow this migration.
 4. Deploy this application version. There may be a brief interval between the migration and application deployment when old browser billing writes fail; reload the app after deployment.
 5. Configure the Stripe webhook for `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `customer.subscription.paused`, `customer.subscription.resumed`, `invoice.paid`, `invoice.payment_failed`, and `invoice.payment_action_required`. Keep the endpoint signing secret in the server environment. Retire old public Payment Links after verifying the authenticated checkout flow; historical links cannot establish account ownership.
@@ -43,7 +43,7 @@ One trusted customer is supported per user. If a user has several historical Str
 
 `billing_accounts` is authoritative. Only the service role can write it or call the snapshot RPC. The browser can read its own row. Browser profile inserts/deletes are revoked, and profile updates are limited to name, email, and updated timestamp. Auth's existing profile-creation trigger still works. Profile billing fields are compatibility mirrors for the UI, never authorization inputs.
 
-A transaction reserves one checkout attempt per customer for 35 minutes. Repeated same-plan requests reuse its Stripe idempotency key and expiration; a different plan is refused until it expires, preventing two parallel tabs from creating duplicate subscriptions.
+A transaction reserves one checkout attempt per customer for 35 minutes. Repeated same-plan requests reuse its Stripe idempotency key and expiration; a different plan is refused until it expires, preventing two parallel tabs from creating duplicate subscriptions. If an uncreated attempt becomes too old for Stripe’s 30-minute minimum expiry, only an explicit `expires_at` validation rejection permits renewing the expiration. Renewal retains the same token/idempotency key and uses compare-and-swap so concurrent retries agree. Network failures, 500s and concurrent request conflicts never replace an ambiguous attempt.
 
 New checkout creates a Stripe customer from a verified authenticated account and stores that mapping before issuing a checkout session. Existing legacy links or exact-email Stripe matches stop new checkout and direct the user to support. This email check is conservative duplicate prevention, not account linking, and does not resolve changed/case-different legacy emails.
 
@@ -61,3 +61,13 @@ npx tsc --noEmit
 npm install --prefix /private/tmp/branded-billing-sql-test --no-package-lock --no-audit --no-fund @electric-sql/pglite@0.5.8
 NODE_PATH=/private/tmp/branded-billing-sql-test/node_modules node scripts/test-billing-sql.cjs
 ```
+
+## Account deletion and open checkout
+
+Deletion and checkout reservation lock the same profile row. Deletion refuses an unexpired reservation and sets a server-owned durable deletion token before reading Stripe. Checkout and retry renewal refuse that token, including when the billing mapping is created concurrently. Deletion also checks all relevant Stripe customers for open subscription Checkout sessions, covering legacy sessions not created through the reservation RPC. Users must wait for an open checkout to expire before deleting.
+
+A normal billing check/sign-out failure clears only that request’s deletion token. Once Auth deletion is submitted, an error or timeout may mean deletion is still running, so the token stays locked; successful deletion cascades the profile and token away. A crashed request or failed guard release also stays locked. This is deliberate: expiring a lease could let a still-running delete race a new purchase.
+
+If a surviving account is stuck, an operator must first confirm the deletion request has terminated and no Auth deletion is still in flight, then inspect Stripe subscriptions and open sessions. Only then clear the exact observed token with the service-only `finish_account_deletion(user_id, token)` RPC. Do not automatically clear tokens on a timer or from a browser request. The user can then retry deletion or checkout.
+
+Regression checks cover both orderings (checkout first/deletion first), ownership privileges, stale-token release, a mapping inserted after deletion starts, open sessions, failed provider reads, and ambiguous Auth/Stripe failures.

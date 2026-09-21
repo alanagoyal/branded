@@ -23,7 +23,7 @@ const { checkDeletionBilling } = load("lib/account-deletion.ts");
 const email = "owner@example.com";
 const iterable = (items) => (async function* () { yield* items; })();
 
-function billing({ linkedEmail = email, customers = [], subscriptions = [], schedules = [], deleted = false } = {}) {
+function billing({ linkedEmail = email, customers = [], subscriptions = [], schedules = [], sessions = [], deleted = false } = {}) {
   const calls = [];
   return {
     calls,
@@ -34,6 +34,7 @@ function billing({ linkedEmail = email, customers = [], subscriptions = [], sche
     subscriptions: {
       list: (params) => { calls.push(["subscriptions", params]); return iterable(subscriptions); },
     },
+    checkout: { sessions: { list: () => iterable(sessions) } },
     subscriptionSchedules: {
       list: (params) => { calls.push(["schedules", params]); return iterable(schedules); },
     },
@@ -87,7 +88,7 @@ test("already deleted Stripe customer does not block account deletion", async ()
 });
 
 function route({ user = { id: "authenticated-user", email }, authError = null, profileError = null,
-  billingError = null, billingThrows = false, signOutError = null, deleteError = null, mappingReadError = null, trustedCustomerId = null } = {}) {
+  billingError = null, billingThrows = false, signOutError = null, deleteError = null, mappingReadError = null, trustedCustomerId = null, guardBlocked = false, guardError = null } = {}) {
   const calls = [];
   const checks = [];
   let table;
@@ -102,7 +103,9 @@ function route({ user = { id: "authenticated-user", email }, authError = null, p
       ? ({ data: trustedCustomerId ? { customer_id: trustedCustomerId } : null, error: mappingReadError })
       : ({ data: { customer_id: "cus_1" }, error: profileError }),
   };
+  const guards = [];
   const admin = {
+    rpc: async (name, params) => { guards.push([name, params]); return { data: guardBlocked ? null : "deletion-token", error: guardError }; },
     from: (name) => { table = name; return query; },
     auth: { admin: { deleteUser: async (id) => { calls.push(["delete", id]); return { error: deleteError }; } } },
   };
@@ -117,7 +120,7 @@ function route({ user = { id: "authenticated-user", email }, authError = null, p
       return billingError;
     } },
   });
-  return { POST, calls, checks };
+  return { POST, calls, checks, guards };
 }
 function request({ origin = "https://www.branded.ai", confirmation = "DELETE", malformed = false } = {}) {
   return {
@@ -214,3 +217,43 @@ test("canonical Stripe lookup failure leaves deletion blocked", async () => {
   stripe.customers.retrieve = async () => { throw new Error("Stripe unavailable"); };
   await assert.rejects(checkDeletionBilling(stripe, email, null, "cus_canonical"), /Stripe unavailable/);
 });
+
+for (const mode of ["subscription", "payment"]) {
+  test(`open ${mode} checkout deletion check`, async () => {
+    const result = await checkDeletionBilling(billing({ sessions: [{ mode, status: "open" }] }), email, null, "cus_owned");
+    if (mode === "subscription") assert.match(result, /checkout is still open/);
+    else assert.equal(result, null);
+  });
+}
+test("checkout lookup failures block deletion", async () => {
+  const stripe = billing();
+  stripe.checkout.sessions.list = () => { throw new Error("Stripe unavailable"); };
+  await assert.rejects(checkDeletionBilling(stripe, email, null, "cus_owned"), /Stripe unavailable/);
+});
+test("active checkout/deletion guard refuses deletion before any billing read", async () => {
+  const r = route({ guardBlocked: true });
+  assert.equal((await r.POST(request())).status, 409);
+  assert.equal(r.calls.length, 0);
+  assert.equal(r.guards.length, 1);
+});
+test("database guard failure never deletes", async () => {
+  const r = route({ guardError: new Error("DB unavailable") });
+  assert.equal((await r.POST(request())).status, 500);
+  assert.equal(r.calls.length, 0);
+});
+for (const options of [{ billingError: "Cancel first" }, { billingThrows: true }, { signOutError: new Error("Auth failed") }]) {
+  test(`deletion releases its guard on completion: ${Object.keys(options).join()}`, async () => {
+    const r = route(options);
+    await r.POST(request());
+    assert.deepEqual(r.guards.map(([name]) => name), ["begin_account_deletion", "finish_account_deletion"]);
+    assert.equal(r.guards[1][1].p_token, "deletion-token");
+  });
+}
+
+for (const options of [{}, { deleteError: new Error("Auth timeout") }]) {
+  test(`submitted deletion never reopens checkout: ${Object.keys(options).join()}`, async () => {
+    const r = route(options);
+    await r.POST(request());
+    assert.deepEqual(r.guards.map(([name]) => name), ["begin_account_deletion"]);
+  });
+}
