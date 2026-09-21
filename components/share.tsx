@@ -7,7 +7,8 @@ import { Input } from "./ui/input";
 import { toast } from "./ui/use-toast";
 
 export function Share({ idString }: { idString: string; type?: string }) {
-  const [link, setLink] = useState("");
+  const [createdLink, setCreatedLink] = useState<{ ids: string; url: string } | null>(null);
+  const link = createdLink?.ids === idString ? createdLink.url : "";
   const [busy, setBusy] = useState(false);
   async function createLink() {
     setBusy(true);
@@ -16,7 +17,7 @@ export function Share({ idString }: { idString: string; type?: string }) {
       const response = await fetch("/api/name-shares", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to create a share link");
-      setLink(`${window.location.origin}${data.path}`);
+      setCreatedLink({ ids: idString, url: `${window.location.origin}${data.path}` });
     } catch (error) {
       toast({ variant: "destructive", description: error instanceof Error ? error.message : "Unable to share names" });
     } finally { setBusy(false); }
