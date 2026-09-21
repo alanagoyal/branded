@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { NameGenerator } from "./name-generator";
 import { Button } from "./ui/button";
@@ -24,6 +25,8 @@ export default function NewGeneration({
       router.push("/new?type=brand-only");
     }
   }
+
+  if (!user) return <div className="mx-auto max-w-xl p-8"><h1 className="text-2xl font-semibold">Create your next brand</h1><p className="my-4">Sign in to generate names and use branding tools. Free accounts include monthly generations.</p><Link className="underline" href="/login">Sign in</Link> or <Link className="underline" href="/signup">create an account</Link>.</div>;
 
   return (
     <div className="min-h-screen px-4 sm:px-8">

@@ -1,18 +1,22 @@
+import { z } from "zod";
+import { requireUser, reserveUsage, readBody, nameSchema, descriptionSchema, accessError } from "@/lib/provider-access";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
-import { init, initLogger, traced, wrapOpenAI } from "braintrust";
 
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
-const logger = initLogger({ projectName: "namebase" });
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+    timeout: 20000,
+    maxRetries: 0,
 });
 
 export async function POST(req: Request, res: NextResponse) {
   try {
-    const body = await req.json();
+    const { user } = await requireUser(req);
+    const body = await readBody(req, z.object({ name: nameSchema }));
+    await reserveUsage(user.id, "logos");
     const { name } = body;
 
     const image = await openai.images.generate({
@@ -33,6 +37,6 @@ export async function POST(req: Request, res: NextResponse) {
       },
     });
   } catch (error) {
-    return NextResponse.json({ error });
+    return accessError(error);
   }
 }

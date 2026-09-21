@@ -1,6 +1,8 @@
+import { z } from "zod";
+import { requireUser, reserveUsage, readBody, nameSchema, descriptionSchema, accessError } from "@/lib/provider-access";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
-import { init, initLogger, traced, wrapOpenAI } from "braintrust";
+import { initLogger, traced, wrapOpenAI } from "braintrust";
 
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
@@ -8,29 +10,40 @@ const logger = initLogger({ projectName: "namebase" });
 const openai = wrapOpenAI(
   new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
+    timeout: 20000,
+    maxRetries: 0,
     baseURL: "https://braintrustproxy.com/v1",
   })
 );
 
+const nameRequestSchema = z.object({
+  description: descriptionSchema,
+  minLength: z.number().int().min(1).max(50), maxLength: z.number().int().min(1).max(50),
+  wordToInclude: z.string().max(100).optional().default(""),
+  wordPlacement: z.enum(["beginning", "end", "anywhere", "any", "start", ""]).optional(),
+  style: z.enum(["one_word", "portmanteau", "alternative_spelling", "foreign_language", "historical", "literary", "any", ""]).optional(),
+  tld: z.boolean().optional().default(false),
+}).refine(v => v.minLength <= v.maxLength);
+
 function cleanNames(names: string[]): string[] {
-  return names
-    .map((name) =>
-      name.includes(".") ? name.split(". ")[1].trim() : name.trim()
-    )
-    .map((name) => name.split("(")[0].trim());
+  return names.map(name => name.replace(/^\d+[.)]\s*/, "").split("(")[0].trim())
+    .filter(name => /^[a-zA-Z0-9][a-zA-Z0-9 -]{0,62}$/.test(name)).slice(0, 10);
 }
 
 async function checkDomainAvailability(domain: string) {
   const response = await fetch(
-    `https://api.whoxy.com/?key=${process.env.WHOXY_API_KEY}&whois=${domain}`
+    `https://api.whoxy.com/?key=${process.env.WHOXY_API_KEY}&whois=${encodeURIComponent(domain)}`, { cache: "no-store", signal: AbortSignal.timeout(10000) }
   );
+  if (!response.ok) throw new Error("WHOIS lookup failed");
   const data = await response.json();
   return data.domain_registered?.toLowerCase() === "no";
 }
 
 export async function POST(req: Request, res: NextResponse) {
   try {
-    const body = await req.json();
+    const { user } = await requireUser(req);
+    const body = await readBody(req, nameRequestSchema);
+    await reserveUsage(user.id, "names");
     const {
       description,
       minLength,
@@ -69,6 +82,7 @@ export async function POST(req: Request, res: NextResponse) {
       async (span) => {
         const response = await openai.chat.completions.create({
           model: "gpt-4o-mini",
+          max_tokens: 1000,
           messages: [
             {
               role: "system",
@@ -85,7 +99,7 @@ export async function POST(req: Request, res: NextResponse) {
         span.log({input: userMessageContent, output});
         return output;
       },
-      { name: "generate-name", event: body }
+      { name: "generate-name", event: { input: body } }
     );
 
     const names = cleanNames(
@@ -95,7 +109,7 @@ export async function POST(req: Request, res: NextResponse) {
     );
 
     let selectedNames = [];
-    let fallbackMessage = null; 
+    let fallbackMessage = null;
 
     if (tld) {
       const domainChecks = names.map((name) =>
@@ -112,19 +126,19 @@ export async function POST(req: Request, res: NextResponse) {
         .filter((domain) => domain.available)
         .map((domain) => domain.name);
 
-      if (validNames.length === 0) {
-        fallbackMessage = "No .com domains were available for the names given your criteria. We found you some names that are available in other TLDs."; 
+      if (validNames.length < 3) {
+        fallbackMessage = `Only ${validNames.length} names had verified available .com domains. Try different criteria for more results.`;
       }
 
       selectedNames =
-        validNames.length >= 3 ? validNames.slice(0, 3) : names.slice(0, 3);
+        validNames.slice(0, 3);
     } else {
       selectedNames = names.slice(0, 3);
     }
 
-    const responsePayload = { 
-      response: selectedNames, 
-      ...(fallbackMessage ? { fallbackMessage } : {}) 
+    const responsePayload = {
+      response: selectedNames,
+      ...(fallbackMessage ? { fallbackMessage } : {})
     };
 
     return new Response(JSON.stringify(responsePayload), {
@@ -134,6 +148,6 @@ export async function POST(req: Request, res: NextResponse) {
       },
     });
   } catch (error) {
-    return NextResponse.json({ error });
+    return accessError(error);
   }
 }

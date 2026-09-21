@@ -1,17 +1,23 @@
+import { z } from "zod";
+import { requireUser, reserveUsage, readBody, nameSchema, descriptionSchema, accessError } from "@/lib/provider-access";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
-import { init, initLogger, traced, wrapOpenAI } from "braintrust";
+import { initLogger, traced, wrapOpenAI } from "braintrust";
 
 const logger = initLogger({ projectName: "namebase" });
 const openai = wrapOpenAI(
   new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
+    timeout: 20000,
+    maxRetries: 0,
     baseURL: "https://braintrustproxy.com/v1",
   })
 );
 export async function POST(req: Request, res: NextResponse) {
   try {
-    const body = await req.json();
+    const { user } = await requireUser(req);
+    const body = await readBody(req, z.object({ name: nameSchema, description: descriptionSchema }));
+    await reserveUsage(user.id, "onePagerContent");
     const {
       name, description
     } = body;
@@ -22,6 +28,7 @@ export async function POST(req: Request, res: NextResponse) {
 
         const completion = await openai.chat.completions.create({
           model: "gpt-4o-mini",
+          max_tokens: 1000,
           seed: 123,
           messages: [
             {
@@ -57,6 +64,6 @@ export async function POST(req: Request, res: NextResponse) {
       },
     });
   } catch (error) {
-    return NextResponse.json({ error });
+    return accessError(error);
   }
 }
