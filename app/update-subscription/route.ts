@@ -1,30 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+import { billingAccount, billingFailure, billingUser, BillingError, stripeClient, syncBilling, requireBillingOrigin } from "@/lib/billing";
 
-export async function GET(req: NextRequest) {
-  const customerId = req.nextUrl.searchParams.get("customer_id");
+export async function POST(request: Request) {
   try {
-    if (customerId) {
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customerId,
-      });
-
-      const currentSubscription = subscriptions.data[0];
-      const planId = currentSubscription.items.data[0].plan.product;
-      const cancelAtPeriodEnd = currentSubscription.cancel_at_period_end;
-      return new NextResponse(JSON.stringify({ planId, cancelAtPeriodEnd, customerId }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-  } catch (error) {
-    return new NextResponse(
-      JSON.stringify({ error: "Failed to fetch customer session" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
+    requireBillingOrigin(request);
+    const user = await billingUser();
+    const account = await billingAccount(user.id);
+    if (!account) throw new BillingError("Please email hi@basecase.vc to verify your existing billing account.");
+    await syncBilling(stripeClient(), account.customer_id);
+    return Response.json({ updated: true });
+  } catch (error) { return billingFailure(error); }
 }

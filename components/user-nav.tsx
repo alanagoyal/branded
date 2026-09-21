@@ -33,7 +33,7 @@ export default function UserNav({ user }: any) {
   const { theme, setTheme } = useTheme();
   const [accountName, setAccountName] = useState("");
   const [isCustomer, setIsCustomer] = useState(false);
-  const [billingPortalUrl, setBillingPortalUrl] = useState("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState("mailto:hi@basecase.vc?subject=Billing%20help");
   const [open, setOpen] = useState(false);
   const [planName, setPlanName] = useState("");
 
@@ -87,7 +87,7 @@ export default function UserNav({ user }: any) {
 
   async function fetchBillingSession(customerId: string) {
     try {
-      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const response = await fetch("/portal-session", { method: "POST" });
       const data = await response.json();
       if (response.ok) {
         setBillingPortalUrl(data.session.url);
