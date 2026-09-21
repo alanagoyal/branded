@@ -8,20 +8,14 @@ export default async function HelpPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: userData, error } = await supabase
-  .from("profiles")
-  .select()
-  .eq("id", user?.id)
-  .single();
-
   return (
     <div className="w-full px-4 flex justify-center items-center flex-col">
       <div className="w-full min-h-screen">
         <div className="mb-6 rounded-md border p-4 text-sm space-y-2">
           <p>To delete your account, open <Link href="/account" className="underline">Account</Link> and choose Delete account.</p>
-          <p>If the chat is unavailable, email <a href="mailto:hi@basecase.vc" className="underline">hi@basecase.vc</a> for help.</p>
+          <p>For help, email <a href="mailto:hi@basecase.vc" className="underline">hi@basecase.vc</a>.</p>
         </div>
-        <CaseChat user={user} userData={userData} />
+        <CaseChat user={user} />
       </div>
     </div>
   );

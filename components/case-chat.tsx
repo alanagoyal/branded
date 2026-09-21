@@ -1,71 +1,45 @@
 "use client";
 
 import { ChatProvider, ChatViewMessage } from "@markprompt/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
-import { type TicketGeneratedData, CaseForm } from "@/components/case-form";
+import { CaseForm } from "@/components/case-form";
 import { Chat } from "@/components/chat";
-import { generateTicketData } from "@/lib/ticket";
+import { createSupportDraft, type SupportDraft } from "@/lib/support";
 
 import { useChatForm } from "./chat-form-context";
 import { Button } from "./ui/button";
-import { createClient } from "@/utils/supabase/client";
 
-export function CaseChat({ user, userData }: { user: any; userData: any }) {
-  const supabase = createClient();
+export function CaseChat({ user }: { user: any }) {
   const { setIsCreatingCase } = useChatForm();
   const [messages, setMessages] = useState<ChatViewMessage[]>([]);
-  const [ticketData, setTicketData] = useState<TicketGeneratedData | undefined>(
+  const [ticketData, setTicketData] = useState<SupportDraft | undefined>(
     undefined
   );
-  const [planName, setPlanName] = useState("");
-
-  useEffect(() => {
-    async function fetchUserPlan() {
-      if (!user) return;
-
-      if (userData && userData.plan_id) {
-        try {
-          const response = await fetch(
-            `/fetch-plan?plan_id=${userData.plan_id}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch user plan");
-          }
-          const data = await response.json();
-          setPlanName(data.planName);
-        } catch (error) {
-          console.error("Error fetching user plan:", error);
-          setPlanName("Free");
-        }
-      }
-    }
-
-    fetchUserPlan();
-  }, [user]);
+  const [draftError, setDraftError] = useState<string | null>(null);
 
   const submitCase = useCallback(async () => {
     setIsCreatingCase(true);
-    const ticketData = await generateTicketData(messages);
-    setTicketData(ticketData);
-    setIsCreatingCase(false);
-
-    setTimeout(() => {
-      window.scrollTo({
-        top: document.body.scrollHeight - 1150,
-        behavior: "smooth",
-      });
-    }, 500);
+    setDraftError(null);
+    try {
+      setTicketData(createSupportDraft(messages));
+      return "Your email draft is ready. Review it, open it in your email app, and send it there.";
+    } catch {
+      setDraftError("Could not prepare the transcript. You can still email hi@basecase.vc directly.");
+      return "Could not prepare an email draft. Please email hi@basecase.vc directly.";
+    } finally {
+      setIsCreatingCase(false);
+    }
   }, [messages, setIsCreatingCase]);
 
   return (
     <div className="flex flex-col w-full">
-      <ChatProvider
+      {process.env.NEXT_PUBLIC_PROJECT_KEY ? <ChatProvider
         chatOptions={{
           apiUrl: process.env.NEXT_PUBLIC_API_URL,
           model: "gpt-4-turbo-preview",
           systemPrompt:
-            'You are an expert AI technical support assistant from Markprompt who excels at helping people solving their issues. When generating a case, do not mention anything about assistance, next step, or whether an agent will reach out. Just say "Please complete the form submission below."',
+            'You are the Branded AI support assistant. The createCase tool prepares an email draft, but does not send or submit a support request. Tell the user to review the draft and send it from their email app. Human support is available to everyone at hi@basecase.vc.',
           tool_choice: "auto",
           tools: [
             {
@@ -74,7 +48,7 @@ export function CaseChat({ user, userData }: { user: any; userData: any }) {
                 function: {
                   name: "createCase",
                   description:
-                    "Creates a case automatically when the user asks to create a ticket/case or when they ask to speak to someone.",
+                    "Prepares an email draft when the user asks for a ticket or to speak to someone. The user must send the email themselves.",
                   parameters: {
                     type: "object",
                     properties: {},
@@ -82,8 +56,7 @@ export function CaseChat({ user, userData }: { user: any; userData: any }) {
                 },
               },
               call: async () => {
-                submitCase();
-                return "Generating case details for you.";
+                return await submitCase();
               },
               requireConfirmation: true,
             },
@@ -101,7 +74,7 @@ export function CaseChat({ user, userData }: { user: any; userData: any }) {
             return (
               <div className="p-3 border border-dashed border-border rounded-md flex flex-col space-y-4 items-start">
                 <p className="text-sm">
-                  Please confirm that you want to submit a case:
+                  Prepare an email draft with this conversation?
                 </p>
                 <Button
                   size="sm"
@@ -123,18 +96,13 @@ export function CaseChat({ user, userData }: { user: any; userData: any }) {
             onSubmitCase={submitCase}
             onNewChat={() => setTicketData(undefined)}
           />
-          {ticketData && <CaseForm {...ticketData} />}
+
         </div>
-      </ChatProvider>
-      {(planName === "Pro" || planName === "Business") && (
-          <div className="pt-2 text-sm text-gray-500">
-            For more assistance, please reach out to{" "}
-            <a href="mailto:hi@basecase.vc" className="underline">
-              support
-            </a>
-            .
-          </div>
-        )}
+      </ChatProvider> : <p className="mb-4 text-sm">Chat is unavailable. You can email support below.</p>}
+      {draftError && <p role="alert" className="py-2 text-sm">{draftError}</p>}
+      <div className="mt-4">
+        <CaseForm key={JSON.stringify(ticketData)} {...(ticketData ?? createSupportDraft([]))} />
+      </div>
     </div>
   );
 }

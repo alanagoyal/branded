@@ -4,7 +4,6 @@ import {
   MarkpromptOptions,
   useChatStore,
 } from "@markprompt/react";
-import Image from "next/image";
 import { useMemo } from "react";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -12,6 +11,7 @@ import remarkMath from "remark-math";
 import { CodeBlock } from "@/components/codeblock";
 import { MessageActions } from "@/components/message-actions";
 import { cn } from "@/lib/utils";
+import { chatFailure, SUPPORT_EMAIL } from "@/lib/support";
 
 import { Icons } from "./icons";
 import { ToolCallsConfirmation } from "./tool-calls-confirmation";
@@ -32,6 +32,7 @@ export function Message({
   chatOptions,
   ...props
 }: MessageProps) {
+  const failure = chatFailure(message.error);
   const submitToolCalls = useChatStore((state) => state.submitToolCalls);
   
 
@@ -72,7 +73,7 @@ export function Message({
           {message.role === "user" ? (
             <Avatar className="h-8 w-8">
               <AvatarFallback>
-                {user.email?.charAt(0).toUpperCase()}
+                {user?.email?.charAt(0).toUpperCase() || "?"}
               </AvatarFallback>
             </Avatar>
           ) : (
@@ -82,9 +83,10 @@ export function Message({
         <div className="flex-1 space-y-2 overflow-hidden">
           <div className="flex-1 space-y-2 overflow-hidden mt-0.5">
             {message.role === "assistant" && message.state === "cancelled" && (
-              <p className="text-muted-foreground text-xs mt-1">
-                This message was cancelled.
-              </p>
+              failure ? <div role="alert" className="text-sm mt-1 space-y-2">
+                <p>Support chat could not reply. Try again or <a className="underline" href={`mailto:${SUPPORT_EMAIL}`}>email support</a>.</p>
+                <details><summary className="cursor-pointer text-xs">Error details</summary><p className="break-words text-xs">{failure}</p></details>
+              </div> : <p className="text-muted-foreground text-xs mt-1">Response stopped. You can try again or email support.</p>
             )}
             {message.content && (
               <MemoizedReactMarkdown

@@ -28,7 +28,7 @@ const CaseCreationButton = ({ onSubmitCase }: { onSubmitCase: () => void }) => {
       {isCreatingCase && (
         <Icons.spinner className="w-4 h-4 animate-spin mr-2" />
       )}
-      Create case
+      Prepare email draft
     </Button>
   );
 };
@@ -91,7 +91,7 @@ export function Chat({
           </div>
           {!isChatting && (
             <CardDescription>
-              Describe the issue your are having
+              Describe the issue you are having
             </CardDescription>
           )}
         </CardHeader>
@@ -131,14 +131,14 @@ export function Chat({
           )}
         </CardContent>
       </div>
-{/*       {isChatting && (
+      {isChatting && (
         <CardFooter className="flex flex-row items-center space-x-4 py-4">
           <p className="flex-grow text-sm text-muted-foreground text-right">
             Still need help?
           </p>
           <CaseCreationButton onSubmitCase={onSubmitCase} />
         </CardFooter>
-      )} */}
+      )}
     </Card>
   );
 }
