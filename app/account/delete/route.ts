@@ -29,9 +29,16 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
     if (profileError) throw profileError;
 
+    const { data: billingAccount, error: billingAccountError } = await admin
+      .from("billing_accounts")
+      .select("customer_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (billingAccountError) throw billingAccountError;
+
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
     const billingError = await checkDeletionBilling(
-      stripe, user.email, profile?.customer_id ?? null,
+      stripe, user.email, profile?.customer_id ?? null, billingAccount?.customer_id ?? null,
     );
     if (billingError) {
       return NextResponse.json({ error: billingError }, { status: 409 });

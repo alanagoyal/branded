@@ -37,7 +37,7 @@ node --env-file=.env.local scripts/reconcile-billing.cjs --input /private/path/v
 
 The first command only validates users, customers, existing mappings, and current subscriptions. The second creates missing trusted mappings and refreshes state with a compare-and-swap RPC. It refuses reassignment of an existing trusted mapping and duplicate Stripe ownership through the unique constraint. It never changes a Stripe customer, subscription, payment, or email. Apply mode can partially complete a manifest; fix the failing record and rerun. Do not run two reconciliations for the same account concurrently.
 
-One trusted customer is supported per user. If a user has several historical Stripe customer records, resolve duplicate subscriptions and confirm the canonical billing customer through support before mapping. Account deletion continues to check the profile link plus all exact-email matches; the historical changed-email caveat remains until reconciliation resolves it.
+One trusted customer is supported per user. If a user has several historical Stripe customer records, resolve duplicate subscriptions and confirm the canonical billing customer through support before mapping. Account deletion checks the authoritative billing mapping, any separate legacy profile link, and all exact-email matches; the historical changed-email caveat remains until reconciliation resolves it.
 
 ## Security and lifecycle semantics
 
