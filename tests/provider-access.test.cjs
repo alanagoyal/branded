@@ -131,3 +131,13 @@ test('share creation rejects another owner’s name and creates no public token'
   const response = await route.POST(request({ ids: ['20000000-0000-4000-8000-000000000001'] }));
   assert.equal(response.status, 403); assert.equal(writes, 0);
 });
+test('brand-only one-pagers allow missing descriptions but reject oversized context', async () => {
+  for (const description of [undefined, null, '']) {
+    const route = routeHarness('generate-one-pager-content');
+    const response = await route.routeModule.POST(request({ name: 'Alpha', description }));
+    assert.equal(response.status, 200); assert.equal(route.providerCalls(), 1);
+  }
+  const invalid = routeHarness('generate-one-pager-content');
+  assert.equal((await invalid.routeModule.POST(request({ name: 'Alpha', description: 'x'.repeat(4001) }))).status, 400);
+  assert.equal(invalid.providerCalls(), 0);
+});

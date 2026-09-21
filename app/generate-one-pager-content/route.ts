@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { requireUser, reserveUsage, readBody, nameSchema, descriptionSchema, accessError } from "@/lib/provider-access";
+import { requireUser, reserveUsage, readBody, nameSchema, accessError } from "@/lib/provider-access";
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";
 import { initLogger, traced, wrapOpenAI } from "braintrust";
@@ -16,7 +16,7 @@ const openai = wrapOpenAI(
 export async function POST(req: Request, res: NextResponse) {
   try {
     const { user } = await requireUser(req);
-    const body = await readBody(req, z.object({ name: nameSchema, description: descriptionSchema }));
+    const body = await readBody(req, z.object({ name: nameSchema, description: z.string().trim().max(4000).nullish() }));
     await reserveUsage(user.id, "onePagerContent");
     const {
       name, description
@@ -24,7 +24,7 @@ export async function POST(req: Request, res: NextResponse) {
 
     const output = await traced(
       async (span) => {
-        let userMessageContent = `Please write one paragraph pitching a startup named ${name} that has the following description: ${description}`;
+        let userMessageContent = `Please write one paragraph pitching a startup named ${name}. ${description ? `Use this description: ${description}` : "No company description was provided. Use the name as context and avoid inventing specific products, traction, funding, or customer claims."}`;
 
         const completion = await openai.chat.completions.create({
           model: "gpt-4o-mini",
