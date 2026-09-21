@@ -1,38 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+import { billingAccount, billingFailure, billingUser, BillingError, stripeClient, syncBilling, requireBillingOrigin } from "@/lib/billing";
 
-export async function GET(req: NextRequest) {
-  const checkoutId = req.nextUrl.searchParams.get("checkout_id");
+export async function POST(request: Request) {
   try {
-    if (checkoutId) {
-      const session = await stripe.checkout.sessions.retrieve(checkoutId);
-      if (typeof session.invoice === "string") {
-        const invoice = await stripe.invoices.retrieve(session.invoice);
-        const subscriptionId = invoice.subscription;
-        const customerId = invoice.customer;
-        let planId = null;
-
-        if (typeof subscriptionId === "string") {
-          const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId);
-          if (subscriptionData.items.data.length > 0) {
-            planId = subscriptionData.items.data[0].plan.product; 
-          }
-        }
-
-        return new NextResponse(JSON.stringify({ invoice, subscriptionId, planId, customerId }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
+    requireBillingOrigin(request);
+    const user = await billingUser();
+    const body = await request.json().catch(() => null);
+    if (typeof body?.checkoutId !== "string" || !/^cs_[a-zA-Z0-9_]{1,250}$/.test(body.checkoutId)) {
+      throw new BillingError("Invalid checkout session.", 400);
     }
-  } catch (error) {
-    return new NextResponse(
-      JSON.stringify({ error: "Failed to fetch invoice data" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  }
+    const account = await billingAccount(user.id);
+    if (!account) throw new BillingError("Billing account not found.", 403);
+    const stripe = stripeClient();
+    const session = await stripe.checkout.sessions.retrieve(body.checkoutId);
+    const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
+    if (customerId !== account.customer_id || session.client_reference_id !== user.id) {
+      throw new BillingError("Checkout session does not belong to this account.", 403);
+    }
+    if (session.status !== "complete") throw new BillingError("Checkout is not complete.");
+    await syncBilling(stripe, account.customer_id);
+    return Response.json({ verified: true });
+  } catch (error) { return billingFailure(error); }
 }

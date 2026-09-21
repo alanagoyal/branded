@@ -1,15 +1,23 @@
 import type Stripe from "stripe";
 
-// Billing IDs in profiles are user-editable. Never use one to mutate Stripe.
+// Historical profile billing IDs were user-editable; only billing_accounts is
+// authoritative. Never use either identifier to mutate Stripe here.
 // Check Stripe directly, including customers whose profile link was lost when
 // the old webhook cleared customer_id on cancellation.
 export async function checkDeletionBilling(
   stripe: Stripe,
   email: string,
   customerId: string | null,
+  trustedCustomerId: string | null = null,
 ): Promise<string | null> {
   const customerIds = new Set<string>();
-  if (customerId) {
+  if (trustedCustomerId) {
+    const customer = await stripe.customers.retrieve(trustedCustomerId);
+    // Ownership comes from the server-only mapping even if the auth or billing
+    // email has since changed. Still inspect the actual subscription/schedule.
+    if (!customer.deleted) customerIds.add(customer.id);
+  }
+  if (customerId && customerId !== trustedCustomerId) {
     const customer = await stripe.customers.retrieve(customerId);
     if (!customer.deleted) {
       if (customer.email?.toLowerCase() !== email.toLowerCase()) {
@@ -24,6 +32,13 @@ export async function checkDeletionBilling(
   }
 
   for (const id of Array.from(customerIds)) {
+    // An unpaid Checkout can create a subscription after account deletion.
+    // Read-only even for historical customer links whose ownership is uncertain.
+    for await (const session of stripe.checkout.sessions.list({ customer: id, status: "open", limit: 100 })) {
+      if (session.mode === "subscription") {
+        return "A subscription checkout is still open. Please wait for it to expire before deleting your account.";
+      }
+    }
     for await (const subscription of stripe.subscriptions.list({
       customer: id,
       status: "all",

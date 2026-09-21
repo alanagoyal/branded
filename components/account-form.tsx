@@ -44,7 +44,7 @@ export default function AccountForm({
   });
   const [planName, setPlanName] = useState("");
   const [customerId, setCustomerId] = useState<string>("");
-  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("mailto:hi@basecase.vc?subject=Billing%20help");
 
   useEffect(() => {
     if (user) {
@@ -71,7 +71,7 @@ export default function AccountForm({
 
   async function fetchBillingSession(customerId: string) {
     try {
-      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const response = await fetch("/portal-session", { method: "POST" });
       const data = await response.json();
       if (response.ok) {
         setBillingPortalUrl(data.session.url);
