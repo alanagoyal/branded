@@ -1,82 +1,34 @@
 "use client";
 
-import { createClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function VerifySubscription({ user }: { user: any }) {
-  const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const checkoutId = useMemo(
-    () => searchParams.get("checkout_id"),
-    [searchParams]
-  );
-  const customerId = useMemo(
-    () => searchParams.get("customer_id"),
-    [searchParams]
-  );
+  const checkoutId = searchParams.get("checkout_id");
+  const refreshBilling = searchParams.get("billing") === "refresh" || searchParams.has("customer_id");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (checkoutId) {
-      fetchInvoice();
-    }
-    if (customerId) {
-      fetchCustomer();
-    }
-  }, [checkoutId, customerId]);
-
-  async function fetchInvoice() {
-    try {
-      const response = await fetch(
-        `/verify-subscription?checkout_id=${checkoutId}`
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        const { error } = await supabase
-          .from("profiles")
-          .update({
-            plan_id: data.planId,
-            customer_id: data.customerId,
-          })
-          .eq("id", user.id);
-
-        if (error) throw error;
-      } else {
-        throw new Error("Failed to fetch invoice data");
+    if (!user || (!checkoutId && !refreshBilling)) return;
+    let active = true;
+    async function verify() {
+      try {
+        const response = await fetch(checkoutId ? "/verify-subscription" : "/update-subscription", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(checkoutId ? { checkoutId } : {}),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to verify billing.");
+        if (active) { router.replace("/new"); router.refresh(); }
+      } catch (error) {
+        if (active) setError(error instanceof Error ? error.message : "Unable to verify billing.");
       }
-    } catch (error) {
-      console.error("Error fetching invoice:", error);
-    } finally {
-      router.push("/new");
     }
-  }
+    void verify();
+    return () => { active = false; };
+  }, [checkoutId, refreshBilling, user, router]);
 
-  async function fetchCustomer() {
-    try {
-      const response = await fetch(
-        `/update-subscription?customer_id=${customerId}`
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        const { error } = await supabase
-          .from("profiles")
-          .update({
-            plan_id: data.cancelAtPeriodEnd ? null : data.planId,
-            customer_id: data.cancelAtPeriodEnd ? null : customerId,
-          })
-          .eq("id", user.id);
-
-        if (error) throw error;
-      }
-    } catch (error) {
-      console.error("Error fetching customer:", error);
-    } finally {
-      router.push("/new");
-    }
-  }
-
-  return null;
+  return error ? <p role="alert">{error} <a className="underline" href="mailto:hi@basecase.vc">Contact support</a></p> : null;
 }

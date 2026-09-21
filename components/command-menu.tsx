@@ -32,7 +32,7 @@ export function CommandMenu({ user }: { user: any }) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [isCustomer, setIsCustomer] = useState(false);
-  const [billingPortalUrl, setBillingPortalUrl] = useState("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState("mailto:hi@basecase.vc?subject=Billing%20help");
   const [planName, setPlanName] = useState("");
   const [accountName, setAccountName] = useState("");
 
@@ -80,7 +80,7 @@ export function CommandMenu({ user }: { user: any }) {
 
   async function fetchBillingSession(customerId: string) {
     try {
-      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const response = await fetch("/portal-session", { method: "POST" });
       const data = await response.json();
       if (response.ok) {
         setBillingPortalUrl(data.session.url);

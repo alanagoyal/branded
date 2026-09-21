@@ -1,4 +1,6 @@
 "use client";
+
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -42,7 +44,7 @@ export default function AccountForm({
   });
   const [planName, setPlanName] = useState("");
   const [customerId, setCustomerId] = useState<string>("");
-  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("mailto:hi@basecase.vc?subject=Billing%20help");
 
   useEffect(() => {
     if (user) {
@@ -69,7 +71,7 @@ export default function AccountForm({
 
   async function fetchBillingSession(customerId: string) {
     try {
-      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const response = await fetch("/portal-session", { method: "POST" });
       const data = await response.json();
       if (response.ok) {
         setBillingPortalUrl(data.session.url);
@@ -136,12 +138,12 @@ export default function AccountForm({
               {planName}
             </a>
           ) : (
-            <a
+            <Link
               href="/pricing"
               className="bg-[#C850C0] px-3 py-1 rounded-full text-sm text-white h-6 flex items-center justify-center"
             >
               {planName}
-            </a>
+            </Link>
           ))}
       </div>
       <Form {...form}>

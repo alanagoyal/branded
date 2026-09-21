@@ -48,7 +48,7 @@ export default function BrandGenerator({
   );
   const router = useRouter();
   const [customerId, setCustomerId] = useState<string>("");
-  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("");
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string>("mailto:hi@basecase.vc?subject=Billing%20help");
   const [isLoading, setIsLoading] = useState(false);
   const [namesList, setNamesList] = useState<NameRecord[]>([]);
   const idsList = namesList.map(({ id }) => id);
@@ -90,7 +90,7 @@ export default function BrandGenerator({
 
   async function fetchBillingSession(customerId: string) {
     try {
-      const response = await fetch(`/portal-session?customer_id=${customerId}`);
+      const response = await fetch("/portal-session", { method: "POST" });
       const data = await response.json();
       if (response.ok) {
         setBillingPortalUrl(data.session.url);
