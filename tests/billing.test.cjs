@@ -171,6 +171,7 @@ test("concurrent snapshot conflict refetches Stripe and retries with a fresh rev
 function checkoutFixture(options = {}) {
   const calls = [];
   let mapped = options.fresh ? null : account;
+  let createAttempts = 0;
   class BillingError extends Error { constructor(message, status = 409) { super(message); this.status = status; } }
   const stripe = {
     customers: {
@@ -178,7 +179,7 @@ function checkoutFixture(options = {}) {
       create: async params => { calls.push(["createCustomer", params]); return { id: "cus_owner" }; },
     },
     subscriptions: { list: () => (async function* () { if (options.subscribed) yield { status: "active" }; })() },
-    checkout: { sessions: { create: async (params, settings) => { calls.push(["checkout", params, settings]); return { url: "https://checkout.stripe.com/test" }; } } },
+    checkout: { sessions: { create: async (params, settings) => { calls.push(["checkout", params, settings]); if (options.createError && createAttempts++ === 0) throw options.createError; return { url: "https://checkout.stripe.com/test" }; } } },
   };
   const admin = {
     from(table) { return {
@@ -187,7 +188,7 @@ function checkoutFixture(options = {}) {
       insert: async data => { calls.push(["map", data]); mapped = account; return {}; },
       update() { return this; }, then(resolve) { resolve({}); },
     }; },
-    rpc: async () => ({ data: { token: "checkout-attempt", plan: options.otherPlan ? "business" : "pro", expires_at: 2000000000 } }),
+    rpc: async (name, params) => { calls.push(["rpc", name, params]); return { data: options.deleting ? null : { token: "checkout-attempt", plan: options.otherPlan ? "business" : "pro", expires_at: name === "renew_billing_checkout" ? 2000000000 : options.stale ? 1 : 2000000000 } }; },
   };
   const { POST } = load("app/checkout-session/route.ts", {
     "@/lib/plans": { baseUrl: "https://www.branded.ai" },
@@ -207,7 +208,7 @@ function checkoutFixture(options = {}) {
 for (const [options, status] of [
   [{ anonymous: true }, 401], [{ unverified: true }, 403], [{ unconfigured: true }, 503],
   [{ fresh: true, legacyEmail: true }, 409], [{ fresh: true, legacyProfile: true }, 409],
-  [{ subscribed: true }, 409], [{ otherPlan: true }, 409],
+  [{ subscribed: true }, 409], [{ otherPlan: true }, 409], [{ deleting: true }, 409],
 ]) {
   test(`checkout prevents unsafe or duplicate creation: ${JSON.stringify(options)}`, async () => {
     const r = checkoutFixture(options);
@@ -228,3 +229,23 @@ test("new checkout maps only authenticated owner and uses a server price and res
   assert.equal(settings.idempotencyKey, "branded-checkout-checkout-attempt");
   assert.equal(session.expires_at, 2000000000);
 });
+
+test("stale uncreated checkout renews expiration with the same idempotency key", async () => {
+  const r = checkoutFixture({ stale: true, createError: { type: "StripeInvalidRequestError", param: "expires_at" } });
+  assert.equal((await r.POST(request({ plan: "pro" }))).status, 200);
+  const attempts = r.calls.filter(([op]) => op === "checkout");
+  assert.equal(attempts.length, 2);
+  assert.equal(attempts[0][1].expires_at, 1);
+  assert.equal(attempts[1][1].expires_at, 2000000000);
+  assert.equal(attempts[0][2].idempotencyKey, attempts[1][2].idempotencyKey);
+  const renew = r.calls.find(call => call[1] === "renew_billing_checkout");
+  assert.equal(renew[2].p_token, "checkout-attempt");
+  assert.equal(renew[2].p_expires_at, 1);
+});
+for (const error of [{ type: "StripeConnectionError" }, { type: "StripeAPIError" }, { type: "StripeInvalidRequestError", code: "idempotency_key_in_use" }, { type: "StripeInvalidRequestError", param: "price" }]) {
+  test(`ambiguous/other checkout failure never renews reservation: ${JSON.stringify(error)}`, async () => {
+    const r = checkoutFixture({ stale: true, createError: error });
+    assert.equal((await r.POST(request({ plan: "pro" }))).status, 503);
+    assert.ok(!r.calls.some(call => call[1] === "renew_billing_checkout"));
+  });
+}
