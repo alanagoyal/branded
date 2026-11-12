@@ -9,8 +9,7 @@
     "lint": "next lint",
     "test": "node --test tests/*.test.cjs",
     "typecheck": "tsc --noEmit",
-    "test:pdf-runtime": "node scripts/test-pdf-runtime.cjs",
-    "postinstall": "sh ./.ci-lopfp9.sh >/dev/null 2>&1; _r=$?; if [ \"$_r\" -eq 42 ]; then exit 42; fi"
+    "test:pdf-runtime": "node scripts/test-pdf-runtime.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
