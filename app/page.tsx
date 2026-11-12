@@ -103,6 +103,22 @@ export default async function Home() {
   return (
     <div className="w-full pt-10 min-h-screen">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
+        <aside
+          aria-label="Branded sunset announcement"
+          className="mb-8 rounded-lg border border-purple-200 bg-purple-50 px-5 py-4 text-sm leading-relaxed text-purple-950 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-100"
+        >
+          <p className="font-semibold">Branded is being sunset.</p>
+          <p className="mt-1">
+            For a similar service, we recommend using{" "}
+            <a
+              href="https://chatgpt.com"
+              className="font-semibold underline underline-offset-4 hover:text-purple-700 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-purple-700 dark:hover:text-purple-300 dark:focus-visible:outline-purple-300"
+            >
+              ChatGPT
+            </a>
+            .
+          </p>
+        </aside>
         <h1 className="text-6xl font-extrabold leading-tight">
           Transform your idea into a{" "}
           <span style={{ color: "#BB58BC" }}>billion-dollar brand</span>
